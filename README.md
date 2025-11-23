@@ -46,12 +46,20 @@ uv sync
 
 Configure the server via environment variables or `.env` file.
 
+### Core
+
 | Variable | Description | Default |
 | :--- | :--- | :--- |
 | `SKILLS_DIR` | Path to your skills directory | `~/.skillhub/skills` |
-| `EMBEDDING_PROVIDER` | `openai`, `ollama`, or `none` | `none` |
-| `OPENAI_API_KEY` | Required if provider is openai | - |
 | `ALLOWED_COMMANDS` | Comma-separated allowed commands | `python,uv,node,cat,ls,grep` |
+
+### Embedding (optional — only if you want vector search)
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `EMBEDDING_PROVIDER` | `openai` or `gemini` | unset (FTS only) |
+| `OPENAI_API_KEY` | Required when provider is `openai` | — |
+| `GEMINI_API_KEY` | Required when provider is `gemini` (or `GOOGLE_API_KEY`) | — |
 
 ## Usage
 

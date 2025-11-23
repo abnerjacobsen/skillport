@@ -211,21 +211,19 @@ class SkillDB:
         Constructs a SQL WHERE clause based on enabled skills/categories settings.
         Returns empty string if no filters are active.
         """
-        conditions = []
-        
+        # Mirror is_skill_enabled logic exactly:
+        # 1) If skills are specified, allow only those names.
+        # 2) Else if categories are specified, allow only those categories.
+        # 3) Else, no filter.
         if settings.skillhub_enabled_skills:
             safe_skills = [f"'{self._escape_sql_string(s)}'" for s in settings.skillhub_enabled_skills]
-            conditions.append(f"name IN ({', '.join(safe_skills)})")
-            
+            return f"name IN ({', '.join(safe_skills)})"
+
         if settings.skillhub_enabled_categories:
             safe_cats = [f"'{self._escape_sql_string(self._norm_token(c))}'" for c in settings.skillhub_enabled_categories]
-            conditions.append(f"category IN ({', '.join(safe_cats)})")
-            
-        if not conditions:
-            return ""
-            
-        # Union logic: Allow if match specific skill name OR specific category
-        return " OR ".join(conditions)
+            return f"category IN ({', '.join(safe_cats)})"
+
+        return ""
 
     def search(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
         tbl = self._get_table()
@@ -331,10 +329,12 @@ class SkillDB:
         tbl = self._get_table()
         if not tbl:
             return []
-        # LanceDB doesn't support boolean literals easily in SQL sometimes, but True/False usually works.
-        # Or we can use where string "always_apply = true"
+        # Apply enabled-skills/categories filtering to keep instructions consistent with runtime filters.
+        base_clause = "always_apply = true"
+        prefilter = self._build_prefilter()
+        where_clause = base_clause if not prefilter else f"{base_clause} AND ({prefilter})"
         try:
-            return tbl.search().where("always_apply = true").limit(100).to_list()
+            return tbl.search().where(where_clause).limit(100).to_list()
         except Exception as e:
             print(f"Error fetching core skills: {e}", file=sys.stderr)
             return []
