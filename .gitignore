@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Distribution / Packaging
+dist/
+build/
+wheels/
+
+# Environment Variables
+.env
+
+# SkillHub / MCP Specific
+# Local Database storage
+*.lancedb/
+*.lance/
+.skillhub/
+
+# Local Agent / Skills Directory (Runtime data)
+# .agent/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+.skillhub/
