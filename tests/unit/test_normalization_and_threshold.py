@@ -7,8 +7,11 @@ from hypothesis import given, settings, strategies as st
 from skillhub_mcp.db import SkillDB
 
 
+THRESHOLD = 0.2
+
+
 class DummySettings:
-    def __init__(self, base_dir, threshold=0.3):
+    def __init__(self, base_dir, threshold=THRESHOLD):
         self.search_threshold = threshold
         self.embedding_provider = "none"
         self.skillhub_enabled_skills = []
@@ -58,9 +61,9 @@ class DummyDB:
 def make_db(base_dir: Path, data):
     dummy_settings = DummySettings(base_dir)
     dummy_db = DummyDB(data)
-    with patch("skillhub_mcp.db.settings", dummy_settings), patch(
-        "skillhub_mcp.db.lancedb.connect", lambda path: dummy_db
-    ), patch("skillhub_mcp.db.get_embedding", lambda query: None):
+    with patch("skillhub_mcp.db.search.settings", dummy_settings), patch(
+        "skillhub_mcp.db.search.lancedb.connect", lambda path: dummy_db
+    ), patch("skillhub_mcp.db.search.get_embedding", lambda query: None):
         return SkillDB()
 
 
@@ -114,8 +117,7 @@ def test_s5_threshold_filters_low_scores(scores):
     """WHEN hits >5 THEN results below threshold are dropped and capped to limit (EARS:S5)."""
     scores_sorted = sorted(scores, reverse=True)
     top = scores_sorted[0]
-    threshold = 0.3
-    expected = [s for s in scores_sorted if s / top >= threshold][:5]
+    expected = [s for s in scores_sorted if s / top >= THRESHOLD][:5]
     with TemporaryDirectory() as tmp:
         db = make_db(Path(tmp), [{"_score": s} for s in scores_sorted])
         results = db.search("anything", limit=5)
