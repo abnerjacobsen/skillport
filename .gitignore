@@ -13,6 +13,7 @@ venv/
 .coverage
 htmlcov/
 .ruff_cache/
+.hypothesis/
 
 # Distribution / Packaging
 dist/
