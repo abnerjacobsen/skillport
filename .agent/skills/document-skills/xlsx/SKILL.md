@@ -8,7 +8,6 @@ metadata:
     tags: [xlsx, excel, spreadsheet, data]
     runtime: python
     requires_setup: true
-    env_version: 1
 ---
 
 # Requirements for Outputs

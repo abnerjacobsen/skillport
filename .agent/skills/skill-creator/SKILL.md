@@ -7,8 +7,7 @@ metadata:
     category: development
     tags: [skill, guide, tutorial, meta]
     runtime: python
-    requires_setup: true
-    env_version: 1
+    requires_setup: false
     alwaysApply: true
 ---
 

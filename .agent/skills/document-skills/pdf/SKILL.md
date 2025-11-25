@@ -8,7 +8,6 @@ metadata:
     tags: [pdf, extraction, conversion, form]
     runtime: python
     requires_setup: true
-    env_version: 1
 ---
 
 # PDF Processing Guide

@@ -8,7 +8,6 @@ metadata:
     tags: [pptx, powerpoint, slides, presentation]
     runtime: python
     requires_setup: true
-    env_version: 1
 ---
 
 # PPTX creation, editing, and analysis

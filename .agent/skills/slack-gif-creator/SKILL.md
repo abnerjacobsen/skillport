@@ -8,7 +8,6 @@ metadata:
     tags: [gif, animation, slack, fun]
     runtime: python
     requires_setup: true
-    env_version: 1
 ---
 
 # Slack GIF Creator

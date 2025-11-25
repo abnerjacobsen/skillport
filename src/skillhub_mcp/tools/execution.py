@@ -1,9 +1,11 @@
+import os
 import subprocess
 from pathlib import Path
 from typing import Dict, Any, List
 from ..config import settings
 from ..db import SkillDB
 from ..utils import is_skill_enabled, is_command_allowed
+from ..setup import check_skill_ready, resolve_runtime_executable
 
 class ExecutionTools:
     """Tool implementations for file read and command execution."""
@@ -118,6 +120,9 @@ class ExecutionTools:
             timeout: True if killed due to timeout
 
         Constraints: Only allowlisted commands. No shell expansion.
+
+        Errors:
+            - SKILL_NOT_READY: Skill requires setup but environment is not ready.
         """
         # 1. Check enabled
         record = self.db.get_skill(skill_name)
@@ -132,38 +137,57 @@ class ExecutionTools:
 
         # 3. Prepare execution
         skill_dir = self._resolve_skill_dir(record)
-            
-        # 4. Execute
-        # Timeout and Max Output
+
+        # 4. Ready Check (EXECUTION_ENV.md v2.2)
+        runtime = record.get("runtime", "none")
+        requires_setup = record.get("requires_setup", False)
+        ready_status = check_skill_ready(skill_dir, runtime, requires_setup)
+
+        if not ready_status["ready"]:
+            # Return SKILL_NOT_READY error
+            return {
+                "error": {
+                    "code": "SKILL_NOT_READY",
+                    "message": f"Skill '{skill_name}' is not ready. Setup required.",
+                    "details": {
+                        "skill_name": skill_name,
+                        "skill_path": str(skill_dir),
+                        "missing": ready_status["missing"],
+                        "setup": ready_status.get("setup"),
+                    },
+                }
+            }
+
+        # 5. Runtime Resolution (EXECUTION_ENV.md v2.2)
+        resolved_command, env_vars = resolve_runtime_executable(skill_dir, command, runtime)
+
+        # 6. Execute
         timeout_sec = self.settings.exec_timeout_seconds
         max_bytes = self.settings.exec_max_output_bytes
-        
-        cmd_list = [command] + args
-        
+
+        cmd_list = [resolved_command] + args
+
+        # Merge environment variables
+        exec_env = os.environ.copy()
+        exec_env.update(env_vars)
+
         try:
-            # Capture output
-            # We can't easily limit capture size in subprocess.run during execution without using Popen and manual reading.
-            # subprocess.run captures all then we truncate. 
-            # If output is huge, it might consume memory. 
-            # For v0.0.0, capturing all then truncating is acceptable unless it blows OOM.
-            # PRD says "output ... exceeding ... truncated".
-            
             proc = subprocess.run(
                 cmd_list,
                 cwd=skill_dir,
                 capture_output=True,
-                text=True, # Treat as text (utf-8)
+                text=True,
                 timeout=timeout_sec,
-                shell=False
+                shell=False,
+                env=exec_env,
             )
-            
+
             stdout = proc.stdout
             stderr = proc.stderr
             exit_code = proc.returncode
             is_timeout = False
-            
+
         except subprocess.TimeoutExpired as e:
-            # Killed
             stdout = e.stdout if e.stdout else ""
             stderr = e.stderr if e.stderr else ""
             exit_code = -1
@@ -174,20 +198,17 @@ class ExecutionTools:
                 "stderr": f"Execution failed: {e}",
                 "exit_code": -1,
                 "timeout": False,
-                "truncated": {"stdout": False, "stderr": False}
+                "truncated": {"stdout": False, "stderr": False},
             }
 
         # Truncate by byte length to honor exec_max_output_bytes
-        trunc_stdout = False
-        trunc_stderr = False
-
         def _truncate_to_bytes(text: str):
             data = text.encode("utf-8")
             if len(data) <= max_bytes:
                 return text, False
             truncated = data[:max_bytes]
             return truncated.decode("utf-8", errors="replace"), True
-        
+
         stdout, trunc_stdout = _truncate_to_bytes(stdout)
         stderr, trunc_stderr = _truncate_to_bytes(stderr)
 
@@ -198,6 +219,6 @@ class ExecutionTools:
             "timeout": is_timeout,
             "truncated": {
                 "stdout": trunc_stdout,
-                "stderr": trunc_stderr
-            }
+                "stderr": trunc_stderr,
+            },
         }

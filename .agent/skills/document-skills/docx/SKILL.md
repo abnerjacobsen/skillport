@@ -8,7 +8,6 @@ metadata:
     tags: [docx, word, office, report]
     runtime: python
     requires_setup: true
-    env_version: 1
 ---
 
 # DOCX creation, editing, and analysis
