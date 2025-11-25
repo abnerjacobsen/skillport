@@ -253,7 +253,7 @@ body
     (skill_dir / "binary.bin").write_bytes(b"\xff\xfe\xfd")
 
     # Stub DB responses
-    stub_record = {"category": "sec"}
+    stub_record = {"category": "sec", "path": str(skill_dir)}
     exec_tools = ExecutionTools(SimpleNamespace(get_skill=lambda name: stub_record))
 
     with pytest.raises(PermissionError):
@@ -277,7 +277,7 @@ category: utils
 body
 """, encoding="utf-8")
 
-    stub_record = {"category": "utils"}
+    stub_record = {"category": "utils", "path": str(skill_dir)}
     exec_tools = ExecutionTools(SimpleNamespace(get_skill=lambda name: stub_record))
 
     called = {}

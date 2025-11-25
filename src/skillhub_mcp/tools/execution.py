@@ -1,8 +1,9 @@
 import subprocess
+from pathlib import Path
 from typing import Dict, Any, List
 from ..config import settings
 from ..db import SkillDB
-from ..utils import validate_path, is_skill_enabled, is_command_allowed
+from ..utils import is_skill_enabled, is_command_allowed
 
 class ExecutionTools:
     """Tool implementations for file read and command execution."""
@@ -10,6 +11,40 @@ class ExecutionTools:
     def __init__(self, db: SkillDB):
         self.db = db
         self.settings = getattr(db, "settings", settings)
+
+    def _resolve_skill_dir(self, record: Dict[str, Any]) -> Path:
+        """Resolve the skill directory from indexed record, anchored to skills root."""
+        skills_root = self.settings.get_effective_skills_dir().resolve()
+        skill_path = Path(record.get("path", "")).resolve()
+        try:
+            if not skill_path.is_relative_to(skills_root):
+                raise PermissionError("Skill path is outside the configured skills directory")
+        except AttributeError:
+            # Python <3.9 fallback
+            from os import path as osp
+            if osp.commonpath([skills_root, skill_path]) != str(skills_root):
+                raise PermissionError("Skill path is outside the configured skills directory")
+        if not skill_path.exists():
+            raise ValueError(f"Skill directory not found: {skill_path}")
+        return skill_path
+
+    def _resolve_file_path(self, skill_dir: Path, file_path: str) -> Path:
+        """Resolve a file path under the given skill_dir with traversal protection."""
+        try:
+            target_path = (skill_dir / file_path).resolve()
+        except Exception as e:
+            raise ValueError(f"Invalid path: {e}")
+
+        try:
+            if not target_path.is_relative_to(skill_dir):
+                raise PermissionError(f"Path traversal detected: {file_path}")
+        except AttributeError:
+            from os import path as osp
+            if osp.commonpath([skill_dir, target_path]) != str(skill_dir):
+                raise PermissionError(f"Path traversal detected: {file_path}")
+        if not target_path.exists():
+            raise FileNotFoundError(f"File not found: {file_path}")
+        return target_path
 
     def read_skill_file(self, skill_name: str, file_path: str) -> Dict[str, Any]:
         """Read a file from the skill's directory."""
@@ -21,8 +56,9 @@ class ExecutionTools:
         if not is_skill_enabled(skill_name, record.get("category"), settings_obj=self.settings):
             raise ValueError(f"Skill is disabled: {skill_name}")
 
-        # 2. Validate path (security)
-        full_path = validate_path(skill_name, file_path, settings_obj=self.settings)
+        # 2. Resolve skill dir from record and validate target path
+        skill_dir = self._resolve_skill_dir(record)
+        full_path = self._resolve_file_path(skill_dir, file_path)
 
         # 3. Check size
         try:
@@ -68,9 +104,7 @@ class ExecutionTools:
             raise ValueError(f"Command not allowed: {command}")
 
         # 3. Prepare execution
-        skill_dir = self.settings.get_effective_skills_dir() / skill_name
-        if not skill_dir.exists():
-            raise ValueError(f"Skill directory not found: {skill_dir}")
+        skill_dir = self._resolve_skill_dir(record)
             
         # 4. Execute
         # Timeout and Max Output

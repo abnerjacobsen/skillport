@@ -72,13 +72,16 @@ class SkillSearchService:
 
         try:
             if vec:
-                results = self._vector_search(table, vec, prefilter, limit)
-            else:
                 try:
-                    results = self._fts_search(table, query_norm, prefilter, limit)
+                    results = self._vector_search(table, vec, prefilter, limit)
                 except Exception as e:
-                    print(f"FTS search failed, using substring fallback: {e}", file=sys.stderr)
-                    results = self._substring_search(table, query_norm, prefilter, limit)
+                    print(f"Vector search failed, falling back to FTS: {e}", file=sys.stderr)
+                    results = self._fts_then_substring(table, query_norm, prefilter, limit)
+                else:
+                    if not results:
+                        results = self._fts_then_substring(table, query_norm, prefilter, limit)
+            else:
+                results = self._fts_then_substring(table, query_norm, prefilter, limit)
         except Exception as e:
             print(f"Search error: {e}", file=sys.stderr)
             return []
@@ -126,6 +129,13 @@ class SkillSearchService:
         return results
 
     # --- Helpers ---
+    def _fts_then_substring(self, table, query: str, prefilter: str, limit: int) -> List[SearchResult]:
+        try:
+            return self._fts_search(table, query, prefilter, limit)
+        except Exception as e:
+            print(f"FTS search failed, using substring fallback: {e}", file=sys.stderr)
+            return self._substring_search(table, query, prefilter, limit)
+
     def _to_result(self, row: Dict[str, Any], source: str, default_score: Optional[float] = None) -> SearchResult:
         score = _normalize_score(row)
         if score == 0.0 and default_score is not None:
