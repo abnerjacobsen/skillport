@@ -10,8 +10,19 @@ class LoadingTools:
         self.settings = getattr(db, "settings", None)
 
     def load_skill(self, skill_name: str) -> Dict[str, Any]:
-        """
-        Load instructions for a specific skill.
+        """Get instructions for a skill. Call this before using any skill.
+
+        The skill_name can come from:
+        - User's request ("use X skill")
+        - Pre-loaded skills list
+        - search_skills results
+
+        Args:
+            skill_name: Exact skill name
+
+        Returns:
+            name: Skill name
+            instructions: Step-by-step instructions to follow
         """
         # 1. Check if exists in DB
         record = self.db.get_skill(skill_name)

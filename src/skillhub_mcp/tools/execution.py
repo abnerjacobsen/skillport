@@ -47,7 +47,21 @@ class ExecutionTools:
         return target_path
 
     def read_skill_file(self, skill_name: str, file_path: str) -> Dict[str, Any]:
-        """Read a file from the skill's directory."""
+        """Read a file from a skill's directory.
+
+        Use only when skill instructions reference a specific file
+        (templates, configs, examples).
+
+        Args:
+            skill_name: Skill name
+            file_path: Relative path (e.g., "templates/format.json")
+
+        Returns:
+            content: File contents (UTF-8 text)
+            truncated: True if file exceeded size limit
+
+        Constraints: Path must stay within skill directory.
+        """
         # 1. Check enabled
         record = self.db.get_skill(skill_name)
         if not record:
@@ -88,9 +102,22 @@ class ExecutionTools:
             "truncated": truncated,
         }
 
-    def execute_skill_command(self, skill_name: str, command: str, args: List[str] = []) -> Dict[str, Any]:
-        """
-        Execute a command within the skill's directory.
+    def run_skill_command(self, skill_name: str, command: str, args: List[str] = []) -> Dict[str, Any]:
+        """Run a command in a skill's directory.
+
+        Use when skill instructions specify a script to execute.
+
+        Args:
+            skill_name: Skill name
+            command: Program name (python, uv, node, cat, ls, grep)
+            args: Command arguments
+
+        Returns:
+            stdout, stderr: Command output
+            exit_code: 0 = success
+            timeout: True if killed due to timeout
+
+        Constraints: Only allowlisted commands. No shell expansion.
         """
         # 1. Check enabled
         record = self.db.get_skill(skill_name)

@@ -229,34 +229,139 @@ When `EMBEDDING_PROVIDER` is set to `openai` or `gemini`, vector search is added
 
 ## Creating Skills
 
-Create a directory under `SKILLS_DIR` with a `SKILL.md` file:
+Create a directory under `SKILLS_DIR` with a `SKILL.md` file.
 
-`~/.skillhub/skills/hello-world/SKILL.md`:
+### Skill Types
+
+Skills fall into three categories. **All three work out of the box** (only Dependency execution requires setup):
+
+| Type | Description | `run_skill_command` | Setup |
+|------|-------------|------------------------|-------|
+| **Prompt-only** | Instructions/templates only | Not used | None |
+| **Native execution** | stdlib/built-ins only | Used | None |
+| **Dependency execution** | External packages | Used | Required |
+
+### Type 1: Prompt-only Skill (Most Common)
+
+Skills that provide instructions, templates, or guidelines for the AI Agent. No code execution needed.
 
 ```markdown
 ---
-name: hello-world
-description: Prints a greeting message.
+name: code-review-checklist
+description: Checklist for reviewing pull requests.
 metadata:
   skillhub:
-    category: demo
-    tags: [demo, hello]
+    category: development
+    tags: [code-review, best-practices]
+    # runtime and requires_setup can be omitted (defaults: none, false)
+---
+# Code Review Checklist
+
+## Before Approving
+- [ ] Tests pass
+- [ ] No security vulnerabilities
+- [ ] Code follows style guide
+...
+```
+
+**Use case:** Brand guidelines, writing styles, checklists, API documentation templates.
+
+> `runtime` and `requires_setup` are optional for Prompt-only skills (they default to `none` and `false`).
+
+### Type 2: Native Execution Skill
+
+Skills that execute code using only standard library (no external packages).
+
+```markdown
+---
+name: json-formatter
+description: Format and validate JSON files.
+metadata:
+  skillhub:
+    category: utilities
+    tags: [json, formatting]
     runtime: python
     requires_setup: false
-    env_version: 1
-    alwaysApply: true  # Optional: If true, listed in system prompt as core skill
 ---
-# Hello World
+# JSON Formatter
 
-Run the python script to say hello.
+Use `run_skill_command` with:
+- command: `python`
+- args: `["scripts/format.py", "<file_path>"]`
 ```
+
+**Use case:** File operations, text processing, date/time utilities (Python `pathlib`, `json`, `datetime`).
+
+### Type 3: Dependency Execution Skill
+
+Skills that require external packages to be installed.
+
+```markdown
+---
+name: pdf-extractor
+description: Extract text and tables from PDF files.
+metadata:
+  skillhub:
+    category: documents
+    tags: [pdf, extraction]
+    runtime: python
+    requires_setup: true
+---
+# PDF Extractor
+
+Use `run_skill_command` with:
+- command: `uv`
+- args: `["run", "scripts/extract.py", "--input", "<pdf_path>"]`
+```
+
+**Setup required:** User must run `uv sync` in the skill directory before use.
+
+### Skill Directory Structure
+
+```
+~/.skillhub/skills/my-skill/
+├── SKILL.md              # AI Agent instructions (required)
+├── README.md             # Human setup instructions (if requires_setup: true)
+├── pyproject.toml        # Python dependencies (if applicable)
+└── scripts/
+    └── main.py
+```
+
+### Metadata Fields
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `runtime` | `none` | `none`, `python`, `node`, `other` |
+| `requires_setup` | `false` | Whether setup is needed before execution |
+| `category` | - | For filtering and search (recommended) |
+| `tags` | `[]` | For search (recommended) |
+| `alwaysApply` | `false` | List as Core Skill in system prompt |
+
+> For Prompt-only skills, `runtime` and `requires_setup` can be omitted entirely.
+
+### Setup Responsibility (Dependency Execution Only)
+
+**SkillHub does not auto-install dependencies.** For skills with `requires_setup: true`:
+
+1. Skill author: Include `pyproject.toml`/`package.json` and document setup in `README.md`
+2. User: Run setup before first use:
+
+```bash
+# Python skill
+cd ~/.skillhub/skills/pdf-extractor && uv sync
+
+# Node skill
+cd ~/.skillhub/skills/csv-analyzer && npm install
+```
+
+If not set up, `run_skill_command` returns `SKILL_NOT_READY` error with a hint to check the skill's README.md.
 
 ## Tools Available
 
 *   `search_skills(query)`: Find relevant skills.
 *   `load_skill(skill_name)`: Get skill instructions.
 *   `read_skill_file(skill_name, file_path)`: Read a file from the skill directory.
-*   `execute_skill_command(skill_name, command, args)`: Run a command in the skill directory.
+*   `run_skill_command(skill_name, command, args)`: Run a command in the skill directory.
 
 ### Core Skills Feature
 

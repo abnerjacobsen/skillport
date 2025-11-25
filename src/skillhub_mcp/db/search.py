@@ -299,3 +299,24 @@ class SkillDB:
         except Exception as e:
             print(f"Error fetching core skills: {e}", file=sys.stderr)
             return []
+
+    def list_all_skills(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """List all skills (respecting prefilter) without search scoring."""
+        tbl = self._get_table()
+        if not tbl:
+            return []
+
+        prefilter = self._build_prefilter()
+        try:
+            query = tbl.search()
+            if prefilter:
+                query = query.where(prefilter)
+            results = query.limit(limit).to_list()
+            # Add a default score for consistency with search results
+            for r in results:
+                if "_score" not in r:
+                    r["_score"] = 1.0
+            return results
+        except Exception as e:
+            print(f"Error listing skills: {e}", file=sys.stderr)
+            return []

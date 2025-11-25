@@ -32,20 +32,16 @@ def create_server() -> FastMCP:
     else:
         print(f"[INFO] Skipping reindex (reason={reindex_decision['reason']})", file=sys.stderr)
 
-    # Generate Instructions (concise, English, agent-skills aware)
+    # Generate Instructions (concise, minimal)
     core_skills = db.get_core_skills()
-    instructions = (
-        "SkillHub MCP is an MCP server that exposes reusable Agent Skills.\n"
-        "- What is a Skill: a folder with SKILL.md (name, description) plus step-by-step instructions and optional assets/scripts.\n"
-        "- Why it matters: staged/just-in-time context loading keeps prompts small, improves grounding, and stays portable across MCP-capable tools.\n"
-        "- How to use: `search_skills` to find skills, `load_skill` to read instructions, `read_skill_file` to inspect files, `execute_skill_command` to run allowed commands.\n"
-    )
+    instructions = "SkillHub MCP provides reusable Agent Skills.\n\n"
     if core_skills:
-        instructions += "Core skills preloaded:\n"
+        instructions += "Pre-loaded skills:\n"
         for skill in core_skills:
             instructions += f"- {skill['name']}: {skill['description']}\n"
-    else:
-        instructions += "Use `search_skills` to discover available skills.\n"
+        instructions += "\n"
+    instructions += "Call load_skill(name) to get a skill's instructions.\n"
+    instructions += "Call search_skills(query) to find skills."
 
     # Debug: Print instructions to stderr to verify
     print(f"[DEBUG] Generated Instructions:\n{instructions}", file=sys.stderr)
@@ -61,7 +57,7 @@ def create_server() -> FastMCP:
     mcp.tool()(discovery_tools.search_skills)
     mcp.tool()(loading_tools.load_skill)
     mcp.tool()(execution_tools.read_skill_file)
-    mcp.tool()(execution_tools.execute_skill_command)
+    mcp.tool()(execution_tools.run_skill_command)
     
     return mcp
 

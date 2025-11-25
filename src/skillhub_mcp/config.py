@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     embedding_provider: str = Field(default="none")  # openai, gemini, none
     # OpenAI
     openai_api_key: Optional[str] = Field(default=None)
-    embedding_model: Optional[str] = Field(default="text-embedding-3-small") # Default for openai/ollama-compatible
+    embedding_model: Optional[str] = Field(default="text-embedding-3-small")  # Default for openai
     # Google Gemini (google-genai). Accepts GEMINI_API_KEY or fallback GOOGLE_API_KEY.
     gemini_api_key: Optional[str] = Field(default=None)
     gemini_embedding_model: Optional[str] = Field(default="gemini-embedding-001")  # multilingual per docs

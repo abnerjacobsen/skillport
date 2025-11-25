@@ -263,7 +263,7 @@ body
         exec_tools.read_skill_file("secure", "binary.bin")
 
 
-def test_x1_execute_skill_command_uses_cwd_and_shell_false(tmp_path, monkeypatch):
+def test_x1_run_skill_command_uses_cwd_and_shell_false(tmp_path, monkeypatch):
     settings = DummySettings(tmp_path)
     _patch_settings(monkeypatch, settings)
 
@@ -295,7 +295,7 @@ body
 
     monkeypatch.setattr(execution.subprocess, "run", fake_run)
 
-    result = exec_tools.execute_skill_command("run", "python", ["-V"])
+    result = exec_tools.run_skill_command("run", "python", ["-V"])
 
     assert called["cwd"] == skill_dir
     assert called["shell"] is False
@@ -355,7 +355,7 @@ def test_reindex_skips_skill_with_non_mapping_frontmatter(tmp_path, monkeypatch)
     (skill_dir / "SKILL.md").write_text(
         """---
 - not-a-map
---- 
+---
 body
 """,
         encoding="utf-8",
@@ -366,3 +366,113 @@ body
 
     # No valid records -> table dropped; ensure no crash and drop occurred.
     assert db.dropped is True
+
+
+# --- S7: Empty/wildcard query lists all ---
+
+def test_s7_empty_query_lists_all_skills(tmp_path, monkeypatch):
+    """S7: Empty query returns all enabled skills up to SEARCH_LIMIT."""
+    settings = DummySettings(tmp_path)
+    _patch_settings(monkeypatch, settings)
+
+    rows = [
+        {"name": "skill-a", "description": "alpha", "category": "cat1", "_score": 1.0},
+        {"name": "skill-b", "description": "beta", "category": "cat1", "_score": 1.0},
+        {"name": "skill-c", "description": "gamma", "category": "cat2", "_score": 1.0},
+    ]
+    dummy_db = DummyDB(DummyTable(rows))
+    monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
+
+    db = _make_skill_db(monkeypatch, settings, dummy_db)
+    search_tools = DiscoveryTools(db)
+
+    result = search_tools.search_skills("")
+    names = [s["name"] for s in result["skills"]]
+
+    assert len(names) == 3
+    assert set(names) == {"skill-a", "skill-b", "skill-c"}
+
+
+def test_s7_wildcard_query_lists_all_skills(tmp_path, monkeypatch):
+    """S7: Wildcard '*' query returns all enabled skills."""
+    settings = DummySettings(tmp_path)
+    _patch_settings(monkeypatch, settings)
+
+    rows = [
+        {"name": "x", "description": "x-desc", "category": "", "_score": 1.0},
+        {"name": "y", "description": "y-desc", "category": "", "_score": 1.0},
+    ]
+    dummy_db = DummyDB(DummyTable(rows))
+    monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
+
+    db = _make_skill_db(monkeypatch, settings, dummy_db)
+    search_tools = DiscoveryTools(db)
+
+    result = search_tools.search_skills("*")
+    names = [s["name"] for s in result["skills"]]
+
+    assert set(names) == {"x", "y"}
+
+
+def test_s7_whitespace_only_query_treated_as_empty(tmp_path, monkeypatch):
+    """S7: Whitespace-only query is treated as empty (list all)."""
+    settings = DummySettings(tmp_path)
+    _patch_settings(monkeypatch, settings)
+
+    rows = [
+        {"name": "one", "description": "first", "category": "", "_score": 1.0},
+        {"name": "two", "description": "second", "category": "", "_score": 1.0},
+    ]
+    dummy_db = DummyDB(DummyTable(rows))
+    monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
+
+    db = _make_skill_db(monkeypatch, settings, dummy_db)
+    search_tools = DiscoveryTools(db)
+
+    result = search_tools.search_skills("   ")
+    names = [s["name"] for s in result["skills"]]
+
+    assert set(names) == {"one", "two"}
+
+
+def test_s7_empty_query_respects_enabled_filter(tmp_path, monkeypatch):
+    """S7: Empty query still respects enabled_skills filter."""
+    settings = DummySettings(tmp_path)
+    settings.skillhub_enabled_skills = ["allowed"]
+    _patch_settings(monkeypatch, settings)
+
+    rows = [
+        {"name": "allowed", "description": "ok", "category": "", "_score": 1.0},
+        {"name": "blocked", "description": "no", "category": "", "_score": 1.0},
+    ]
+    dummy_db = DummyDB(DummyTable(rows))
+    monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
+
+    db = _make_skill_db(monkeypatch, settings, dummy_db)
+    search_tools = DiscoveryTools(db)
+
+    result = search_tools.search_skills("")
+    names = [s["name"] for s in result["skills"]]
+
+    assert names == ["allowed"]
+
+
+def test_s7_empty_query_respects_search_limit(tmp_path, monkeypatch):
+    """S7: Empty query caps results at SEARCH_LIMIT."""
+    settings = DummySettings(tmp_path)
+    settings.search_limit = 2
+    _patch_settings(monkeypatch, settings)
+
+    rows = [
+        {"name": f"skill-{i}", "description": f"desc-{i}", "category": "", "_score": 1.0}
+        for i in range(10)
+    ]
+    dummy_db = DummyDB(DummyTable(rows))
+    monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
+
+    db = _make_skill_db(monkeypatch, settings, dummy_db)
+    search_tools = DiscoveryTools(db)
+
+    result = search_tools.search_skills("")
+
+    assert len(result["skills"]) == 2  # capped at SEARCH_LIMIT

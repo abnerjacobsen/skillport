@@ -11,31 +11,44 @@ class DiscoveryTools:
         self.settings = getattr(db, "settings", settings)
 
     def search_skills(self, query: str) -> Dict[str, Any]:
+        """Find skills by natural language query.
+
+        Use when you don't know which skill exists for a task.
+        Skip if you already know the skill name.
+        Pass empty string or "*" to list available skills.
+
+        Args:
+            query: What you want to do, or "" / "*" to list all
+
+        Returns:
+            skills: List of {name, description, score} sorted by relevance
         """
-        Search for relevant skills using natural language query.
-        """
-        # 1. Search in DB (Hybrid or FTS)
         limit = self.settings.search_limit
-        candidates = self.db.search(query, limit=limit)
-        
-        # 2. Filter by enabled settings
+        query_stripped = query.strip()
+
+        # Empty or wildcard query -> list all skills
+        if not query_stripped or query_stripped == "*":
+            candidates = self.db.list_all_skills(limit=limit * 2)
+        else:
+            candidates = self.db.search(query, limit=limit)
+
+        # Filter by enabled settings
         results = []
         for cand in candidates:
-            # cand is a dict-like object from LanceDB
             name = cand["name"]
             category = cand.get("category")
-            
+
             if is_skill_enabled(name, category, settings_obj=self.settings):
                 score = float(cand.get("_score", 0.0))
                 results.append(
                     {
                         "name": name,
                         "description": cand["description"],
-                        "score": max(0.0, score),  # presentable score (non-negative)
+                        "score": max(0.0, score),
                     }
                 )
-                
+
             if len(results) >= limit:
                 break
-                
+
         return {"skills": results}
