@@ -113,6 +113,9 @@ class SkillDB:
             if not skill_md.exists():
                 continue
 
+            content = skill_md.read_text(encoding="utf-8")
+            line_count = content.count("\n") + (1 if content and not content.endswith("\n") else 0)
+
             meta, body = parse_frontmatter(skill_md)
             if not isinstance(meta, dict):
                 print(
@@ -126,8 +129,8 @@ class SkillDB:
             if not isinstance(metadata_block, dict):
                 metadata_block = {}
 
-            name = meta.get("name", skill_path.name)
-            description = meta.get("description", "")
+            name = meta.get("name") or skill_path.name
+            description = meta.get("description") or ""
             skillhub_meta = metadata_block.get("skillhub", {})
             if not isinstance(skillhub_meta, dict):
                 skillhub_meta = {}
@@ -162,6 +165,7 @@ class SkillDB:
                 always_apply=always_apply,
                 instructions=body,
                 path=str(skill_path.absolute()),
+                lines=line_count,
                 metadata=json.dumps(
                     self._canonical_metadata(meta, metadata_block, skillhub_meta, category, tags, always_apply)
                 ),

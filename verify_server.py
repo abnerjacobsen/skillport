@@ -30,7 +30,8 @@ async def run_test():
             tool_names = [t.name for t in tools.tools]
             print(f"✅ Found Tools: {tool_names}")
             
-            expected_tools = ["search_skills", "load_skill", "read_skill_file", "run_skill_command"]
+            # run_skill_command is disabled by default (Phase 5)
+            expected_tools = ["search_skills", "load_skill", "read_skill_file"]
             missing = [t for t in expected_tools if t not in tool_names]
             if missing:
                 print(f"❌ Missing tools! Expected at least {expected_tools}, missing {missing}")
@@ -60,17 +61,9 @@ async def run_test():
             except Exception as e:
                 print(f"❌ read_skill_file failed: {e}")
 
-            # 6. Test run_skill_command (python hello.py)
-            print("\n--- Testing run_skill_command ---")
-            try:
-                exec_result = await session.call_tool("run_skill_command", arguments={
-                    "skill_name": "hello-world",
-                    "command": "python",
-                    "args": ["hello.py"]
-                })
-                print(f"Exec Result: {exec_result.content[0].text}")
-            except Exception as e:
-                print(f"❌ run_skill_command failed: {e}")
+            # 6. Test run_skill_command - SKIPPED (disabled by default in Phase 5)
+            # Agents should execute scripts directly using the path from load_skill
+            print("\n--- Skipping run_skill_command (disabled by default) ---")
 
             print("\n✅ Verification Complete!")
 

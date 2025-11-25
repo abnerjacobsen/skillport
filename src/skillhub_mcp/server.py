@@ -1,53 +1,27 @@
+"""SkillHub MCP Server.
+
+This module handles server creation and the main entry point.
+CLI modes (--lint, --list) are handled by cli.py.
+Validation logic is in validation.py.
+"""
+
 import sys
-import os
-from typing import Dict, List, Any
 from fastmcp import FastMCP
+
 from .db import SkillDB
+from .cli import parse_flags, handle_cli_mode
+from .validation import SKILLHUB_BANNER, report_skill_status
 from .tools.discovery import DiscoveryTools
 from .tools.loading import LoadingTools
 from .tools.execution import ExecutionTools
 
-# CLI flags (Phase 5: simplified - removed --setup-list, --setup-auto)
-KNOWN_FLAGS = {"--reindex", "--skip-auto-reindex"}
-
-
-def _parse_flags() -> Dict[str, bool]:
-    """Parse CLI flags and return a dict of flag states."""
-    argv = sys.argv[1:]
-    flags = {
-        "force_reindex": "--reindex" in argv,
-        "skip_auto": ("--skip-auto-reindex" in argv) or (os.getenv("SKILLHUB_SKIP_AUTO_REINDEX") == "1"),
-    }
-    # strip known flags so FastMCP doesn't see them
-    sys.argv = [sys.argv[0]] + [a for a in argv if a not in KNOWN_FLAGS]
-    return flags
-
-
-def _report_skill_status(db: SkillDB) -> None:
-    """Report the status of all skills at startup (simplified for Phase 5).
-
-    Phase 5: Removed ready/not-ready checks. Simply lists indexed skills.
-    """
-    try:
-        all_skills = db.list_all_skills(limit=1000)
-        if not all_skills:
-            print("[INFO] No skills found.", file=sys.stderr)
-            return
-
-        skill_count = len(all_skills)
-        print(f"[INFO] {skill_count} skill(s) indexed:", file=sys.stderr)
-        for skill in all_skills[:10]:  # Show first 10
-            name = skill.get("name", "unknown")
-            print(f"  - {name}", file=sys.stderr)
-        if skill_count > 10:
-            print(f"  ... and {skill_count - 10} more", file=sys.stderr)
-
-    except Exception as e:
-        print(f"[WARN] Failed to report skill status: {e}", file=sys.stderr)
-
 
 def create_server() -> FastMCP:
-    flags = _parse_flags()
+    """Create and configure the MCP server."""
+    flags = parse_flags()
+
+    # Show banner at startup
+    print(SKILLHUB_BANNER, file=sys.stderr)
 
     # Instantiate DB explicitly so lifecycle is tied to the server instance.
     db = SkillDB()
@@ -65,7 +39,7 @@ def create_server() -> FastMCP:
         print(f"[INFO] Skipping reindex (reason={reindex_decision['reason']})", file=sys.stderr)
 
     # Report skill status at startup
-    _report_skill_status(db)
+    report_skill_status(db)
 
     # Generate Instructions for AI agents
     core_skills = db.get_core_skills()
@@ -96,12 +70,19 @@ When instructions say "run script.py", use the path from load_skill: `python {pa
     mcp.tool()(execution_tools.read_skill_file)
     # This tool is not recommended for coding agents as it requires a terminal.
     # mcp.tool()(execution_tools.run_skill_command)
-    
+
     return mcp
 
+
 def main():
+    """Main entry point for SkillHub MCP."""
+    # Handle CLI-only modes (--lint, --list)
+    handle_cli_mode()
+
+    # Normal server startup
     mcp = create_server()
     mcp.run()
+
 
 if __name__ == "__main__":
     main()
