@@ -1,47 +1,50 @@
-name: release
+name: Release
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches: [main]
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
-  release:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          release-type: python
+
+  snapshot-docs:
+    needs: release-please
+    if: needs.release-please.outputs.release_created
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
+          ref: main
           fetch-depth: 0
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-
-      - name: Install semantic-release deps
-        run: |
-          npm install --no-save semantic-release @semantic-release/{changelog,git,github,commit-analyzer,release-notes-generator}
-
-      - name: Semantic Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
-
       - name: Snapshot docs (latest -> releases/vX.Y.Z)
-        if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
-          # fail if snapshot already exists to avoid accidental overwrite
-          if [ -d docs/releases/v${VERSION} ]; then
-            echo "docs/releases/v${VERSION} already exists; aborting."
-            exit 1
+          VERSION=${{ needs.release-please.outputs.tag_name }}
+          VERSION=${VERSION#v}
+
+          if [ -d "docs/releases/v${VERSION}" ]; then
+            echo "docs/releases/v${VERSION} already exists; skipping."
+            exit 0
           fi
+
           mkdir -p docs/releases
-          # copy while excluding WIP specs
-          rsync -av --exclude 'specs/wip/**' --exclude 'tasks/AGENTS.md' docs/latest/ docs/releases/v${VERSION}/
+          rsync -av --exclude 'specs/wip/**' --exclude 'tasks/AGENTS.md' \
+            docs/latest/ docs/releases/v${VERSION}/
+
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add docs/releases CHANGELOG.md
+          git add docs/releases
           git commit -m "chore: snapshot docs v${VERSION}" || true
-          git push origin HEAD:main || true
+          git push origin main
