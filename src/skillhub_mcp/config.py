@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     # Filter Settings
     skillhub_enabled_skills: List[str] = Field(default=[])
     skillhub_enabled_categories: List[str] = Field(default=[])
+    skillhub_enabled_namespaces: List[str] = Field(default=[])
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

@@ -30,22 +30,18 @@ class IndexStateStore:
         if not skills_dir.exists():
             return {"hash": "", "count": 0}
 
-        for skill_path in skills_dir.iterdir():
-            if not skill_path.is_dir():
-                continue
-            skill_md = skill_path / "SKILL.md"
-            if not skill_md.exists():
-                continue
-            try:
-                st = skill_md.stat()
-            except FileNotFoundError:
-                continue
-            try:
-                body_digest = hashlib.sha1(skill_md.read_bytes()).hexdigest()
-            except Exception:
-                body_digest = "err"
-            rel = skill_md.relative_to(skills_dir)
-            entries.append(f"{rel}:{st.st_mtime_ns}:{st.st_size}:{body_digest}")
+        for pattern in ("*/SKILL.md", "*/*/SKILL.md"):
+            for skill_md in skills_dir.glob(pattern):
+                try:
+                    st = skill_md.stat()
+                except FileNotFoundError:
+                    continue
+                try:
+                    body_digest = hashlib.sha1(skill_md.read_bytes()).hexdigest()
+                except Exception:
+                    body_digest = "err"
+                rel = skill_md.relative_to(skills_dir)
+                entries.append(f"{rel}:{st.st_mtime_ns}:{st.st_size}:{body_digest}")
 
         entries.sort()
         joined = "|".join(entries)

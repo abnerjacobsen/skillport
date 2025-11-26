@@ -32,13 +32,15 @@ class DiscoveryTools:
         # Filter by enabled settings
         results: List[Dict[str, Any]] = []
         for cand in candidates:
-            name = cand["name"]
+            skill_id = cand.get("id") or cand.get("name")
+            name = cand.get("name", skill_id)
             category = cand.get("category")
 
-            if is_skill_enabled(name, category, settings_obj=self.settings):
+            if is_skill_enabled(skill_id, category, settings_obj=self.settings):
                 score = float(cand.get("_score", 0.0))
                 results.append(
                     {
+                        "id": skill_id,
                         "name": name,
                         "description": cand["description"],
                         "score": max(0.0, score),

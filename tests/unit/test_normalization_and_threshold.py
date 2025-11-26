@@ -16,6 +16,7 @@ class DummySettings:
         self.embedding_provider = "none"
         self.skillhub_enabled_skills = []
         self.skillhub_enabled_categories = []
+        self.skillhub_enabled_namespaces = []
         self.skills_dir = base_dir / "skills"
         self.db_path = base_dir / "db.lancedb"
 

@@ -123,6 +123,11 @@ Instructions for the AI agent go here.
 
 When `EMBEDDING_PROVIDER=none` (default), search uses Full-Text Search. Set to `openai` or `gemini` with the corresponding API key for vector search.
 
+### GitHub sources
+- Downloaded via GitHub tarball API (`/repos/{owner}/{repo}/tarball/{ref}`).
+- Guardrails: max 1MB per file, 10MB total extracted; symlinks/hidden files are rejected.
+- Private repos / higher rate limits: set `GITHUB_TOKEN`.
+
 <details>
 <summary>All Configuration Options</summary>
 
@@ -184,8 +189,8 @@ Skills with `alwaysApply: true` appear as "Core Skills" in the agent's system pr
 | Tool | Purpose |
 | :--- | :--- |
 | `search_skills(query)` | Find skills by description. Use `""` or `"*"` to list all. |
-| `load_skill(skill_name)` | Get full instructions and directory path. |
-| `read_skill_file(skill_name, file_path)` | Read templates/configs into context. |
+| `load_skill(skill_id)` | Get full instructions and directory path (supports `group/skill` ids). |
+| `read_skill_file(skill_id, file_path)` | Read templates/configs into context. |
 
 **Workflow**: `search_skills` → `load_skill` → execute scripts via terminal
 
@@ -195,10 +200,14 @@ Skills with `alwaysApply: true` appear as "Core Skills" in the agent's system pr
 # Add skills to ~/.skillhub/skills/
 skillhub add hello-world         # Add sample skill
 skillhub add template            # Add skill template
+skillhub add ./my-skill/         # Copy a local skill (single)
+skillhub add ./my-collection/ --keep-structure  # Copy multiple, keep namespace
+skillhub add https://github.com/user/repo/tree/main/skills  # From GitHub tarball
 
-# Verify
-skillhub --list                  # List indexed skills
-skillhub --lint                  # Validate SKILL.md files
+# Remove / List / Lint
+skillhub remove my-skill         # Delete by id (e.g., group/skill)
+skillhub list --json             # List installed skills
+skillhub --lint                  # Validate SKILL.md files (indexed)
 
 # Server
 skillhub                         # Start MCP server

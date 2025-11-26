@@ -122,7 +122,9 @@ class SkillSearchService:
         qlow = query.lower()
         results: List[SearchResult] = []
         for row in rows:
-            if qlow in str(row.get("name", "")).lower() or qlow in str(row.get("description", "")).lower():
+            if qlow in str(row.get("id", "")).lower() or qlow in str(row.get("name", "")).lower() or qlow in str(
+                row.get("description", "")
+            ).lower():
                 results.append(self._to_result(row, "substring", default_score=0.1))
                 if len(results) >= limit:
                     break

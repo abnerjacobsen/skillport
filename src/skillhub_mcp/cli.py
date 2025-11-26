@@ -1,10 +1,12 @@
-"""CLI-only modes for SkillHub (--lint, --list, add).
+"""CLI-only modes for SkillHub (lint, list, add, remove).
 
 This module handles CLI flags and standalone commands that don't start the server.
 """
 
+import argparse
 import os
 import sys
+from pathlib import Path
 from typing import Dict, List, Any
 
 from .db import SkillDB
@@ -13,11 +15,21 @@ from .validation import (
     validate_skill,
 )
 from .config import settings
+from .skill_manager import (
+    SourceType,
+    SkillInfo,
+    AddResult,
+    resolve_source,
+    detect_skills,
+    add_builtin,
+    add_local,
+    remove_skill,
+    fetch_github_source,
+    parse_github_url,
+)
 
 # CLI flags
 KNOWN_FLAGS = {"--reindex", "--skip-auto-reindex", "--lint", "--list"}
-# Subcommands (positional, like 'add')
-KNOWN_COMMANDS = {"add"}
 
 
 def parse_flags() -> Dict[str, Any]:
@@ -67,7 +79,11 @@ def run_lint(db: SkillDB, skill_name: str | None = None) -> int:
 
     # Filter to specific skill if requested
     if skill_name:
-        all_skills = [s for s in all_skills if s.get("name") == skill_name]
+        all_skills = [
+            s
+            for s in all_skills
+            if s.get("name") == skill_name or s.get("id") == skill_name
+        ]
         if not all_skills:
             print(f"Skill '{skill_name}' not found.")
             return 1
@@ -111,46 +127,50 @@ def run_lint(db: SkillDB, skill_name: str | None = None) -> int:
     return 1
 
 
-def run_list(db: SkillDB) -> int:
+def run_list(db: SkillDB, skills: List[Dict[str, Any]] | None = None) -> int:
     """List all skills without starting the server. Returns exit code."""
-    all_skills = db.list_all_skills(limit=1000)
+    all_skills = skills if skills is not None else db.list_all_skills(limit=1000)
     if not all_skills:
         print("No skills found.")
         return 1
 
-    # Sort by name
-    all_skills.sort(key=lambda s: s.get("name", ""))
+    # Sort by id for stability
+    all_skills.sort(key=lambda s: s.get("id", ""))
 
-    print(f"{'─' * 60}")
+    print(f"{'─' * 70}")
     print(f" {len(all_skills)} skill(s)")
-    print(f"{'─' * 60}\n")
+    print(f"{'─' * 70}\n")
+    print(f"  {'ID':<32} {'NAME':<18} CATEGORY")
+    print(f"  {'-'*32} {'-'*18} {'-'*16}")
 
     for skill in all_skills:
+        skill_id = skill.get("id", "")
         name = skill.get("name", "unknown")
-        description = skill.get("description", "")
-        always_apply = skill.get("always_apply", False)
-        # Truncate description for display
-        desc_display = description[:40] + "..." if len(description) > 40 else description
-        marker = "★" if always_apply else " "
-        print(f"  {marker} {name:<24} {desc_display}")
+        category = skill.get("category", "") or ""
+        print(f"  {skill_id:<32} {name:<18} {category}")
 
-    print(f"\n{'─' * 60}\n")
+    print(f"\n{'─' * 70}\n")
     return 0
 
 
 def handle_cli_mode() -> bool:
-    """Handle CLI-only modes (--lint, --list, add).
+    """Handle CLI-only modes (lint, list, add, remove).
 
     Returns True if a CLI mode was handled (and program should exit),
     False if normal server startup should proceed.
     """
     argv = sys.argv[1:]
 
-    # add subcommand
-    if argv and argv[0] == "add":
-        skill_name = argv[1] if len(argv) > 1 else None
-        exit_code = run_add(skill_name)
-        sys.exit(exit_code)
+    if argv:
+        if argv[0] == "add":
+            exit_code = run_add_cli(argv[1:])
+            sys.exit(exit_code)
+        if argv[0] == "remove":
+            exit_code = run_remove_cli(argv[1:])
+            sys.exit(exit_code)
+        if argv[0] == "list":
+            exit_code = run_list_cli(argv[1:])
+            sys.exit(exit_code)
 
     # --lint mode
     if "--lint" in argv:
@@ -163,130 +183,300 @@ def handle_cli_mode() -> bool:
     # --list mode
     if "--list" in argv:
         parse_flags()  # consume flags
-        db = SkillDB()
-        _ensure_index(db)
-        exit_code = run_list(db)
+        # Remaining args (after stripping known flags) may include --dir/--json
+        exit_code = run_list_cli(sys.argv[1:])
         sys.exit(exit_code)
 
     return False
 
 
 # =============================================================================
-# add command
+# add / remove / list commands
 # =============================================================================
-
-# Built-in skill templates
-BUILTIN_SKILLS = {
-    "hello-world": """\
----
-name: hello-world
-description: A simple hello world skill for testing SkillHub.
-metadata:
-  skillhub:
-    category: examples
-    tags: [hello, test, demo]
----
-# Hello World Skill
-
-This is a sample skill to verify your SkillHub installation is working.
-
-## Usage
-
-When the user asks to test SkillHub or says "hello", respond with a friendly greeting
-and confirm that the skill system is operational.
-
-## Example Response
-
-"Hello! The hello-world skill is working correctly."
-""",
-    "template": """\
----
-name: my-custom-skill
-description: Replace this with a description of what your skill does.
-metadata:
-  skillhub:
-    category: custom
-    tags: [template, starter]
----
-# My Custom Skill
-
-Replace this content with instructions for the AI agent.
-
-## When to Use
-
-Describe the situations when this skill should be activated.
-
-## Instructions
-
-1. Step one...
-2. Step two...
-3. Step three...
-
-## Examples
-
-Provide example inputs and expected outputs.
-""",
-}
+def _settings_with_dir(dir_arg: str | None):
+    if dir_arg is None:
+        return settings
+    return settings.model_copy(update={"skills_dir": Path(dir_arg).expanduser().resolve()})
 
 
-def run_add(skill_name: str | None) -> int:
-    """Add a built-in skill to the skills directory.
+def _print_add_results(results: List[AddResult]) -> bool:
+    ok = True
+    for res in results:
+        mark = "✓" if res.success else "⚠"
+        print(f"{mark} {res.message}")
+        ok = ok and res.success
+    return ok
 
-    Args:
-        skill_name: Name of the built-in skill to add (hello-world, template).
+
+def _prompt_structure_choice(skills: List[SkillInfo], source_name: str):
+    """Multiple skills detected -> ask structure.
 
     Returns:
-        Exit code (0=success, 1=failure).
+      False -> flat
+      True -> keep_structure with source_name
+      ("custom", namespace) -> keep_structure with custom namespace
+      None -> cancel
     """
-    skills_dir = settings.get_effective_skills_dir()
+    print(f"\nFound {len(skills)} skills:")
+    for s in skills:
+        print(f"  - {s.name}")
 
-    # Show usage if no skill name provided
-    if not skill_name:
-        print(f"{'─' * 60}")
-        print(" SkillHub Add")
-        print(f"{'─' * 60}\n")
-        print("  Usage: skillhub add <skill-name>\n")
-        print("  Available skills:")
-        for name in BUILTIN_SKILLS:
-            print(f"    - {name}")
-        print("\n  Example:")
-        print("    skillhub add hello-world")
-        print("    skillhub add template")
-        print(f"\n{'─' * 60}\n")
+    print("\nHow to add?")
+    print(f"  [1] Flat    → skills/{skills[0].name}/, ...")
+    print(f"  [2] Grouped → skills/{source_name}/{skills[0].name}/, ...")
+    print(f"  [3] Custom Group → skills/<namespace>/{skills[0].name}/, ...")
+    print("  [0] Cancel")
+
+    while True:
+        choice = input("\nChoice [1]: ").strip() or "1"
+        if choice == "0":
+            return None      # Cancel
+        if choice == "1":
+            return False     # flat
+        if choice == "2":
+            return True      # keep_structure
+        if choice == "3":
+            ns = input("Enter namespace (no slashes, e.g., my-collection): ").strip()
+            if not ns or "/" in ns or ".." in ns:
+                print("Invalid namespace. Use a single segment without '/'.")
+                continue
+            return ("custom", ns)
+        print("Invalid choice. Enter 0, 1, 2, or 3.")
+
+
+def run_add_cli(argv: List[str]) -> int:
+    """Add skills from built-ins or local paths."""
+    parser = argparse.ArgumentParser(prog="skillhub add", add_help=True)
+    parser.add_argument("source", help="Built-in skill name, local path, or GitHub URL")
+    parser.add_argument("--dir", dest="target_dir", help="Install destination (default: SKILLS_DIR)")
+    parser.add_argument("--force", action="store_true", help="Overwrite without confirmation")
+    parser.add_argument("--name", dest="name_override", help="Override skill name (single skill only)")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--flat", dest="keep_structure", action="store_false", help="Flatten when multiple skills")
+    group.add_argument(
+        "--keep-structure",
+        dest="keep_structure",
+        action="store_true",
+        help="Preserve directory structure when multiple skills",
+    )
+    parser.add_argument("--namespace", dest="namespace_override", help="Custom namespace when keeping structure")
+    parser.set_defaults(keep_structure=None)
+
+    try:
+        args = parser.parse_args(argv)
+    except SystemExit as e:
+        return e.code
+
+    try:
+        source_type, resolved = resolve_source(args.source)
+    except ValueError as e:
+        print(f"Error: {e}")
         return 1
 
-    # Check if skill exists
-    if skill_name not in BUILTIN_SKILLS:
-        print(f"Unknown skill: {skill_name}")
-        print(f"Available skills: {', '.join(BUILTIN_SKILLS.keys())}")
-        return 1
+    target_dir = Path(args.target_dir).expanduser().resolve() if args.target_dir else settings.get_effective_skills_dir()
 
-    # Create skills directory if needed
-    if not skills_dir.exists():
+    temp_dir_to_cleanup = None
+    origin_payload = None
+
+    if source_type == SourceType.GITHUB:
         try:
-            skills_dir.mkdir(parents=True, exist_ok=True)
-            print(f"Created: {skills_dir}")
-        except OSError as e:
-            print(f"Failed to create directory: {e}")
+            parsed_url = parse_github_url(resolved)
+            temp_dir = fetch_github_source(resolved)
+        except Exception as e:
+            print(f"Error: {e}")
+            return 1
+        source_path = Path(temp_dir)
+        source_label = Path(parsed_url.normalized_path).name or parsed_url.repo
+        temp_dir_to_cleanup = source_path
+        origin_payload = {
+            "source": resolved,
+            "kind": "github",
+            "ref": parsed_url.ref,
+            "path": parsed_url.normalized_path,
+        }
+    else:
+        source_path = Path(resolved)
+        source_label = source_path.name
+        origin_payload = {
+            "source": str(source_path),
+            "kind": "local",
+        }
+
+    if source_type == SourceType.BUILTIN:
+        try:
+            force_flag = args.force
+            dest = target_dir / resolved
+            if dest.exists() and not force_flag:
+                answer = input(f"Skill '{resolved}' already exists. Overwrite? [y/N] ").strip().lower()
+                if answer not in {"y", "yes"}:
+                    print("Aborted.")
+                    return 1
+                force_flag = True
+            result = add_builtin(resolved, target_dir, force_flag)
+            print(result.message)
+            if result.success:
+                from .skill_manager import record_origin
+
+                record_origin(result.skill_id, {"source": "builtin", "kind": "builtin"})
+            return 0 if result.success else 1
+        except Exception as e:
+            print(f"Error: {e}")
             return 1
 
-    # Determine target directory name
-    target_dir_name = f"_{skill_name}" if skill_name == "template" else skill_name
-    target_dir = skills_dir / target_dir_name
-    target_file = target_dir / "SKILL.md"
-
-    # Check if already exists
-    if target_file.exists():
-        print(f"Skill already exists: {target_dir}")
-        return 1
-
-    # Create skill
     try:
-        target_dir.mkdir(parents=True, exist_ok=True)
-        target_file.write_text(BUILTIN_SKILLS[skill_name])
-        print(f"Added: {target_dir}")
-        print("\nVerify with: skillhub --list")
-        return 0
-    except OSError as e:
-        print(f"Failed to create skill: {e}")
+        skills = detect_skills(source_path)
+    except Exception as e:
+        print(f"Error: {e}")
         return 1
+
+    if not skills:
+        print(f"Error: No skills found in {source_path}")
+        return 1
+
+    keep_structure = args.keep_structure
+    namespace_override = args.namespace_override
+    name_override = args.name_override
+    if len(skills) == 1:
+        keep_structure = False if keep_structure is None else keep_structure
+    else:
+        if keep_structure is None:
+            choice = _prompt_structure_choice(skills, source_label if isinstance(source_label, str) else source_path.name)
+            if choice is None:
+                print("Cancelled.")
+                return 1
+            if choice is True or choice is False:
+                keep_structure = choice
+            elif isinstance(choice, tuple) and choice[0] == "custom":
+                keep_structure = True
+                namespace_override = choice[1]
+    if name_override and len(skills) != 1:
+        print("--name can only be used when a single skill is detected.")
+        return 1
+    if name_override and ("/" in name_override or ".." in name_override):
+        print("Invalid --name value. Use a single segment without '/'.")
+        return 1
+
+    # Prompt before destructive overwrite if needed
+    conflicts: List[str] = []
+    for skill in skills:
+        namespace = namespace_override or source_label
+        skill_id = skill.name if not keep_structure else f"{namespace}/{skill.name}"
+        if (target_dir / skill_id).exists():
+            conflicts.append(skill_id)
+
+    force_flag = args.force
+    if conflicts and not force_flag:
+        listed = ", ".join(conflicts)
+        answer = input(f"Skill(s) {listed} already exist. Overwrite? [y/N] ").strip().lower()
+        if answer not in {"y", "yes"}:
+            print("Aborted.")
+            return 1
+        force_flag = True
+
+    try:
+        results = add_local(
+            source_path,
+            skills,
+            target_dir=target_dir,
+            keep_structure=bool(keep_structure),
+            force=force_flag,
+            namespace_override=namespace_override,
+            rename_single_to=name_override,
+        )
+    except Exception as e:
+        print(f"Error: {e}")
+        return 1
+
+    ok = _print_add_results(results)
+
+    if ok and origin_payload:
+        from .skill_manager import record_origin
+
+        for res in results:
+            if res.success:
+                record_origin(res.skill_id, origin_payload)
+
+    if temp_dir_to_cleanup:
+        import shutil
+
+        try:
+            shutil.rmtree(temp_dir_to_cleanup, ignore_errors=True)
+        except Exception:
+            pass
+
+    return 0 if ok else 1
+
+
+def run_remove_cli(argv: List[str]) -> int:
+    """Remove a skill by id."""
+    parser = argparse.ArgumentParser(prog="skillhub remove", add_help=True)
+    parser.add_argument("skill_id", help="Skill id (e.g., hello-world or group/skill)")
+    parser.add_argument("--dir", dest="target_dir", help="Skills directory (default: SKILLS_DIR)")
+    parser.add_argument("--force", action="store_true", help="Delete without confirmation")
+
+    try:
+        args = parser.parse_args(argv)
+    except SystemExit as e:
+        return e.code
+
+    target_dir = Path(args.target_dir).expanduser().resolve() if args.target_dir else settings.get_effective_skills_dir()
+
+    if not target_dir.exists():
+        print(f"Skills directory not found: {target_dir}")
+        return 1
+
+    if not args.force:
+        confirm = input(f"Remove '{args.skill_id}'? [y/N] ").strip().lower()
+        if confirm not in {"y", "yes"}:
+            print("Aborted.")
+            return 1
+
+    try:
+        result = remove_skill(args.skill_id, target_dir)
+    except Exception as e:
+        print(f"Error: {e}")
+        return 1
+
+    print(result.message)
+    if result.success:
+        from .skill_manager import remove_origin
+
+        remove_origin(args.skill_id)
+    return 0 if result.success else 1
+
+
+def run_list_cli(argv: List[str]) -> int:
+    """List installed skills (optionally as JSON)."""
+    parser = argparse.ArgumentParser(prog="skillhub list", add_help=True)
+    parser.add_argument("--dir", dest="target_dir", help="Skills directory (default: SKILLS_DIR)")
+    parser.add_argument("--category", dest="category", help="Filter by category")
+    parser.add_argument("--json", dest="as_json", action="store_true", help="Output JSON")
+    parser.add_argument("--id-prefix", dest="id_prefix", help="Filter by skill id prefix (e.g., group/)")
+    parser.add_argument("--name", dest="name_filter", help="Filter by exact skill name")
+
+    try:
+        args = parser.parse_args(argv)
+    except SystemExit as e:
+        return e.code
+
+    cfg = _settings_with_dir(args.target_dir)
+    db = SkillDB(settings_override=cfg)
+    _ensure_index(db)
+    skills = db.list_all_skills(limit=1000)
+
+    if args.category:
+        cat_norm = " ".join(args.category.strip().split()).lower()
+        skills = [s for s in skills if (s.get("category") or "").lower() == cat_norm]
+    if args.id_prefix:
+        prefix = args.id_prefix
+        skills = [s for s in skills if str(s.get("id", "")).startswith(prefix)]
+    if args.name_filter:
+        skills = [s for s in skills if s.get("name") == args.name_filter]
+
+    if args.as_json:
+        import json
+
+        print(json.dumps(skills, ensure_ascii=False, indent=2))
+        return 0 if skills else 1
+
+    return run_list(db, skills=skills)
