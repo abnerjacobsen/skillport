@@ -3,6 +3,7 @@ import sys
 from typing import List, Optional, Any, Dict
 
 import lancedb
+from pathlib import Path
 
 from .embeddings import get_embedding
 from .models import SkillRecord
@@ -13,7 +14,7 @@ from ..utils import parse_frontmatter
 
 
 class SkillDB:
-    schema_version = "fts-v1"
+    schema_version = "fts-v2"
 
     def __init__(self, settings_override=None):
         self.settings = settings_override or settings
@@ -57,18 +58,31 @@ class SkillDB:
         Constructs a SQL WHERE clause based on enabled skills/categories settings.
         Mirrors is_skill_enabled logic:
         1) If skills specified: restrict to names.
-        2) Else if categories specified: restrict to categories.
-        3) Else: no filter.
+        2) Else if namespaces/prefixes specified: restrict by id prefix.
+        3) Else if categories specified: restrict to categories.
+        4) Else: no filter.
         """
-        if self.settings.skillhub_enabled_skills:
+        enabled_skills = self.settings.get_enabled_skills()
+        if enabled_skills:
             safe_skills = [
-                f"'{self._escape_sql_string(self._norm_token(s))}'" for s in self.settings.skillhub_enabled_skills
+                f"'{self._escape_sql_string(self._norm_token(s))}'" for s in enabled_skills
             ]
-            return f"lower(name) IN ({', '.join(safe_skills)})"
+            return f"id IN ({', '.join(safe_skills)})"
 
-        if self.settings.skillhub_enabled_categories:
+        enabled_namespaces = self.settings.get_enabled_namespaces()
+        if enabled_namespaces:
+            clauses = []
+            for ns in enabled_namespaces:
+                prefix = self._escape_sql_string(self._norm_token(ns).rstrip("/"))
+                if prefix:
+                    clauses.append(f"lower(id) LIKE '{prefix}%'")
+            if clauses:
+                return "(" + " OR ".join(clauses) + ")"
+
+        enabled_categories = self.settings.get_enabled_categories()
+        if enabled_categories:
             safe_cats = [
-                f"'{self._escape_sql_string(self._norm_token(c))}'" for c in self.settings.skillhub_enabled_categories
+                f"'{self._escape_sql_string(self._norm_token(c))}'" for c in enabled_categories
             ]
             return f"category IN ({', '.join(safe_cats)})"
 
@@ -105,13 +119,25 @@ class SkillDB:
 
         records: List[SkillRecord] = []
         vectors_present = False
+        ids_seen: set[str] = set()
 
-        for skill_path in skills_dir.iterdir():
-            if not skill_path.is_dir():
-                continue
+        def _iter_skill_dirs(base: Path):
+            seen: set[Path] = set()
+            for pattern in ("*/SKILL.md", "*/*/SKILL.md"):
+                for skill_md in base.glob(pattern):
+                    skill_dir = skill_md.parent
+                    if skill_dir in seen:
+                        continue
+                    seen.add(skill_dir)
+                    rel = skill_dir.relative_to(base)
+                    # Support up to 2 levels (namespace/skill)
+                    if len(rel.parts) > 2:
+                        print(f"Skipping deep skill path (>2 levels): {skill_dir}", file=sys.stderr)
+                        continue
+                    yield skill_dir
+
+        for skill_path in _iter_skill_dirs(skills_dir):
             skill_md = skill_path / "SKILL.md"
-            if not skill_md.exists():
-                continue
 
             content = skill_md.read_text(encoding="utf-8")
             line_count = content.count("\n") + (1 if content and not content.endswith("\n") else 0)
@@ -152,12 +178,26 @@ class SkillDB:
             elif isinstance(tags, str):
                 tags_norm = [self._norm_token(tags)]
 
-            text_to_embed = f"{name} {description} {category_norm} {' '.join(tags_norm)}"
+            rel = skill_path.relative_to(skills_dir)
+            if len(rel.parts) == 1:
+                skill_id = rel.parts[0]
+            elif len(rel.parts) == 2:
+                skill_id = "/".join(rel.parts[:2])
+            else:
+                continue
+
+            if skill_id in ids_seen:
+                print(f"Skipping duplicate skill id '{skill_id}' at {skill_path}", file=sys.stderr)
+                continue
+            ids_seen.add(skill_id)
+
+            text_to_embed = f"{skill_id} {name} {description} {category_norm} {' '.join(tags_norm)}"
             vec = self.search_service.embed_fn(text_to_embed)
             if vec:
                 vectors_present = True
 
             record = SkillRecord(
+                id=skill_id,
                 name=name,
                 description=description,
                 category=category_norm,
@@ -201,12 +241,17 @@ class SkillDB:
         tbl = self.db.open_table(self.table_name)
         try:
             tbl.create_fts_index(
-                ["name", "description", "tags_text", "category"],
+                ["id", "name", "description", "tags_text", "category"],
                 replace=True,
                 use_tantivy=True,
             )
         except Exception as e:
             print(f"FTS index creation failed (maybe already exists or not supported): {e}", file=sys.stderr)
+
+        try:
+            tbl.create_scalar_index("id", index_type="HASH", replace=True)
+        except Exception as e:
+            print(f"ID scalar index creation failed: {e}", file=sys.stderr)
 
         try:
             tbl.create_scalar_index("category", index_type="BITMAP", replace=True)
@@ -285,15 +330,24 @@ class SkillDB:
             normalize_query=self._normalize,
         )
 
-    def get_skill(self, skill_name: str) -> Optional[Dict[str, Any]]:
+    def get_skill(self, identifier: str) -> Optional[Dict[str, Any]]:
         tbl = self._get_table()
         if not tbl:
             return None
 
-        safe_name = self._escape_sql_string(skill_name)
-        res = tbl.search().where(f"name = '{safe_name}'").limit(1).to_list()
+        safe = self._escape_sql_string(identifier)
+        # 1) Exact id match first
+        res = tbl.search().where(f"id = '{safe}'").limit(1).to_list()
         if res:
             return res[0]
+
+        # 2) Fallback to name match; detect ambiguity
+        name_matches = tbl.search().where(f"name = '{safe}'").limit(5).to_list()
+        if len(name_matches) == 1:
+            return name_matches[0]
+        if len(name_matches) > 1:
+            ids = [m.get("id") for m in name_matches if m.get("id")]
+            raise ValueError(f"Ambiguous skill name '{identifier}'. Specify full id. Candidates: {', '.join(ids)}")
         return None
 
     def get_core_skills(self) -> List[Dict[str, Any]]:

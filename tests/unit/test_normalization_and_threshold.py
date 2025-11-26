@@ -16,6 +16,7 @@ class DummySettings:
         self.embedding_provider = "none"
         self.skillhub_enabled_skills = []
         self.skillhub_enabled_categories = []
+        self.skillhub_enabled_namespaces = []
         self.skills_dir = base_dir / "skills"
         self.db_path = base_dir / "db.lancedb"
 
@@ -24,6 +25,15 @@ class DummySettings:
 
     def get_effective_db_path(self):
         return self.db_path
+
+    def get_enabled_skills(self):
+        return self.skillhub_enabled_skills
+
+    def get_enabled_categories(self):
+        return self.skillhub_enabled_categories
+
+    def get_enabled_namespaces(self):
+        return self.skillhub_enabled_namespaces
 
 
 class DummyTable:

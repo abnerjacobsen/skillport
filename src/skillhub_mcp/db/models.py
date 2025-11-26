@@ -4,6 +4,7 @@ from lancedb.pydantic import LanceModel
 
 
 class SkillRecord(LanceModel):
+    id: str
     name: str
     description: str
     category: str = ""
@@ -16,4 +17,3 @@ class SkillRecord(LanceModel):
     # Using List[float] allows flexibility for different embedding models (OpenAI: 1536, Gemini: 768, etc.)
     # without strict schema validation failures on dimension mismatch during development/model switching.
     vector: Optional[List[float]] = None
-

@@ -7,7 +7,6 @@ Validation logic is in validation.py.
 
 import sys
 from fastmcp import FastMCP
-
 from .db import SkillDB
 from .cli import parse_flags, handle_cli_mode
 from .validation import SKILLHUB_BANNER, report_skill_status
@@ -46,14 +45,15 @@ def create_server() -> FastMCP:
 
     instructions = """SkillHub provides reusable Agent Skills that load progressively to save context.
 
-Workflow: search_skills → load_skill → execute in your terminal
+Workflow: search_skills → load_skill (by skill_id) → execute in your terminal
 
 When instructions say "run script.py", use the path from load_skill: `python {path}/script.py`
 """
     if core_skills:
         instructions += "\nPre-loaded skills (always available):\n"
         for skill in core_skills:
-            instructions += f"- {skill['name']}: {skill['description']}\n"
+            skill_id = skill.get("id", skill.get("name"))
+            instructions += f"- {skill_id}: {skill['description']}\n"
 
     print(f"[DEBUG] Server Instructions:\n{instructions}", file=sys.stderr)
 

@@ -63,29 +63,41 @@ class ExecutionTools:
             raise FileNotFoundError(f"File not found: {file_path}")
         return target_path
 
-    def read_skill_file(self, skill_name: str, file_path: str) -> Dict[str, Any]:
+    def read_skill_file(self, skill_id: str | None = None, file_path: str | None = None, skill_name: str | None = None) -> Dict[str, Any]:
         """Read a file from a skill directory into context. For templates/configs only.
 
         For scripts, execute directly in your terminal instead of reading.
 
         Args:
-            skill_name: Skill name from load_skill.
+            skill_id: Skill id from load_skill (preferred).
+            skill_name: Legacy alias.
             file_path: Relative path (e.g., "templates/config.json").
 
         Returns:
             content: File text (UTF-8)
             truncated: True if exceeded size limit
         """
-        # 1. Check enabled
-        record = self.db.get_skill(skill_name)
-        if not record:
-            raise ValueError(f"Skill not found: {skill_name}")
+        identifier = skill_id or skill_name
+        if not identifier:
+            raise ValueError("skill_id is required")
 
-        if not is_skill_enabled(skill_name, record.get("category"), settings_obj=self.settings):
-            raise ValueError(f"Skill is disabled: {skill_name}")
+        # 1. Check enabled
+        try:
+            record = self.db.get_skill(identifier)
+        except ValueError as e:
+            raise ValueError(f"{e}. Use full skill_id (e.g., group/skill).") from e
+        if not record:
+            raise ValueError(f"Skill not found: {identifier}")
+
+        skill_identifier = record.get("id", identifier)
+
+        if not is_skill_enabled(skill_identifier, record.get("category"), settings_obj=self.settings):
+            raise ValueError(f"Skill is disabled: {skill_identifier}")
 
         # 2. Resolve skill dir from record and validate target path
         skill_dir = self._resolve_skill_dir(record)
+        if file_path is None:
+            raise ValueError("file_path is required")
         full_path = self._resolve_file_path(skill_dir, file_path)
 
         # 3. Check size
@@ -116,25 +128,41 @@ class ExecutionTools:
             "truncated": truncated,
         }
 
-    def run_skill_command(self, skill_name: str, command: str, args: List[str] = []) -> Dict[str, Any]:
+    def run_skill_command(
+        self,
+        skill_id: str | None = None,
+        command: str | None = None,
+        args: List[str] | None = None,
+        skill_name: str | None = None,
+    ) -> Dict[str, Any]:
         """Run a command in the skill directory. Only for clients without terminal access.
 
         If you have a terminal/Bash tool, execute directly instead: `python {path}/script.py`
 
         Args:
-            skill_name: Skill name from load_skill.
+            skill_id: Skill id from load_skill (preferred).
+            skill_name: Legacy alias.
             command: python, python3, uv, bash, sh, cat, ls, or grep.
             args: Command arguments (e.g., ["script.py", "input.txt"]).
 
         Returns:
             stdout, stderr, exit_code, timeout
         """
+        identifier = skill_id or skill_name
+        if not identifier:
+            raise ValueError("skill_id is required")
+
         # 1. Check enabled
-        record = self.db.get_skill(skill_name)
+        try:
+            record = self.db.get_skill(identifier)
+        except ValueError as e:
+            raise ValueError(f"{e}. Use full skill_id (e.g., group/skill).") from e
         if not record:
-            raise ValueError(f"Skill not found: {skill_name}")
-        if not is_skill_enabled(skill_name, record.get("category"), settings_obj=self.settings):
-            raise ValueError(f"Skill is disabled: {skill_name}")
+            raise ValueError(f"Skill not found: {identifier}")
+
+        skill_identifier = record.get("id", identifier)
+        if not is_skill_enabled(skill_identifier, record.get("category"), settings_obj=self.settings):
+            raise ValueError(f"Skill is disabled: {skill_identifier}")
 
         # 2. Check command allowlist
         if not is_command_allowed(command, settings_obj=self.settings):
@@ -142,6 +170,12 @@ class ExecutionTools:
 
         # 3. Prepare execution
         skill_dir = self._resolve_skill_dir(record)
+
+        if command is None:
+            raise ValueError("command is required")
+
+        if args is None:
+            args = []
 
         # 4. Build command list
         if command in ("python", "python3"):

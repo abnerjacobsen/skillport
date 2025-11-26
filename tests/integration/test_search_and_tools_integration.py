@@ -8,6 +8,7 @@ import skillhub_mcp.tools.discovery as discovery
 import skillhub_mcp.tools.execution as execution
 from skillhub_mcp.tools.discovery import DiscoveryTools
 from skillhub_mcp.tools.execution import ExecutionTools
+from skillhub_mcp.tools.loading import LoadingTools
 from skillhub_mcp import utils
 
 
@@ -23,6 +24,7 @@ class DummySettings:
         self.gemini_embedding_model = None
         self.skillhub_enabled_skills = []
         self.skillhub_enabled_categories = []
+        self.skillhub_enabled_namespaces = []
         self.allowed_commands = ["python", "python3", "uv", "node", "cat", "ls", "grep", "echo"]
         self.exec_timeout_seconds = 2
         self.exec_max_output_bytes = 16
@@ -36,6 +38,15 @@ class DummySettings:
 
     def get_effective_db_path(self) -> Path:
         return self.db_path
+
+    def get_enabled_skills(self):
+        return self.skillhub_enabled_skills
+
+    def get_enabled_categories(self):
+        return self.skillhub_enabled_categories
+
+    def get_enabled_namespaces(self):
+        return self.skillhub_enabled_namespaces
 
 
 class DummyTable:
@@ -91,6 +102,16 @@ class DummyTable:
             options = [n.strip(" ' \"") for n in names.split(",")]
             return row.get("name", "").lower() in options
 
+        if text.startswith("lower(id) in"):
+            ids = text.split("(")[1].split(")")[0]
+            options = [i.strip(" ' \"") for i in ids.split(",")]
+            return row.get("id", "").lower() in options
+
+        if text.startswith("id in"):
+            ids = text.split("(")[1].split(")")[0]
+            options = [i.strip(" ' \"") for i in ids.split(",")]
+            return row.get("id", "") in options
+
         if text.startswith("category in"):
             cats = text.split("(")[1].split(")")[0]
             options = [c.strip(" ' \"") for c in cats.split(",")]
@@ -99,6 +120,10 @@ class DummyTable:
         if text.startswith("name ="):
             target = text.split("=")[1].strip(" ' \"")
             return row.get("name", "").lower() == target
+
+        if text.startswith("id ="):
+            target = text.split("=")[1].strip(" ' \"")
+            return row.get("id", "").lower() == target
 
         if text.startswith("always_apply = true"):
             return bool(row.get("always_apply")) is True
@@ -143,8 +168,8 @@ def test_s3a_embedding_failure_falls_back_to_fts(tmp_path, monkeypatch):
     _patch_settings(monkeypatch, settings)
 
     rows = [
-        {"name": "alpha", "description": "first", "_score": 0.9},
-        {"name": "beta", "description": "second", "_score": 0.8},
+        {"id": "alpha", "name": "alpha", "description": "first", "_score": 0.9},
+        {"id": "beta", "name": "beta", "description": "second", "_score": 0.8},
     ]
     dummy_db = DummyDB(DummyTable(rows, fail_fts=False))
     monkeypatch.setattr(search_mod, "get_embedding", lambda q: (_ for _ in ()).throw(RuntimeError("boom")))
@@ -160,8 +185,8 @@ def test_s3b_fts_failure_falls_back_to_substring(tmp_path, monkeypatch):
     _patch_settings(monkeypatch, settings)
 
     rows = [
-        {"name": "beta-tool", "description": "does beta things"},
-        {"name": "gamma", "description": "unrelated"},
+        {"id": "beta-tool", "name": "beta-tool", "description": "does beta things"},
+        {"id": "gamma", "name": "gamma", "description": "unrelated"},
     ]
     dummy_db = DummyDB(DummyTable(rows, fail_fts=True))
     monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
@@ -179,8 +204,8 @@ def test_s4_filter_respects_enabled_categories_with_normalization(tmp_path, monk
     _patch_settings(monkeypatch, settings)
 
     rows = [
-        {"name": "ml-skill", "description": "ml", "category": "ml", "_score": 1.0},
-        {"name": "ops-skill", "description": "ops", "category": "ops", "_score": 0.9},
+        {"id": "ml-skill", "name": "ml-skill", "description": "ml", "category": "ml", "_score": 1.0},
+        {"id": "ops-skill", "name": "ops-skill", "description": "ops", "category": "ops", "_score": 0.9},
     ]
     dummy_db = DummyDB(DummyTable(rows))
     monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
@@ -197,9 +222,9 @@ def test_s5b_vector_results_skip_threshold(tmp_path, monkeypatch):
     _patch_settings(monkeypatch, settings)
 
     rows = [
-        {"name": "v1", "description": "", "_distance": 0.1},
-        {"name": "v2", "description": "", "_distance": 0.2},
-        {"name": "v3", "description": "", "_distance": 0.3},
+        {"id": "v1", "name": "v1", "description": "", "_distance": 0.1},
+        {"id": "v2", "name": "v2", "description": "", "_distance": 0.2},
+        {"id": "v3", "name": "v3", "description": "", "_distance": 0.3},
     ]
     dummy_db = DummyDB(DummyTable(rows))
     monkeypatch.setattr(search_mod, "get_embedding", lambda q: [0.1, 0.2])
@@ -233,6 +258,69 @@ alwaysApply: true
 
     assert dummy_db.created_fts_fields is not None
     assert "instructions" not in dummy_db.created_fts_fields
+    assert "id" in dummy_db.created_fts_fields
+
+
+def test_namespace_ids_added_to_index(tmp_path, monkeypatch):
+    settings = DummySettings(tmp_path)
+    _patch_settings(monkeypatch, settings)
+
+    nested = settings.skills_dir / "awesome-skills" / "code-review"
+    nested.mkdir(parents=True)
+    (nested / "SKILL.md").write_text(
+        """---
+name: code-review
+description: Code review checklist
+metadata:
+  skillhub:
+    category: dev
+---
+body
+""",
+        encoding="utf-8",
+    )
+
+    flat = settings.skills_dir / "solo"
+    flat.mkdir(parents=True)
+    (flat / "SKILL.md").write_text(
+        """---
+name: solo
+description: Solo skill
+---
+body
+""",
+        encoding="utf-8",
+    )
+
+    dummy_db = DummyDB()
+    monkeypatch.setattr(search_mod, "get_embedding", lambda text: None)
+
+    db = _make_skill_db(monkeypatch, settings, dummy_db)
+    db.initialize_index()
+
+    ids = [row["id"] for row in dummy_db.table.data]
+    assert "solo" in ids
+    assert "awesome-skills/code-review" in ids
+
+
+def test_load_skill_ambiguous_name_raises(tmp_path, monkeypatch):
+    settings = DummySettings(tmp_path)
+    _patch_settings(monkeypatch, settings)
+
+    rows = [
+        {"id": "a/code-review", "name": "code-review", "description": "", "category": "", "instructions": ""},
+        {"id": "b/code-review", "name": "code-review", "description": "", "category": "", "instructions": ""},
+    ]
+    dummy_db = DummyDB(DummyTable(rows))
+    monkeypatch.setattr(search_mod.lancedb, "connect", lambda path: dummy_db)
+    monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
+
+    db = _make_skill_db(monkeypatch, settings, dummy_db)
+    loader = LoadingTools(db)
+
+    with pytest.raises(ValueError) as e:
+        loader.load_skill(skill_name="code-review")
+    assert "Ambiguous" in str(e.value)
 
 
 def test_f1_read_skill_file_rejects_traversal_and_non_utf8(tmp_path, monkeypatch):
@@ -376,9 +464,9 @@ def test_s7_empty_query_lists_all_skills(tmp_path, monkeypatch):
     _patch_settings(monkeypatch, settings)
 
     rows = [
-        {"name": "skill-a", "description": "alpha", "category": "cat1", "_score": 1.0},
-        {"name": "skill-b", "description": "beta", "category": "cat1", "_score": 1.0},
-        {"name": "skill-c", "description": "gamma", "category": "cat2", "_score": 1.0},
+        {"id": "skill-a", "name": "skill-a", "description": "alpha", "category": "cat1", "_score": 1.0},
+        {"id": "skill-b", "name": "skill-b", "description": "beta", "category": "cat1", "_score": 1.0},
+        {"id": "skill-c", "name": "skill-c", "description": "gamma", "category": "cat2", "_score": 1.0},
     ]
     dummy_db = DummyDB(DummyTable(rows))
     monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
@@ -399,8 +487,8 @@ def test_s7_wildcard_query_lists_all_skills(tmp_path, monkeypatch):
     _patch_settings(monkeypatch, settings)
 
     rows = [
-        {"name": "x", "description": "x-desc", "category": "", "_score": 1.0},
-        {"name": "y", "description": "y-desc", "category": "", "_score": 1.0},
+        {"id": "x", "name": "x", "description": "x-desc", "category": "", "_score": 1.0},
+        {"id": "y", "name": "y", "description": "y-desc", "category": "", "_score": 1.0},
     ]
     dummy_db = DummyDB(DummyTable(rows))
     monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
@@ -420,8 +508,8 @@ def test_s7_whitespace_only_query_treated_as_empty(tmp_path, monkeypatch):
     _patch_settings(monkeypatch, settings)
 
     rows = [
-        {"name": "one", "description": "first", "category": "", "_score": 1.0},
-        {"name": "two", "description": "second", "category": "", "_score": 1.0},
+        {"id": "one", "name": "one", "description": "first", "category": "", "_score": 1.0},
+        {"id": "two", "name": "two", "description": "second", "category": "", "_score": 1.0},
     ]
     dummy_db = DummyDB(DummyTable(rows))
     monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
@@ -442,8 +530,8 @@ def test_s7_empty_query_respects_enabled_filter(tmp_path, monkeypatch):
     _patch_settings(monkeypatch, settings)
 
     rows = [
-        {"name": "allowed", "description": "ok", "category": "", "_score": 1.0},
-        {"name": "blocked", "description": "no", "category": "", "_score": 1.0},
+        {"id": "allowed", "name": "allowed", "description": "ok", "category": "", "_score": 1.0},
+        {"id": "blocked", "name": "blocked", "description": "no", "category": "", "_score": 1.0},
     ]
     dummy_db = DummyDB(DummyTable(rows))
     monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
@@ -457,6 +545,26 @@ def test_s7_empty_query_respects_enabled_filter(tmp_path, monkeypatch):
     assert names == ["allowed"]
 
 
+def test_enabled_namespace_filters_results(tmp_path, monkeypatch):
+    settings = DummySettings(tmp_path)
+    settings.skillhub_enabled_namespaces = ["group/"]
+    _patch_settings(monkeypatch, settings)
+
+    rows = [
+        {"id": "group/a", "name": "a", "description": "one", "category": "", "_score": 1.0},
+        {"id": "other/b", "name": "b", "description": "two", "category": "", "_score": 1.0},
+    ]
+    dummy_db = DummyDB(DummyTable(rows))
+    monkeypatch.setattr(search_mod, "get_embedding", lambda q: None)
+
+    db = _make_skill_db(monkeypatch, settings, dummy_db)
+    search_tools = DiscoveryTools(db)
+
+    result = search_tools.search_skills("")
+    ids = [s["name"] for s in result["skills"]]
+    assert ids == ["a"]
+
+
 def test_s7_empty_query_respects_search_limit(tmp_path, monkeypatch):
     """S7: Empty query caps results at SEARCH_LIMIT."""
     settings = DummySettings(tmp_path)
@@ -464,7 +572,7 @@ def test_s7_empty_query_respects_search_limit(tmp_path, monkeypatch):
     _patch_settings(monkeypatch, settings)
 
     rows = [
-        {"name": f"skill-{i}", "description": f"desc-{i}", "category": "", "_score": 1.0}
+        {"id": f"skill-{i}", "name": f"skill-{i}", "description": f"desc-{i}", "category": "", "_score": 1.0}
         for i in range(10)
     ]
     dummy_db = DummyDB(DummyTable(rows))

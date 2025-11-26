@@ -9,7 +9,7 @@ def _norm_token(value: str) -> str:
     """Trim + compress whitespace + lowercase for stable comparisons."""
     return " ".join(str(value).strip().split()).lower()
 
-def validate_path(skill_name: str, file_path: str, settings_obj=None) -> Path:
+def validate_path(skill_id: str, file_path: str, settings_obj=None) -> Path:
     """
     Resolves and validates that file_path is within the skill directory.
     Raises ValueError or PermissionError if invalid.
@@ -17,7 +17,7 @@ def validate_path(skill_name: str, file_path: str, settings_obj=None) -> Path:
     cfg = settings_obj or settings
 
     skills_root = cfg.get_effective_skills_dir()
-    skill_dir = skills_root / skill_name
+    skill_dir = skills_root / skill_id
     
     # Resolve relative to skill_dir
     # Note: file_path comes from user, e.g. "templates/invoice.txt"
@@ -33,12 +33,12 @@ def validate_path(skill_name: str, file_path: str, settings_obj=None) -> Path:
     try:
         # Python 3.9+: safe relative check
         if not target_path.is_relative_to(skill_dir):
-            raise PermissionError(f"Path traversal detected: {file_path} is outside skill '{skill_name}' directory")
+            raise PermissionError(f"Path traversal detected: {file_path} is outside skill directory")
     except AttributeError:
         # Fallback for older Python: use commonpath
         common = os.path.commonpath([skill_dir, target_path])
         if common != str(skill_dir):
-            raise PermissionError(f"Path traversal detected: {file_path} is outside skill '{skill_name}' directory")
+            raise PermissionError(f"Path traversal detected: {file_path} is outside skill directory")
     
     if not target_path.exists():
         raise FileNotFoundError(f"File not found: {file_path}")
@@ -72,21 +72,30 @@ def parse_frontmatter(file_path: Path) -> Tuple[Dict[str, Any], str]:
     # No frontmatter or parse error
     return {}, content
 
-def is_skill_enabled(skill_name: str, category: Optional[str] = None, settings_obj=None) -> bool:
+def is_skill_enabled(skill_id: str, category: Optional[str] = None, settings_obj=None) -> bool:
     """
     Checks if a skill is enabled based on server configuration.
     """
     cfg = settings_obj or settings
 
     # Normalize inputs and configured filters for parity between DB prefilter and runtime checks
-    skill_norm = _norm_token(skill_name)
-    enabled_skills = [_norm_token(s) for s in cfg.skillhub_enabled_skills]
-    enabled_categories = [_norm_token(c) for c in cfg.skillhub_enabled_categories]
+    skill_norm = _norm_token(skill_id)
+    leaf_norm = _norm_token(skill_id.split("/")[-1])
+    enabled_skills = [_norm_token(s) for s in cfg.get_enabled_skills()]
+    enabled_categories = [_norm_token(c) for c in cfg.get_enabled_categories()]
+    enabled_namespaces = [_norm_token(p).rstrip("/") for p in cfg.get_enabled_namespaces()]
     category_norm = _norm_token(category) if category is not None else None
 
     # 1. If enabled_skills is set, only those are enabled.
     if enabled_skills:
-        return skill_norm in enabled_skills
+        return skill_norm in enabled_skills or leaf_norm in enabled_skills
+
+    # 2. If namespaces are set, allow any skill whose id starts with namespace
+    if enabled_namespaces:
+        for ns in enabled_namespaces:
+            if skill_norm.startswith(ns):
+                return True
+        return False
 
     # 2. If enabled_categories is set, only skills in those categories are enabled.
     if enabled_categories:

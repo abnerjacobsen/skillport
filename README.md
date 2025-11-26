@@ -123,6 +123,45 @@ Instructions for the AI agent go here.
 
 When `EMBEDDING_PROVIDER=none` (default), search uses Full-Text Search. Set to `openai` or `gemini` with the corresponding API key for vector search.
 
+### Skill Filtering
+
+Expose different skills to different agents by running multiple SkillHub instances with filters:
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `SKILLHUB_ENABLED_SKILLS` | Comma-separated skill ids (e.g., `hello-world,group/skill`) | all |
+| `SKILLHUB_ENABLED_CATEGORIES` | Comma-separated categories to expose | all |
+| `SKILLHUB_ENABLED_NAMESPACES` | Comma-separated namespaces (e.g., `superpowers,my-tools`) | all |
+
+**Example**: Dev tools for IDE, specific skills for chat:
+
+```json
+{
+  "mcpServers": {
+    "skillhub-dev": {
+      "command": "uv",
+      "args": ["run", "skillhub-mcp"],
+      "env": {
+        "SKILLHUB_ENABLED_CATEGORIES": "development,testing"
+      }
+    },
+    "skillhub-chat": {
+      "command": "uv",
+      "args": ["run", "skillhub-mcp"],
+      "env": {
+        "SKILLHUB_ENABLED_SKILLS": "writing-assistant,code-reviewer,summarizer"
+      }
+    }
+  }
+}
+```
+
+### GitHub Sources
+
+- Downloaded via GitHub tarball API (`/repos/{owner}/{repo}/tarball/{ref}`).
+- Guardrails: max 1MB per file, 10MB total extracted; symlinks/hidden files are rejected.
+- Private repos / higher rate limits: set `GITHUB_TOKEN`.
+
 <details>
 <summary>All Configuration Options</summary>
 
@@ -133,12 +172,6 @@ When `EMBEDDING_PROVIDER=none` (default), search uses Full-Text Search. Set to `
 | `GEMINI_API_KEY` | Required when provider is `gemini` | — |
 | `EMBEDDING_MODEL` | OpenAI model | `text-embedding-3-small` |
 | `GEMINI_EMBEDDING_MODEL` | Gemini model | `gemini-embedding-001` |
-
-### Skill Filtering
-| Variable | Description | Default |
-| :--- | :--- | :--- |
-| `SKILLHUB_ENABLED_SKILLS` | Comma-separated skill names to expose | all |
-| `SKILLHUB_ENABLED_CATEGORIES` | Comma-separated categories to expose | all |
 
 ### Limits
 | Variable | Description | Default |
@@ -184,25 +217,43 @@ Skills with `alwaysApply: true` appear as "Core Skills" in the agent's system pr
 | Tool | Purpose |
 | :--- | :--- |
 | `search_skills(query)` | Find skills by description. Use `""` or `"*"` to list all. |
-| `load_skill(skill_name)` | Get full instructions and directory path. |
-| `read_skill_file(skill_name, file_path)` | Read templates/configs into context. |
+| `load_skill(skill_id)` | Get full instructions and directory path (supports `group/skill` ids). |
+| `read_skill_file(skill_id, file_path)` | Read templates/configs into context. |
 
 **Workflow**: `search_skills` → `load_skill` → execute scripts via terminal
 
 ## CLI
 
 ```bash
-# Add skills to ~/.skillhub/skills/
-skillhub add hello-world         # Add sample skill
-skillhub add template            # Add skill template
+# Add skills
+skillhub add hello-world                        # Built-in sample skill
+skillhub add template                           # Built-in skill template
+skillhub add ./my-skill/                        # Local directory (single skill)
+skillhub add ./my-collection/ --keep-structure  # Multiple skills, keep namespace
+skillhub add ./my-collection/ --namespace foo   # Multiple skills, custom namespace
+skillhub add https://github.com/user/repo/tree/main/skills  # From GitHub
 
-# Verify
-skillhub --list                  # List indexed skills
-skillhub --lint                  # Validate SKILL.md files
+# List skills (tree view with namespaces)
+skillhub list                    # All skills
+skillhub list --category dev     # Filter by category
+skillhub list --id-prefix group/ # Filter by namespace
+skillhub list --json             # JSON output
+
+# Validate skills
+skillhub lint                    # Lint all skills
+skillhub lint my-skill           # Lint specific skill by id
+
+# Remove skills
+skillhub remove my-skill         # By id (e.g., hello-world or group/skill)
+skillhub remove my-skill --force # Skip confirmation
 
 # Server
 skillhub                         # Start MCP server
 skillhub --reindex               # Force reindex on startup
+
+# All commands support --dir to specify a custom skills directory
+skillhub list --dir ./my-skills
+skillhub add hello-world --dir ./my-skills
 ```
 
 > **Note**: `skillhub` is an alias for `skillhub-mcp`. Both work identically.
