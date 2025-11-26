@@ -1,3 +1,4 @@
+import hashlib
 import os
 from typing import List, Optional, Any
 from pathlib import Path
@@ -40,12 +41,6 @@ class Settings(BaseSettings):
         - Extra provider fields are ignored (no error).
         - Missing required key/model -> raise early to fail fast.
         """
-        # Allow SKILLHUB_DB_PATH as an explicit env alias for db_path.
-        # If both DB_PATH and SKILLHUB_DB_PATH are set, SKILLHUB_DB_PATH wins.
-        db_override = os.getenv("SKILLHUB_DB_PATH")
-        if db_override:
-            object.__setattr__(self, "db_path", Path(db_override).expanduser())
-
         # Alias for Gemini
         if not self.gemini_api_key:
             google_key = os.getenv("GOOGLE_API_KEY")
@@ -74,6 +69,14 @@ class Settings(BaseSettings):
         return self.skills_dir.expanduser().resolve()
 
     def get_effective_db_path(self) -> Path:
-        return self.db_path.expanduser().resolve()
+        # If DB_PATH is explicitly set, use it
+        if os.getenv("DB_PATH"):
+            return self.db_path.expanduser().resolve()
+
+        # Auto-generate path based on SKILL_DIR hash
+        # This allows multiple SKILL_DIRs to have separate indexes
+        skills_dir = self.get_effective_skills_dir()
+        dir_hash = hashlib.sha256(str(skills_dir).encode()).hexdigest()[:12]
+        return Path(f"~/.skillhub/indexes/{dir_hash}/skills.lancedb").expanduser().resolve()
 
 settings = Settings()

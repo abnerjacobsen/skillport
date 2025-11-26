@@ -9,7 +9,6 @@ from typing import Dict, List, Any
 
 from .db import SkillDB
 from .validation import (
-    SKILLHUB_BANNER,
     TROPHY_ART,
     validate_skill,
 )
@@ -58,8 +57,6 @@ def _ensure_index(db: SkillDB) -> None:
 
 def run_lint(db: SkillDB, skill_name: str | None = None) -> int:
     """Run detailed lint validation. Returns exit code (0=pass, 1=fail)."""
-    print(SKILLHUB_BANNER)
-
     all_skills = db.list_all_skills(limit=1000)
     if not all_skills:
         print("No skills found.")
@@ -113,8 +110,6 @@ def run_lint(db: SkillDB, skill_name: str | None = None) -> int:
 
 def run_list(db: SkillDB) -> int:
     """List all skills without starting the server. Returns exit code."""
-    print(SKILLHUB_BANNER)
-
     all_skills = db.list_all_skills(limit=1000)
     if not all_skills:
         print("No skills found.")
