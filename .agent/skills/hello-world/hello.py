@@ -1,1 +1,1 @@
-print("Hello from SkillPod!")
+print("Hello from SkillSouko!")

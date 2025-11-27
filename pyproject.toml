@@ -1,5 +1,5 @@
 [project]
-name = "skillpod"
+name = "skillsouko"
 version = "0.1.0"
 description = "MCP server for Agent Skills"
 readme = "README.md"
@@ -35,8 +35,8 @@ filterwarnings = [
 ]
 
 [project.scripts]
-skillpod = "skillpod.__main__:main"
-skillpod-mcp = "skillpod.__main__:main"  # legacy alias
+skillsouko = "skillsouko.__main__:main"
+skillsouko-mcp = "skillsouko.__main__:main"  # legacy alias
 
 [tool.ruff]
 exclude = [

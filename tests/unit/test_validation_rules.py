@@ -2,7 +2,7 @@
 
 import pytest
 
-from skillpod.modules.skills.internal.validation import (
+from skillsouko.modules.skills.internal.validation import (
     validate_skill_record,
     NAME_MAX_LENGTH,
     NAME_PATTERN,

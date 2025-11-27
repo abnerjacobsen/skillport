@@ -4,9 +4,9 @@ from unittest.mock import patch
 
 import pytest
 
-from skillpod.modules.indexing import search as idx_search
-from skillpod.modules.skills import search_skills, read_skill_file
-from skillpod.shared.config import Config
+from skillsouko.modules.indexing import search as idx_search
+from skillsouko.modules.skills import search_skills, read_skill_file
+from skillsouko.shared.config import Config
 
 
 class DummyTable:
@@ -99,8 +99,8 @@ def test_embedding_failure_falls_back_to_fts(tmp_path, monkeypatch):
     ]
     dummy_db = DummyDB(DummyTable(rows))
 
-    monkeypatch.setattr("skillpod.modules.indexing.internal.lancedb.lancedb.connect", lambda path: dummy_db)
-    monkeypatch.setattr("skillpod.modules.indexing.internal.embeddings.get_embedding", lambda text, config: (_ for _ in ()).throw(RuntimeError("boom")))
+    monkeypatch.setattr("skillsouko.modules.indexing.internal.lancedb.lancedb.connect", lambda path: dummy_db)
+    monkeypatch.setattr("skillsouko.modules.indexing.internal.embeddings.get_embedding", lambda text, config: (_ for _ in ()).throw(RuntimeError("boom")))
 
     result = idx_search("anything", limit=2, config=cfg)
     assert [r["name"] for r in result] == ["alpha", "beta"]
@@ -113,8 +113,8 @@ def test_fts_failure_falls_back_to_substring(tmp_path, monkeypatch):
         {"id": "gamma", "name": "gamma", "description": "unrelated"},
     ]
     dummy_db = DummyDB(DummyTable(rows, fail_fts=True))
-    monkeypatch.setattr("skillpod.modules.indexing.internal.lancedb.lancedb.connect", lambda path: dummy_db)
-    monkeypatch.setattr("skillpod.modules.indexing.internal.embeddings.get_embedding", lambda text, config: None)
+    monkeypatch.setattr("skillsouko.modules.indexing.internal.lancedb.lancedb.connect", lambda path: dummy_db)
+    monkeypatch.setattr("skillsouko.modules.indexing.internal.embeddings.get_embedding", lambda text, config: None)
 
     results = idx_search("beta", limit=3, config=cfg)
     assert any(r["name"] == "beta-tool" for r in results)
@@ -131,8 +131,8 @@ def test_filter_respects_enabled_categories(tmp_path, monkeypatch):
         {"id": "ops-skill", "name": "ops-skill", "description": "ops", "category": "ops", "_score": 0.9},
     ]
     dummy_db = DummyDB(DummyTable(rows))
-    monkeypatch.setattr("skillpod.modules.indexing.internal.lancedb.lancedb.connect", lambda path: dummy_db)
-    monkeypatch.setattr("skillpod.modules.indexing.internal.embeddings.get_embedding", lambda text, config: None)
+    monkeypatch.setattr("skillsouko.modules.indexing.internal.lancedb.lancedb.connect", lambda path: dummy_db)
+    monkeypatch.setattr("skillsouko.modules.indexing.internal.embeddings.get_embedding", lambda text, config: None)
 
     result = search_skills("anything", config=cfg)
     assert [s.name for s in result.skills] == ["ml-skill"]
@@ -147,7 +147,7 @@ def test_read_skill_file_guards_traversal_and_binary(tmp_path):
 name: secure
 description: Secure skill
 metadata:
-  skillpod:
+  skillsouko:
     category: sec
 ---
 body
@@ -161,7 +161,7 @@ body
     store = SimpleNamespace(get_by_id=lambda *args, **kwargs: record)
 
     # Monkeypatch public getter to use stub record
-    with patch("skillpod.modules.skills.public.read.idx_get_by_id", store.get_by_id):
+    with patch("skillsouko.modules.skills.public.read.idx_get_by_id", store.get_by_id):
         with pytest.raises(PermissionError):
             read_skill_file("secure", "../escape.txt", config=cfg)
         with pytest.raises(ValueError):

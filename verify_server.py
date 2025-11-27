@@ -5,19 +5,19 @@ from mcp.client.stdio import stdio_client
 
 # Configure environment for the server
 server_env = os.environ.copy()
-server_env["SKILLPOD_SKILLS_DIR"] = os.path.abspath(".agent/skills")
-server_env["SKILLPOD_EMBEDDING_PROVIDER"] = "none"
-server_env["SKILLPOD_LOG_LEVEL"] = "ERROR"  # Reduce noise
+server_env["SKILLSOUKO_SKILLS_DIR"] = os.path.abspath(".agent/skills")
+server_env["SKILLSOUKO_EMBEDDING_PROVIDER"] = "none"
+server_env["SKILLSOUKO_LOG_LEVEL"] = "ERROR"  # Reduce noise
 
 # Define server parameters
 server_params = StdioServerParameters(
     command="uv",
-    args=["run", "skillpod"],
+    args=["run", "skillsouko"],
     env=server_env
 )
 
 async def run_test():
-    print("Starting SkillPod MCP Client Verification...")
+    print("Starting SkillSouko MCP Client Verification...")
     
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:

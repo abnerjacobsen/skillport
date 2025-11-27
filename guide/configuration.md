@@ -1,29 +1,29 @@
 # Configuration
 
-This guide covers all configuration options for SkillPod.
+This guide covers all configuration options for SkillSouko.
 
 ## Environment Variables
 
-All environment variables are prefixed with `SKILLPOD_`. The prefix is optional for common variables like `SKILLS_DIR`.
+All environment variables are prefixed with `SKILLSOUKO_`. The prefix is optional for common variables like `SKILLS_DIR`.
 
 ### Core Settings
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SKILLPOD_SKILLS_DIR` | Path to skills directory | `~/.skillpod/skills` |
-| `SKILLPOD_DB_PATH` | Path to LanceDB index | `~/.skillpod/indexes/default/` |
+| `SKILLSOUKO_SKILLS_DIR` | Path to skills directory | `~/.skillsouko/skills` |
+| `SKILLSOUKO_DB_PATH` | Path to LanceDB index | `~/.skillsouko/indexes/default/` |
 
 ### Search
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SKILLPOD_EMBEDDING_PROVIDER` | Search mode: `none`, `openai`, or `gemini` | `none` |
-| `SKILLPOD_SEARCH_LIMIT` | Maximum search results | `10` |
-| `SKILLPOD_SEARCH_THRESHOLD` | Minimum score threshold (0-1) | `0.2` |
+| `SKILLSOUKO_EMBEDDING_PROVIDER` | Search mode: `none`, `openai`, or `gemini` | `none` |
+| `SKILLSOUKO_SEARCH_LIMIT` | Maximum search results | `10` |
+| `SKILLSOUKO_SEARCH_THRESHOLD` | Minimum score threshold (0-1) | `0.2` |
 
 #### Full-Text Search (Default)
 
-When `SKILLPOD_EMBEDDING_PROVIDER=none` (default), search uses BM25-based full-text search via Tantivy. This is:
+When `SKILLSOUKO_EMBEDDING_PROVIDER=none` (default), search uses BM25-based full-text search via Tantivy. This is:
 
 - **Fast** — no external API calls
 - **Private** — all data stays local
@@ -31,7 +31,7 @@ When `SKILLPOD_EMBEDDING_PROVIDER=none` (default), search uses BM25-based full-t
 
 ```bash
 # No configuration needed — this is the default
-SKILLPOD_EMBEDDING_PROVIDER=none
+SKILLSOUKO_EMBEDDING_PROVIDER=none
 ```
 
 #### Vector Search (Optional)
@@ -40,14 +40,14 @@ For semantic search across large skill collections, enable vector embeddings:
 
 **OpenAI:**
 ```bash
-export SKILLPOD_EMBEDDING_PROVIDER=openai
+export SKILLSOUKO_EMBEDDING_PROVIDER=openai
 export OPENAI_API_KEY=sk-...
 export OPENAI_EMBEDDING_MODEL=text-embedding-3-small  # optional
 ```
 
 **Gemini:**
 ```bash
-export SKILLPOD_EMBEDDING_PROVIDER=gemini
+export SKILLSOUKO_EMBEDDING_PROVIDER=gemini
 export GEMINI_API_KEY=...
 export GEMINI_EMBEDDING_MODEL=gemini-embedding-001  # optional
 ```
@@ -64,8 +64,8 @@ Search always returns results through a fallback chain:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SKILLPOD_EXEC_TIMEOUT_SECONDS` | Command execution timeout | `60` |
-| `SKILLPOD_MAX_FILE_BYTES` | Max file read size | `65536` |
+| `SKILLSOUKO_EXEC_TIMEOUT_SECONDS` | Command execution timeout | `60` |
+| `SKILLSOUKO_MAX_FILE_BYTES` | Max file read size | `65536` |
 
 ## Client-Based Skill Filtering
 
@@ -73,57 +73,57 @@ Expose different skills to different AI agents by configuring filter environment
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SKILLPOD_ENABLED_SKILLS` | Comma-separated skill IDs | all |
-| `SKILLPOD_ENABLED_CATEGORIES` | Comma-separated categories | all |
-| `SKILLPOD_ENABLED_NAMESPACES` | Comma-separated namespaces | all |
+| `SKILLSOUKO_ENABLED_SKILLS` | Comma-separated skill IDs | all |
+| `SKILLSOUKO_ENABLED_CATEGORIES` | Comma-separated categories | all |
+| `SKILLSOUKO_ENABLED_NAMESPACES` | Comma-separated namespaces | all |
 
 ### Filter Priority
 
 Filters are evaluated in order of specificity:
 
-1. If `SKILLPOD_ENABLED_SKILLS` is set → only those exact skill IDs
-2. Otherwise, if `SKILLPOD_ENABLED_NAMESPACES` is set → only matching prefixes
-3. Otherwise, if `SKILLPOD_ENABLED_CATEGORIES` is set → only matching categories
+1. If `SKILLSOUKO_ENABLED_SKILLS` is set → only those exact skill IDs
+2. Otherwise, if `SKILLSOUKO_ENABLED_NAMESPACES` is set → only matching prefixes
+3. Otherwise, if `SKILLSOUKO_ENABLED_CATEGORIES` is set → only matching categories
 4. If none are set → all skills available
 
 ### Examples
 
 **Filter by category:**
 ```bash
-export SKILLPOD_ENABLED_CATEGORIES=development,testing
+export SKILLSOUKO_ENABLED_CATEGORIES=development,testing
 ```
 
 **Filter by specific skills:**
 ```bash
-export SKILLPOD_ENABLED_SKILLS=hello-world,code-review,my-namespace/my-skill
+export SKILLSOUKO_ENABLED_SKILLS=hello-world,code-review,my-namespace/my-skill
 ```
 
 **Filter by namespace:**
 ```bash
-export SKILLPOD_ENABLED_NAMESPACES=my-tools,team-skills
+export SKILLSOUKO_ENABLED_NAMESPACES=my-tools,team-skills
 ```
 
 ## Per-Client Setup
 
-Run different SkillPod configurations for different AI agents:
+Run different SkillSouko configurations for different AI agents:
 
 ```json
 {
   "mcpServers": {
-    "skillpod-dev": {
+    "skillsouko-dev": {
       "command": "uv",
-      "args": ["run", "skillpod-mcp"],
+      "args": ["run", "skillsouko-mcp"],
       "env": {
-        "SKILLPOD_SKILLS_DIR": "~/.skillpod/skills",
-        "SKILLPOD_ENABLED_CATEGORIES": "development,testing"
+        "SKILLSOUKO_SKILLS_DIR": "~/.skillsouko/skills",
+        "SKILLSOUKO_ENABLED_CATEGORIES": "development,testing"
       }
     },
-    "skillpod-writing": {
+    "skillsouko-writing": {
       "command": "uv",
-      "args": ["run", "skillpod-mcp"],
+      "args": ["run", "skillsouko-mcp"],
       "env": {
-        "SKILLPOD_SKILLS_DIR": "~/.skillpod/skills",
-        "SKILLPOD_ENABLED_CATEGORIES": "writing,research"
+        "SKILLSOUKO_SKILLS_DIR": "~/.skillsouko/skills",
+        "SKILLSOUKO_ENABLED_CATEGORIES": "writing,research"
       }
     }
   }
@@ -148,13 +148,13 @@ export GITHUB_TOKEN=ghp_xxxxx
 
 ```bash
 # Repository root
-skillpod add https://github.com/user/repo
+skillsouko add https://github.com/user/repo
 
 # Specific directory (branch/tag)
-skillpod add https://github.com/user/repo/tree/main/skills/my-skill
+skillsouko add https://github.com/user/repo/tree/main/skills/my-skill
 
 # Specific directory (commit)
-skillpod add https://github.com/user/repo/tree/abc123/path/to/skill
+skillsouko add https://github.com/user/repo/tree/abc123/path/to/skill
 ```
 
 ### Security Limits
@@ -170,7 +170,7 @@ skillpod add https://github.com/user/repo/tree/abc123/path/to/skill
 
 ### Automatic Reindexing
 
-SkillPod automatically reindexes when:
+SkillSouko automatically reindexes when:
 - Skills directory content changes (hash-based detection)
 - Schema version changes
 - Embedding provider changes
@@ -179,34 +179,34 @@ SkillPod automatically reindexes when:
 
 ```bash
 # Force reindex on server start
-skillpod serve --reindex
+skillsouko serve --reindex
 
 # Skip auto-reindex check
-skillpod serve --skip-auto-reindex
+skillsouko serve --skip-auto-reindex
 ```
 
 ### Index Location
 
 | SKILLS_DIR | Index Location |
 |------------|----------------|
-| Default (`~/.skillpod/skills`) | `~/.skillpod/indexes/default/` |
-| Custom path | `~/.skillpod/indexes/{hash}/` |
+| Default (`~/.skillsouko/skills`) | `~/.skillsouko/indexes/default/` |
+| Custom path | `~/.skillsouko/indexes/{hash}/` |
 
 ## MCP Client Configuration
 
 ### Cursor
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=skillpod&config=eyJjb21tYW5kIjoidXYiLCJhcmdzIjpbInJ1biIsInNraWxscG9kLW1jcCJdLCJlbnYiOnsiU0tJTExQT0RfU0tJTExTX0RJUiI6In4vLnNraWxscG9kL3NraWxscyJ9fQ==)
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=skillsouko&config=eyJjb21tYW5kIjoidXYiLCJhcmdzIjpbInJ1biIsInNraWxscG9kLW1jcCJdLCJlbnYiOnsiU0tJTExQT0RfU0tJTExTX0RJUiI6In4vLnNraWxscG9kL3NraWxscyJ9fQ==)
 
 Or manually add to `~/.cursor/mcp.json`:
 
 ```json
 {
   "mcpServers": {
-    "skillpod": {
+    "skillsouko": {
       "command": "uv",
-      "args": ["run", "skillpod-mcp"],
-      "env": { "SKILLPOD_SKILLS_DIR": "~/.skillpod/skills" }
+      "args": ["run", "skillsouko-mcp"],
+      "env": { "SKILLSOUKO_SKILLS_DIR": "~/.skillsouko/skills" }
     }
   }
 }
@@ -219,10 +219,10 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "skillpod": {
+    "skillsouko": {
       "command": "uv",
-      "args": ["run", "skillpod-mcp"],
-      "env": { "SKILLPOD_SKILLS_DIR": "~/.skillpod/skills" }
+      "args": ["run", "skillsouko-mcp"],
+      "env": { "SKILLSOUKO_SKILLS_DIR": "~/.skillsouko/skills" }
     }
   }
 }
@@ -235,10 +235,10 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 ```json
 {
   "mcpServers": {
-    "skillpod": {
+    "skillsouko": {
       "command": "uv",
-      "args": ["run", "skillpod-mcp"],
-      "env": { "SKILLPOD_SKILLS_DIR": "~/.skillpod/skills" }
+      "args": ["run", "skillsouko-mcp"],
+      "env": { "SKILLSOUKO_SKILLS_DIR": "~/.skillsouko/skills" }
     }
   }
 }
@@ -247,14 +247,14 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 ### Claude Code
 
 ```bash
-claude mcp add skillpod -- uv run skillpod-mcp
+claude mcp add skillsouko -- uv run skillsouko-mcp
 # With custom skills directory:
-claude mcp add --env SKILLPOD_SKILLS_DIR=~/.skillpod/skills skillpod -- uv run skillpod-mcp
+claude mcp add --env SKILLSOUKO_SKILLS_DIR=~/.skillsouko/skills skillsouko -- uv run skillsouko-mcp
 ```
 
 ### Kiro
 
-[![Add to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=skillpod&config=%7B%22command%22%3A%20%22uv%22%2C%20%22args%22%3A%20%5B%22run%22%2C%20%22skillpod-mcp%22%5D%2C%20%22env%22%3A%20%7B%22SKILLPOD_SKILLS_DIR%22%3A%20%22~/.skillpod/skills%22%7D%2C%20%22disabled%22%3A%20false%2C%20%22autoApprove%22%3A%20%5B%5D%7D)
+[![Add to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=skillsouko&config=%7B%22command%22%3A%20%22uv%22%2C%20%22args%22%3A%20%5B%22run%22%2C%20%22skillsouko-mcp%22%5D%2C%20%22env%22%3A%20%7B%22SKILLSOUKO_SKILLS_DIR%22%3A%20%22~/.skillsouko/skills%22%7D%2C%20%22disabled%22%3A%20false%2C%20%22autoApprove%22%3A%20%5B%5D%7D)
 
 ## See Also
 

@@ -2,10 +2,10 @@ from pathlib import Path
 
 from hypothesis import given, settings, strategies as st
 
-from skillpod.modules.indexing.internal.lancedb import IndexStore
-from skillpod.modules.indexing.internal.search_service import SearchService
-from skillpod.shared.config import Config
-from skillpod.shared.utils import normalize_token
+from skillsouko.modules.indexing.internal.lancedb import IndexStore
+from skillsouko.modules.indexing.internal.search_service import SearchService
+from skillsouko.shared.config import Config
+from skillsouko.shared.utils import normalize_token
 
 THRESHOLD = 0.2
 
@@ -49,7 +49,7 @@ def test_query_normalization(text):
         def table_names(self):
             return []
 
-    with patch("skillpod.modules.indexing.internal.lancedb.lancedb.connect", lambda path: DummyDB()):
+    with patch("skillsouko.modules.indexing.internal.lancedb.lancedb.connect", lambda path: DummyDB()):
         store = IndexStore(cfg)
         expected = " ".join(text.strip().split())
         assert store._normalize_query(text) == expected

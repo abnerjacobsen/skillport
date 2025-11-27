@@ -1,10 +1,10 @@
-# SkillPod
+# 📦 SkillSouko
 
 <div align="center">
 
-**Agent Skills Management for MCP**
+🏭 **Your Agent Skills Warehouse** · *Skill + 倉庫 (Souko)* 📦
 
-Install, organize, and deliver Agent Skills to any MCP client.
+A centralized hub to install, organize, and distribute Agent Skills to any MCP client.
 
 [![MCP](https://img.shields.io/badge/MCP-Enabled-green)](https://modelcontextprotocol.io)
 [![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://python.org)
@@ -16,14 +16,14 @@ Install, organize, and deliver Agent Skills to any MCP client.
 
 [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) are folders of instructions, scripts, and resources that AI agents load on demand. Instead of cramming everything into a system prompt, skills let agents search for and load only what they need.
 
-**SkillPod** brings Agent Skills to any MCP-compatible client (Cursor, Windsurf, Claude Desktop, etc.) with full lifecycle management.
+**SkillSouko** brings Agent Skills to any MCP-compatible client (Cursor, Windsurf, Claude Desktop, etc.) with full lifecycle management.
 
-## Why SkillPod?
+## Why SkillSouko?
 
-| Need | SkillPod Solution |
+| Need | SkillSouko Solution |
 |------|-------------------|
 | Use Agent Skills in Cursor/Windsurf | MCP server delivers skills to any client |
-| Add skills from GitHub | `skillpod add https://github.com/...` |
+| Add skills from GitHub | `skillsouko add https://github.com/...` |
 | Organize by team or project | Categories and namespaces |
 | Different skills for different clients | Filter by category, namespace, or skill ID |
 | Scale to 100+ skills | FTS search + optional vector search |
@@ -34,7 +34,7 @@ Install, organize, and deliver Agent Skills to any MCP client.
 └──────────────────────┬──────────────────────┘
                        │ MCP
               ┌────────▼────────┐
-              │    SkillPod     │
+              │    SkillSouko     │
               │  search → load  │
               └────────┬────────┘
                        │
@@ -50,21 +50,21 @@ Install, organize, and deliver Agent Skills to any MCP client.
 
 **Cursor** (one-click)
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=skillpod&config=eyJjb21tYW5kIjoidXYiLCJhcmdzIjpbInJ1biIsInNraWxscG9kLW1jcCJdLCJlbnYiOnsiU0tJTExQT0RfU0tJTExTX0RJUiI6In4vLnNraWxscG9kL3NraWxscyJ9fQ==)
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=skillsouko&config=eyJjb21tYW5kIjoidXYiLCJhcmdzIjpbInJ1biIsInNraWxscG9kLW1jcCJdLCJlbnYiOnsiU0tJTExQT0RfU0tJTExTX0RJUiI6In4vLnNraWxscG9kL3NraWxscyJ9fQ==)
 
 **Kiro** (one-click)
 
-[![Add to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=skillpod&config=%7B%22command%22%3A%20%22uv%22%2C%20%22args%22%3A%20%5B%22run%22%2C%20%22skillpod-mcp%22%5D%2C%20%22env%22%3A%20%7B%22SKILLPOD_SKILLS_DIR%22%3A%20%22~/.skillpod/skills%22%7D%2C%20%22disabled%22%3A%20false%2C%20%22autoApprove%22%3A%20%5B%5D%7D)
+[![Add to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=skillsouko&config=%7B%22command%22%3A%20%22uv%22%2C%20%22args%22%3A%20%5B%22run%22%2C%20%22skillsouko-mcp%22%5D%2C%20%22env%22%3A%20%7B%22SKILLSOUKO_SKILLS_DIR%22%3A%20%22~/.skillsouko/skills%22%7D%2C%20%22disabled%22%3A%20false%2C%20%22autoApprove%22%3A%20%5B%5D%7D)
 
 **Other Clients**
 
 ```json
 {
   "mcpServers": {
-    "skillpod": {
+    "skillsouko": {
       "command": "uv",
-      "args": ["run", "skillpod-mcp"],
-      "env": { "SKILLPOD_SKILLS_DIR": "~/.skillpod/skills" }
+      "args": ["run", "skillsouko-mcp"],
+      "env": { "SKILLSOUKO_SKILLS_DIR": "~/.skillsouko/skills" }
     }
   }
 }
@@ -75,14 +75,14 @@ Install, organize, and deliver Agent Skills to any MCP client.
 
 - **Claude Desktop**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
-- **Claude Code**: `claude mcp add skillpod -- uv run skillpod-mcp`
+- **Claude Code**: `claude mcp add skillsouko -- uv run skillsouko-mcp`
 
 </details>
 
 ### 2. Add Your First Skill
 
 ```bash
-skillpod add hello-world
+skillsouko add hello-world
 ```
 
 ### 3. Use It
@@ -111,22 +111,22 @@ Three tools for progressive skill loading:
 Full lifecycle management from the command line:
 
 ```bash
-skillpod add <source>      # GitHub URL, local path, or built-in name
-skillpod list              # See installed skills
-skillpod search <query>    # Find skills by description
-skillpod show <id>         # View skill details
-skillpod lint [id]         # Validate skill files
-skillpod remove <id>       # Uninstall a skill
+skillsouko add <source>      # GitHub URL, local path, or built-in name
+skillsouko list              # See installed skills
+skillsouko search <query>    # Find skills by description
+skillsouko show <id>         # View skill details
+skillsouko lint [id]         # Validate skill files
+skillsouko remove <id>       # Uninstall a skill
 ```
 
 **GitHub Integration:**
 
 ```bash
 # Add from GitHub
-skillpod add https://github.com/user/repo/tree/main/skills/code-review
+skillsouko add https://github.com/user/repo/tree/main/skills/code-review
 
 # Add entire repository
-skillpod add https://github.com/user/repo
+skillsouko add https://github.com/user/repo
 ```
 
 ### Organize: Categories & Namespaces
@@ -136,7 +136,7 @@ Structure your skills and control what each client sees:
 ```yaml
 # SKILL.md frontmatter
 metadata:
-  skillpod:
+  skillsouko:
     category: development
     tags: [testing, quality]
     alwaysApply: true  # Core Skills - always available
@@ -149,10 +149,10 @@ Expose different skills to different AI agents:
 ```json
 {
   "mcpServers": {
-    "skillpod-development": {
+    "skillsouko-development": {
       "command": "uv",
-      "args": ["run", "skillpod-mcp"],
-      "env": { "SKILLPOD_ENABLED_CATEGORIES": "development,testing" }
+      "args": ["run", "skillsouko-mcp"],
+      "env": { "SKILLSOUKO_ENABLED_CATEGORIES": "development,testing" }
     }
   }
 }
@@ -164,17 +164,17 @@ Expose different skills to different AI agents:
   "mcpServers": {
     "writing-skills": {
       "command": "uv",
-      "args": ["run", "skillpod-mcp"],
-      "env": { "SKILLPOD_ENABLED_CATEGORIES": "writing,research" }
+      "args": ["run", "skillsouko-mcp"],
+      "env": { "SKILLSOUKO_ENABLED_CATEGORIES": "writing,research" }
     }
   }
 }
 ```
 
 Filter options:
-- `SKILLPOD_ENABLED_SKILLS` — Specific skill IDs
-- `SKILLPOD_ENABLED_CATEGORIES` — By category
-- `SKILLPOD_ENABLED_NAMESPACES` — By directory prefix
+- `SKILLSOUKO_ENABLED_SKILLS` — Specific skill IDs
+- `SKILLSOUKO_ENABLED_CATEGORIES` — By category
+- `SKILLSOUKO_ENABLED_NAMESPACES` — By directory prefix
 
 ### Scale: Smart Search
 
@@ -184,7 +184,7 @@ Works out of the box with no API keys. BM25-based search via Tantivy indexes ski
 
 ```bash
 # No configuration needed
-SKILLPOD_EMBEDDING_PROVIDER=none  # default
+SKILLSOUKO_EMBEDDING_PROVIDER=none  # default
 ```
 
 **Vector Search (Optional)**
@@ -193,11 +193,11 @@ For semantic search across large skill collections:
 
 ```bash
 # OpenAI
-export SKILLPOD_EMBEDDING_PROVIDER=openai
+export SKILLSOUKO_EMBEDDING_PROVIDER=openai
 export OPENAI_API_KEY=sk-...
 
 # Gemini
-export SKILLPOD_EMBEDDING_PROVIDER=gemini
+export SKILLSOUKO_EMBEDDING_PROVIDER=gemini
 export GEMINI_API_KEY=...
 ```
 
@@ -207,8 +207,8 @@ export GEMINI_API_KEY=...
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SKILLPOD_SKILLS_DIR` | Skills directory | `~/.skillpod/skills` |
-| `SKILLPOD_EMBEDDING_PROVIDER` | `none`, `openai`, or `gemini` | `none` |
+| `SKILLSOUKO_SKILLS_DIR` | Skills directory | `~/.skillsouko/skills` |
+| `SKILLSOUKO_EMBEDDING_PROVIDER` | `none`, `openai`, or `gemini` | `none` |
 
 [Full Configuration Guide →](guide/configuration.md)
 
@@ -219,7 +219,7 @@ export GEMINI_API_KEY=...
 name: my-skill
 description: What this skill does
 metadata:
-  skillpod:
+  skillsouko:
     category: development
     tags: [example]
 ---
@@ -240,10 +240,10 @@ Instructions for the AI agent.
 ## Development
 
 ```bash
-git clone https://github.com/gotalab/skillpod.git
-cd skillpod
+git clone https://github.com/gotalab/skillsouko.git
+cd skillsouko
 uv sync
-SKILLPOD_SKILLS_DIR=.agent/skills uv run skillpod serve
+SKILLSOUKO_SKILLS_DIR=.agent/skills uv run skillsouko serve
 ```
 
 ## License

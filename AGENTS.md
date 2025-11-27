@@ -12,8 +12,8 @@
 
 ## 2. Project Context
 ### Architecture
-*   **Brand**: SkillPod
-*   **Package & CLI**: `skillpod` (legacy alias: `skillpod-mcp`)
+*   **Brand**: SkillSouko
+*   **Package & CLI**: `skillsouko` (legacy alias: `skillsouko-mcp`)
 *   **Type**: MCP Server (Model Context Protocol)
 *   **Stack**:
     *   **Runtime**: Python 3.10+
@@ -23,7 +23,7 @@
     *   **Config**: `pydantic-settings`
 
 ### Directory Structure
-*   `src/skillpod/`: Source code (modular monolith)
+*   `src/skillsouko/`: Source code (modular monolith)
     *   `interfaces/cli/`: Typer CLI adapter
     *   `interfaces/mcp/`: FastMCP server adapter
     *   `modules/skills/`: Skill management public/internal APIs
@@ -41,7 +41,7 @@ To act autonomously, always verify changes using these commands:
 *   **Install/Sync**: `uv sync`
 *   **Run Server (Manual)**:
     ```bash
-    SKILLPOD_SKILLS_DIR=.agent/skills SKILLPOD_EMBEDDING_PROVIDER=none uv run skillpod
+    SKILLSOUKO_SKILLS_DIR=.agent/skills SKILLSOUKO_EMBEDDING_PROVIDER=none uv run skillsouko
     ```
 *   **Verify Functionality (Critical)**:
     ```bash

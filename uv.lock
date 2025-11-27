@@ -1878,7 +1878,7 @@ wheels = [
 ]
 
 [[package]]
-name = "skillpod"
+name = "skillsouko"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

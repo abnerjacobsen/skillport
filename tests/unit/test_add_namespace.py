@@ -1,6 +1,6 @@
 
-from skillpod.modules.skills.internal.manager import detect_skills, add_local
-from skillpod.shared.config import Config
+from skillsouko.modules.skills.internal.manager import detect_skills, add_local
+from skillsouko.shared.config import Config
 
 
 def test_add_local_custom_namespace(tmp_path):

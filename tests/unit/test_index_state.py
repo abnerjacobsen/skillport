@@ -1,8 +1,8 @@
 from pathlib import Path
 from unittest.mock import patch
 
-from skillpod.modules.indexing.internal.lancedb import IndexStore
-from skillpod.shared.config import Config
+from skillsouko.modules.indexing.internal.lancedb import IndexStore
+from skillsouko.shared.config import Config
 
 
 class DummyDB:
@@ -21,7 +21,7 @@ class DummyDB:
 
 def _make_store(tmp_path: Path):
     cfg = Config(skills_dir=tmp_path / "skills", db_path=tmp_path / "db.lancedb")
-    with patch("skillpod.modules.indexing.internal.lancedb.lancedb.connect", lambda path: DummyDB()):
+    with patch("skillsouko.modules.indexing.internal.lancedb.lancedb.connect", lambda path: DummyDB()):
         return IndexStore(cfg)
 
 

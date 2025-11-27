@@ -2,7 +2,7 @@
 name: hello-world
 description: A simple hello world skill for testing.
 metadata:
-  skillpod:
+  skillsouko:
     category: development
     tags: [hello, test, demo]
     alwaysApply: true

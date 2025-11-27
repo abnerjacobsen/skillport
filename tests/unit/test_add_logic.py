@@ -3,13 +3,13 @@
 import pytest
 from pathlib import Path
 
-from skillpod.modules.skills.internal.manager import (
+from skillsouko.modules.skills.internal.manager import (
     detect_skills,
     add_local,
     add_builtin,
     BUILTIN_SKILLS,
 )
-from skillpod.shared.config import Config
+from skillsouko.shared.config import Config
 
 
 def _create_skill(path: Path, name: str, description: str = "Test description") -> Path:

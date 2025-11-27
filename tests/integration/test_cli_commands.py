@@ -10,9 +10,9 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from skillpod.interfaces.cli.app import app
-from skillpod.modules.indexing import build_index
-from skillpod.shared.config import Config
+from skillsouko.interfaces.cli.app import app
+from skillsouko.modules.indexing import build_index
+from skillsouko.shared.config import Config
 
 
 runner = CliRunner()
@@ -30,7 +30,7 @@ def _create_skill(path: Path, name: str, description: str = "Test skill") -> Pat
     skill_dir = path / name
     skill_dir.mkdir(parents=True, exist_ok=True)
     (skill_dir / "SKILL.md").write_text(
-        f"---\nname: {name}\ndescription: {description}\nmetadata:\n  skillpod:\n    category: test\n---\n# {name}\n\nInstructions here.",
+        f"---\nname: {name}\ndescription: {description}\nmetadata:\n  skillsouko:\n    category: test\n---\n# {name}\n\nInstructions here.",
         encoding="utf-8"
     )
     return skill_dir
@@ -48,14 +48,14 @@ def skills_env(tmp_path: Path, monkeypatch) -> SkillsEnv:
     skills = tmp_path / "skills"
     skills.mkdir()
     db_path = tmp_path / "db.lancedb"
-    monkeypatch.setenv("SKILLPOD_SKILLS_DIR", str(skills))
-    monkeypatch.setenv("SKILLPOD_DB_PATH", str(db_path))
-    monkeypatch.setenv("SKILLPOD_EMBEDDING_PROVIDER", "none")
+    monkeypatch.setenv("SKILLSOUKO_SKILLS_DIR", str(skills))
+    monkeypatch.setenv("SKILLSOUKO_DB_PATH", str(db_path))
+    monkeypatch.setenv("SKILLSOUKO_EMBEDDING_PROVIDER", "none")
     return SkillsEnv(skills_dir=skills, db_path=db_path)
 
 
 class TestListCommand:
-    """skillpod list tests."""
+    """skillsouko list tests."""
 
     def test_list_empty_skills_dir(self, skills_env: SkillsEnv):
         """Empty skills dir → shows 0 skills."""
@@ -104,7 +104,7 @@ class TestListCommand:
 
 
 class TestSearchCommand:
-    """skillpod search tests."""
+    """skillsouko search tests."""
 
     def test_search_finds_match(self, skills_env: SkillsEnv):
         """Query matches → returns results."""
@@ -153,7 +153,7 @@ class TestSearchCommand:
 
 
 class TestShowCommand:
-    """skillpod show tests."""
+    """skillsouko show tests."""
 
     def test_show_existing_skill(self, skills_env: SkillsEnv):
         """Existing skill → shows details."""
@@ -190,7 +190,7 @@ class TestShowCommand:
 
 
 class TestAddCommand:
-    """skillpod add tests.
+    """skillsouko add tests.
 
     Note: Built-in skill add returns AddResult with empty `added` list,
     causing CLI to exit 1 despite successful file creation. This is a
@@ -250,7 +250,7 @@ class TestAddCommand:
 
 
 class TestRemoveCommand:
-    """skillpod remove tests."""
+    """skillsouko remove tests."""
 
     def test_remove_existing_skill(self, skills_env: SkillsEnv):
         """Remove existing skill → success."""
@@ -271,7 +271,7 @@ class TestRemoveCommand:
 
 
 class TestLintCommand:
-    """skillpod lint tests."""
+    """skillsouko lint tests."""
 
     def test_lint_valid_skills(self, skills_env: SkillsEnv):
         """Valid skills → "All pass" (exit 0)."""
@@ -329,7 +329,7 @@ class TestLintCommand:
 
 
 class TestServeCommand:
-    """skillpod serve tests."""
+    """skillsouko serve tests."""
 
     def test_serve_help(self, skills_env: SkillsEnv):
         """serve --help → shows help (exit 0)."""

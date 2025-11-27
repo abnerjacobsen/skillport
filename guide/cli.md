@@ -1,30 +1,30 @@
 # CLI Reference
 
-SkillPod provides a command-line interface for managing [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) and running the MCP server.
+SkillSouko provides a command-line interface for managing [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) and running the MCP server.
 
 ## Overview
 
 ```bash
-skillpod <command> [options]
+skillsouko <command> [options]
 ```
 
-> **Note**: `skillpod-mcp` is a legacy alias for `skillpod`. Both work identically.
+> **Note**: `skillsouko-mcp` is a legacy alias for `skillsouko`. Both work identically.
 
 ## Commands
 
-### skillpod add
+### skillsouko add
 
 Add skills from various sources.
 
 ```bash
-skillpod add <source> [options]
+skillsouko add <source> [options]
 ```
 
 #### Sources
 
 | Type | Example | Description |
 |------|---------|-------------|
-| Built-in | `hello-world` | Sample skill bundled with SkillPod |
+| Built-in | `hello-world` | Sample skill bundled with SkillSouko |
 | Built-in | `template` | Starter template for creating skills |
 | Local | `./my-skill/` | Single skill directory |
 | Local | `./my-collection/` | Directory containing multiple skills |
@@ -51,7 +51,7 @@ skillpod add <source> [options]
 ローカルパスまたは GitHub URL を指定し、`--keep-structure` も `--namespace` も指定しない場合、対話モードでスキルの追加先を選択できます。
 
 ```
-$ skillpod add ./my-collection/
+$ skillsouko add ./my-collection/
 
 Found 3 skill(s): skill-a, skill-b, skill-c
 Where to add?
@@ -74,43 +74,43 @@ Choice [1/2/3] (1):
 **Built-in skills:**
 ```bash
 # Add sample skill
-skillpod add hello-world
+skillsouko add hello-world
 
 # Add template for creating your own
-skillpod add template
+skillsouko add template
 ```
 
 **Local directory:**
 ```bash
 # Single skill
-skillpod add ./my-skill/
+skillsouko add ./my-skill/
 
 # Multiple skills - interactive mode
-skillpod add ./my-collection/
+skillsouko add ./my-collection/
 
 # Multiple skills - flat (skip interactive)
-skillpod add ./my-collection/ --no-keep-structure
+skillsouko add ./my-collection/ --no-keep-structure
 # → skills/skill-a/, skills/skill-b/, skills/skill-c/
 
 # Multiple skills - preserve structure
-skillpod add ./my-collection/ --keep-structure
+skillsouko add ./my-collection/ --keep-structure
 # → skills/my-collection/skill-a/, skills/my-collection/skill-b/
 
 # Multiple skills - custom namespace
-skillpod add ./my-collection/ --keep-structure --namespace team-tools
+skillsouko add ./my-collection/ --keep-structure --namespace team-tools
 # → skills/team-tools/skill-a/, skills/team-tools/skill-b/
 ```
 
 **GitHub:**
 ```bash
 # Specific skill from repository
-skillpod add https://github.com/user/repo/tree/main/skills/code-review
+skillsouko add https://github.com/user/repo/tree/main/skills/code-review
 
 # All skills from repository
-skillpod add https://github.com/user/repo
+skillsouko add https://github.com/user/repo
 
 # Force overwrite existing
-skillpod add https://github.com/user/repo --force
+skillsouko add https://github.com/user/repo --force
 ```
 
 #### Output
@@ -132,12 +132,12 @@ Added 1, skipped 2 (use --force to overwrite)
 
 ---
 
-### skillpod list
+### skillsouko list
 
 List installed skills.
 
 ```bash
-skillpod list [options]
+skillsouko list [options]
 ```
 
 #### Options
@@ -151,13 +151,13 @@ skillpod list [options]
 
 ```bash
 # List all skills
-skillpod list
+skillsouko list
 
 # Limit results
-skillpod list --limit 20
+skillsouko list --limit 20
 
 # JSON output for scripting
-skillpod list --json
+skillsouko list --json
 ```
 
 #### Output Format
@@ -188,12 +188,12 @@ skillpod list --json
 
 ---
 
-### skillpod search
+### skillsouko search
 
 Search for skills.
 
 ```bash
-skillpod search <query> [options]
+skillsouko search <query> [options]
 ```
 
 #### Options
@@ -207,23 +207,23 @@ skillpod search <query> [options]
 
 ```bash
 # Search by description
-skillpod search "PDF text extraction"
+skillsouko search "PDF text extraction"
 
 # Limit results
-skillpod search "code review" --limit 5
+skillsouko search "code review" --limit 5
 
 # JSON output
-skillpod search "testing" --json
+skillsouko search "testing" --json
 ```
 
 ---
 
-### skillpod show
+### skillsouko show
 
 Show skill details.
 
 ```bash
-skillpod show <skill-id> [options]
+skillsouko show <skill-id> [options]
 ```
 
 #### Options
@@ -236,23 +236,23 @@ skillpod show <skill-id> [options]
 
 ```bash
 # Show skill details
-skillpod show hello-world
+skillsouko show hello-world
 
 # Show namespaced skill
-skillpod show team-tools/code-review
+skillsouko show team-tools/code-review
 
 # JSON output
-skillpod show pdf --json
+skillsouko show pdf --json
 ```
 
 ---
 
-### skillpod remove
+### skillsouko remove
 
 Remove installed skills.
 
 ```bash
-skillpod remove <skill-id> [options]
+skillsouko remove <skill-id> [options]
 ```
 
 #### Options
@@ -266,24 +266,24 @@ skillpod remove <skill-id> [options]
 
 ```bash
 # Remove with confirmation
-skillpod remove hello-world
+skillsouko remove hello-world
 # → Remove 'hello-world'? [y/N]
 
 # Remove without confirmation
-skillpod remove hello-world --force
+skillsouko remove hello-world --force
 
 # Remove namespaced skill
-skillpod remove team-tools/code-review --force
+skillsouko remove team-tools/code-review --force
 ```
 
 ---
 
-### skillpod lint
+### skillsouko lint
 
 Validate skill files.
 
 ```bash
-skillpod lint [skill-id] [options]
+skillsouko lint [skill-id] [options]
 ```
 
 #### Options
@@ -317,10 +317,10 @@ skillpod lint [skill-id] [options]
 
 ```bash
 # Lint all skills
-skillpod lint
+skillsouko lint
 
 # Lint specific skill
-skillpod lint hello-world
+skillsouko lint hello-world
 ```
 
 #### Output
@@ -348,12 +348,12 @@ broken-skill
 
 ---
 
-### skillpod serve
+### skillsouko serve
 
 Start the MCP server.
 
 ```bash
-skillpod serve [options]
+skillsouko serve [options]
 ```
 
 #### Options
@@ -367,21 +367,21 @@ skillpod serve [options]
 
 ```bash
 # Start server
-skillpod serve
+skillsouko serve
 
 # Start with forced reindex
-skillpod serve --reindex
+skillsouko serve --reindex
 ```
 
 #### Legacy Mode
 
 ```bash
 # 以下は同等 (後方互換)
-skillpod
-skillpod serve
+skillsouko
+skillsouko serve
 ```
 
-> **Note**: `skillpod --reindex` は **サポートしない**。常に `skillpod serve --reindex` を使用すること。
+> **Note**: `skillsouko --reindex` は **サポートしない**。常に `skillsouko serve --reindex` を使用すること。
 
 ---
 
@@ -398,8 +398,8 @@ CLI commands respect these environment variables:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SKILLPOD_SKILLS_DIR` | Skills directory | `~/.skillpod/skills` |
-| `SKILLPOD_EMBEDDING_PROVIDER` | Embedding provider (`none`, `openai`, `gemini`) | `none` |
+| `SKILLSOUKO_SKILLS_DIR` | Skills directory | `~/.skillsouko/skills` |
+| `SKILLSOUKO_EMBEDDING_PROVIDER` | Embedding provider (`none`, `openai`, `gemini`) | `none` |
 | `OPENAI_API_KEY` | OpenAI API key (for vector search) | |
 | `GEMINI_API_KEY` | Gemini API key (for vector search) | |
 | `GOOGLE_API_KEY` | Alternative to `GEMINI_API_KEY` | |

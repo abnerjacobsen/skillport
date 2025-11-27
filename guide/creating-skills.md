@@ -1,22 +1,22 @@
 # Creating Skills
 
-This guide covers how to create and structure [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) for SkillPod.
+This guide covers how to create and structure [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) for SkillSouko.
 
 ## Quick Start
 
 ```bash
 # Add the template skill
-skillpod add template
+skillsouko add template
 
 # Edit the template
-# ~/.skillpod/skills/template/SKILL.md
+# ~/.skillsouko/skills/template/SKILL.md
 ```
 
 Or create from scratch:
 
 ```bash
-mkdir -p ~/.skillpod/skills/my-skill
-cat > ~/.skillpod/skills/my-skill/SKILL.md << 'EOF'
+mkdir -p ~/.skillsouko/skills/my-skill
+cat > ~/.skillsouko/skills/my-skill/SKILL.md << 'EOF'
 ---
 name: my-skill
 description: What this skill does (used for search)
@@ -55,7 +55,7 @@ Detailed instructions for the AI agent.
 name: code-review
 description: Systematic code review checklist for pull requests
 metadata:
-  skillpod:
+  skillsouko:
     category: development
     tags: [code-review, pr, quality]
     alwaysApply: false
@@ -77,7 +77,7 @@ Skills with `alwaysApply: true` are loaded into every conversation:
 name: team-standards
 description: Our team's coding standards
 metadata:
-  skillpod:
+  skillsouko:
     alwaysApply: true
 ---
 ```
@@ -244,7 +244,7 @@ The `name` field must match the directory name:
 ✗ skills/code-review/SKILL.md  →  name: review-code
 ```
 
-Validate with: `skillpod lint`
+Validate with: `skillsouko lint`
 
 ### 2. Write Searchable Descriptions
 
@@ -264,7 +264,7 @@ Help users find your skill:
 
 ```yaml
 metadata:
-  skillpod:
+  skillsouko:
     category: data-processing
     tags: [pdf, text-extraction, documents]
 ```
@@ -278,7 +278,7 @@ metadata:
 
 ```bash
 # Validate structure
-skillpod lint my-skill
+skillsouko lint my-skill
 
 # Test in real conversation
 # Ask: "Search for my-skill"
@@ -317,7 +317,7 @@ description: Guidelines for writing good git commit messages
 name: pdf-extractor
 description: Extract text and metadata from PDF documents
 metadata:
-  skillpod:
+  skillsouko:
     category: data-processing
     tags: [pdf, text-extraction, documents]
 ---
@@ -368,7 +368,7 @@ my-skills-repo/
 
 Users install with:
 ```bash
-skillpod add https://github.com/user/my-skills-repo
+skillsouko add https://github.com/user/my-skills-repo
 ```
 
 ### Single Skill Repository
@@ -383,7 +383,7 @@ pdf-extractor/
 
 Users install with:
 ```bash
-skillpod add https://github.com/user/pdf-extractor
+skillsouko add https://github.com/user/pdf-extractor
 ```
 
 ## See Also

@@ -1,6 +1,6 @@
 # Design Philosophy
 
-This document explains the design principles behind SkillPod and Agent Skills.
+This document explains the design principles behind SkillSouko and Agent Skills.
 
 ## What are Agent Skills?
 
@@ -61,11 +61,11 @@ Skill: "When reviewing PRs on GitHub:
         3. Verify test coverage..."
 ```
 
-## Why SkillPod?
+## Why SkillSouko?
 
-Claude Code has built-in Skills support (`.claude/skills/`), but it's Claude-specific. SkillPod brings Agent Skills to **any MCP client** with additional management capabilities:
+Claude Code has built-in Skills support (`.claude/skills/`), but it's Claude-specific. SkillSouko brings Agent Skills to **any MCP client** with additional management capabilities:
 
-| Feature | Claude Code Native | SkillPod |
+| Feature | Claude Code Native | SkillSouko |
 |---------|-------------------|----------|
 | Client support | Claude Code only | Any MCP client |
 | Search | Basic matching | FTS (default) + Vector (optional) |
@@ -73,7 +73,7 @@ Claude Code has built-in Skills support (`.claude/skills/`), but it's Claude-spe
 | Filtering | None | By category, namespace, or skill ID |
 | Scaling | Limited | 100+ skills efficiently |
 
-### SkillPod's Four Pillars
+### SkillSouko's Four Pillars
 
 1. **Deliver**: MCP server for any client (Cursor, Windsurf, Claude Desktop, etc.)
 2. **Manage**: CLI for skill lifecycle (add, remove, lint, list)
@@ -116,7 +116,7 @@ Skills load information in stages, minimizing context usage:
           to work in user's project
                     ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ SkillPod MCP Server                                         │
+│ SkillSouko MCP Server                                         │
 │                                                             │
 │  ├── search_skills()   → Find relevant skills               │
 │  ├── load_skill()      → Get instructions + path            │
@@ -133,7 +133,7 @@ Skills load information in stages, minimizing context usage:
 {
     "name": "pdf-extractor",
     "instructions": "...",
-    "path": "/Users/me/.skillpod/skills/pdf-extractor"
+    "path": "/Users/me/.skillsouko/skills/pdf-extractor"
 }
 ```
 
@@ -141,7 +141,7 @@ The agent uses `path` to execute scripts:
 
 ```bash
 # Agent runs in user's project:
-python /Users/me/.skillpod/skills/pdf-extractor/scripts/extract.py \
+python /Users/me/.skillsouko/skills/pdf-extractor/scripts/extract.py \
     ./input.pdf \
     --output ./output/extracted.txt
 ```
@@ -179,7 +179,7 @@ The key insight: **executing code doesn't require reading code**.
 
 ## Client-Based Skill Filtering
 
-Different AI agents need different skills. SkillPod lets you control what each client sees:
+Different AI agents need different skills. SkillSouko lets you control what each client sees:
 
 ```
 IDE Agent (Cursor, Windsurf):
@@ -200,11 +200,11 @@ Configure via environment variables:
 ```json
 {
   "mcpServers": {
-    "skillpod-ide": {
-      "env": { "SKILLPOD_ENABLED_CATEGORIES": "development" }
+    "skillsouko-ide": {
+      "env": { "SKILLSOUKO_ENABLED_CATEGORIES": "development" }
     },
-    "skillpod-chat": {
-      "env": { "SKILLPOD_ENABLED_CATEGORIES": "writing,research" }
+    "skillsouko-chat": {
+      "env": { "SKILLSOUKO_ENABLED_CATEGORIES": "writing,research" }
     }
   }
 }
@@ -216,7 +216,7 @@ Same skill repository, different views per client.
 
 ### Full-Text Search (Default)
 
-SkillPod uses BM25-based full-text search via Tantivy as the default:
+SkillSouko uses BM25-based full-text search via Tantivy as the default:
 
 - **No API keys required** — works out of the box
 - **Privacy-preserving** — no data sent to external services
@@ -228,8 +228,8 @@ SkillPod uses BM25-based full-text search via Tantivy as the default:
 For semantic search across large collections, enable OpenAI or Gemini embeddings:
 
 ```bash
-export SKILLPOD_EMBEDDING_PROVIDER=openai
-export SKILLPOD_OPENAI_API_KEY=sk-...
+export SKILLSOUKO_EMBEDDING_PROVIDER=openai
+export SKILLSOUKO_OPENAI_API_KEY=sk-...
 ```
 
 ### Fallback Chain
@@ -252,8 +252,8 @@ always something
 
 ```bash
 # Just works with defaults
-skillpod add hello-world
-skillpod serve
+skillsouko add hello-world
+skillsouko serve
 ```
 
 Configuration only when you need to customize.
@@ -270,7 +270,7 @@ Configuration only when you need to customize.
 
 Skills use Anthropic's Agent Skills format:
 - Works with Claude Code natively
-- Works with any MCP client via SkillPod
+- Works with any MCP client via SkillSouko
 - Plain Markdown + YAML (no lock-in)
 
 ### 4. Searchable by Default
