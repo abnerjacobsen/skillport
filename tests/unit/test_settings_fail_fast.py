@@ -1,20 +1,17 @@
 import pytest
 
-from skillpod_mcp.config import Settings
+from skillpod.shared.config import Config
 
 
-def test_c1_openai_requires_key(monkeypatch):
-    """WHEN provider=openai and key missing THEN settings init fails (EARS:C1)."""
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    monkeypatch.delenv("EMBEDDING_PROVIDER", raising=False)
+def test_openai_requires_key(monkeypatch):
+    """provider=openai without key should fail fast."""
+    monkeypatch.delenv("SKILLPOD_OPENAI_API_KEY", raising=False)
     with pytest.raises(ValueError):
-        Settings(embedding_provider="openai")
+        Config(embedding_provider="openai")
 
 
-def test_c1_gemini_requires_key(monkeypatch):
-    """WHEN provider=gemini and key missing THEN settings init fails (EARS:C1)."""
-    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
-    monkeypatch.delenv("EMBEDDING_PROVIDER", raising=False)
+def test_gemini_requires_key(monkeypatch):
+    """provider=gemini without key should fail fast."""
+    monkeypatch.delenv("SKILLPOD_GEMINI_API_KEY", raising=False)
     with pytest.raises(ValueError):
-        Settings(embedding_provider="gemini")
+        Config(embedding_provider="gemini")

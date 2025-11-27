@@ -1,5 +1,5 @@
 [project]
-name = "skillpod-mcp"
+name = "skillpod"
 version = "0.1.0"
 description = "MCP server for Agent Skills"
 readme = "README.md"
@@ -14,6 +14,8 @@ dependencies = [
     "tantivy>=0.20.0", # Often needed for lancedb FTS
     "google-genai>=1.52.0",
     "requests>=2.32.0",
+    "typer>=0.12.5",
+    "rich>=13.7.0",
 ]
 
 [build-system]
@@ -33,8 +35,8 @@ filterwarnings = [
 ]
 
 [project.scripts]
-skillpod-mcp = "skillpod_mcp.server:main"
-skillpod = "skillpod_mcp.server:main"
+skillpod = "skillpod.__main__:main"
+skillpod-mcp = "skillpod.__main__:main"  # legacy alias
 
 [tool.ruff]
 exclude = [

@@ -5,14 +5,14 @@ from mcp.client.stdio import stdio_client
 
 # Configure environment for the server
 server_env = os.environ.copy()
-server_env["SKILLS_DIR"] = os.path.abspath(".agent/skills")
-server_env["EMBEDDING_PROVIDER"] = "none"
-server_env["LOG_LEVEL"] = "ERROR" # Reduce noise
+server_env["SKILLPOD_SKILLS_DIR"] = os.path.abspath(".agent/skills")
+server_env["SKILLPOD_EMBEDDING_PROVIDER"] = "none"
+server_env["SKILLPOD_LOG_LEVEL"] = "ERROR"  # Reduce noise
 
 # Define server parameters
 server_params = StdioServerParameters(
     command="uv",
-    args=["run", "skillpod-mcp"],
+    args=["run", "skillpod"],
     env=server_env
 )
 

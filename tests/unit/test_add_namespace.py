@@ -1,5 +1,6 @@
 
-from skillpod_mcp.skill_manager.add import detect_skills, add_local
+from skillpod.modules.skills.internal.manager import detect_skills, add_local
+from skillpod.shared.config import Config
 
 
 def test_add_local_custom_namespace(tmp_path):
@@ -15,14 +16,15 @@ def test_add_local_custom_namespace(tmp_path):
 
     skills = detect_skills(source)
     target = tmp_path / "dest"
+    cfg = Config(skills_dir=target)
 
     results = add_local(
         source_path=source,
         skills=skills,
-        target_dir=target,
+        config=cfg,
         keep_structure=True,
-        namespace_override="customns",
         force=False,
+        namespace_override="customns",
     )
 
     added_ids = [r.skill_id for r in results if r.success]

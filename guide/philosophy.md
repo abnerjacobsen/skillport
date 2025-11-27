@@ -2,7 +2,9 @@
 
 This document explains the design principles behind SkillPod and Agent Skills.
 
-## Why Skills?
+## What are Agent Skills?
+
+[Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) are folders of instructions, scripts, and resources that AI agents discover and load dynamically. They were introduced by Anthropic as a way to give agents expert knowledge without bloating the context window.
 
 ### The Problem with System Prompts
 
@@ -25,7 +27,7 @@ System Prompt (loaded every conversation):
 
 ### The Skills Solution
 
-Skills use **progressive disclosure** - load knowledge only when relevant:
+Skills use **progressive disclosure** — load knowledge only when relevant:
 
 ```
 Conversation start:
@@ -61,25 +63,30 @@ Skill: "When reviewing PRs on GitHub:
 
 ## Why SkillPod?
 
-Claude Code has built-in Skills support (`.claude/skills/`), but:
+Claude Code has built-in Skills support (`.claude/skills/`), but it's Claude-specific. SkillPod brings Agent Skills to **any MCP client** with additional management capabilities:
 
-| Feature | Claude Code | SkillPod |
-|---------|-------------|----------|
+| Feature | Claude Code Native | SkillPod |
+|---------|-------------------|----------|
 | Client support | Claude Code only | Any MCP client |
-| Search | Basic matching | Hybrid vector + FTS |
-| Filtering | None | By category/namespace/skill |
+| Search | Basic matching | FTS (default) + Vector (optional) |
 | Installation | Manual copy | CLI + GitHub integration |
+| Filtering | None | By category, namespace, or skill ID |
 | Scaling | Limited | 100+ skills efficiently |
 
-SkillPod brings Skills to **every MCP client** with search and scoping.
+### SkillPod's Four Pillars
+
+1. **Deliver**: MCP server for any client (Cursor, Windsurf, Claude Desktop, etc.)
+2. **Manage**: CLI for skill lifecycle (add, remove, lint, list)
+3. **Organize**: Categories, namespaces, and Core Skills (alwaysApply)
+4. **Scale**: FTS search by default, optional vector search
 
 ## Progressive Disclosure
 
-Skills load information in stages:
+Skills load information in stages, minimizing context usage:
 
 | Stage | When Loaded | Token Cost | Content |
 |-------|-------------|------------|---------|
-| **Level 1** | Server start | ~100/skill | Name + description (metadata) |
+| **Level 1** | Server start | ~100/skill | Name + description (indexed metadata) |
 | **Level 2** | `load_skill()` | < 5,000 | Full instructions (SKILL.md body) |
 | **Level 3** | `read_skill_file()` | Variable | Templates, configs, references |
 
@@ -170,9 +177,9 @@ The key insight: **executing code doesn't require reading code**.
 - Just executing a working script
 - Running validated tools
 
-## Scoped Access
+## Client-Based Skill Filtering
 
-Different agents need different skills:
+Different AI agents need different skills. SkillPod lets you control what each client sees:
 
 ```
 IDE Agent (Cursor, Windsurf):
@@ -188,7 +195,7 @@ Chat Agent (Claude Desktop):
 └── research
 ```
 
-SkillPod enables this via filtering:
+Configure via environment variables:
 
 ```json
 {
@@ -203,7 +210,41 @@ SkillPod enables this via filtering:
 }
 ```
 
-Same skill repository, different views per agent.
+Same skill repository, different views per client.
+
+## Search Strategy
+
+### Full-Text Search (Default)
+
+SkillPod uses BM25-based full-text search via Tantivy as the default:
+
+- **No API keys required** — works out of the box
+- **Privacy-preserving** — no data sent to external services
+- **Fast** — indexes name, description, tags, category
+- **Reliable** — always returns results
+
+### Vector Search (Optional)
+
+For semantic search across large collections, enable OpenAI or Gemini embeddings:
+
+```bash
+export SKILLPOD_EMBEDDING_PROVIDER=openai
+export SKILLPOD_OPENAI_API_KEY=sk-...
+```
+
+### Fallback Chain
+
+Search always returns results through a fallback chain:
+
+```
+vector search (if enabled)
+    ↓ (no results or provider=none)
+FTS (BM25)
+    ↓ (no results)
+substring match
+    ↓
+always something
+```
 
 ## Design Principles
 
@@ -212,7 +253,7 @@ Same skill repository, different views per agent.
 ```bash
 # Just works with defaults
 skillpod add hello-world
-skillpod  # starts server
+skillpod serve
 ```
 
 Configuration only when you need to customize.
@@ -223,11 +264,11 @@ Configuration only when you need to customize.
 |-------|------|----------|
 | Basic | "I want to try skills" | `add`, `list`, defaults |
 | Intermediate | "I have many skills" | Categories, namespaces |
-| Advanced | "I need fine control" | Filtering, multi-instance, embedding |
+| Advanced | "I need fine control" | Filtering, embedding providers |
 
 ### 3. Portable Format
 
-Skills use Claude's Agent Skills format:
+Skills use Anthropic's Agent Skills format:
 - Works with Claude Code natively
 - Works with any MCP client via SkillPod
 - Plain Markdown + YAML (no lock-in)
@@ -235,7 +276,7 @@ Skills use Claude's Agent Skills format:
 ### 4. Searchable by Default
 
 Every skill is searchable without configuration:
-- FTS works out of the box
+- FTS works out of the box (default)
 - Vector search optional (needs API key)
 - Fallback chain ensures results
 
@@ -259,6 +300,6 @@ Every skill is searchable without configuration:
 
 ## See Also
 
-- [Creating Skills](creating-skills.md) - Practical skill authoring
-- [Configuration](configuration.md) - Filtering and scoping options
-- [Internal Design Docs](../docs/latest/SKILL_PHILOSOPHY.md) - Detailed rationale
+- [Creating Skills](creating-skills.md) — Practical skill authoring
+- [Configuration](configuration.md) — Filtering and search options
+- [CLI Reference](cli.md) — Command documentation

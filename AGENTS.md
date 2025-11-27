@@ -13,7 +13,7 @@
 ## 2. Project Context
 ### Architecture
 *   **Brand**: SkillPod
-*   **Package & CLI**: `skillpod-mcp` (alias: `skillpod`)
+*   **Package & CLI**: `skillpod` (legacy alias: `skillpod-mcp`)
 *   **Type**: MCP Server (Model Context Protocol)
 *   **Stack**:
     *   **Runtime**: Python 3.10+
@@ -23,14 +23,12 @@
     *   **Config**: `pydantic-settings`
 
 ### Directory Structure
-*   `src/skillpod_mcp/`: Source code
-    *   `server.py`: Server initialization
-    *   `tools/`: Tool implementations (discovery, loading, execution)
-    *   `db/`: Database & Search package (search.py, models.py, embeddings.py, state.py, search_service.py)
-    *   `config.py`: Configuration
-    *   `cli.py`: CLI module
-    *   `validation.py`: Validation module
-    *   `utils.py`: Utility functions
+*   `src/skillpod/`: Source code (modular monolith)
+    *   `interfaces/cli/`: Typer CLI adapter
+    *   `interfaces/mcp/`: FastMCP server adapter
+    *   `modules/skills/`: Skill management public/internal APIs
+    *   `modules/indexing/`: Index build/query logic
+    *   `shared/`: Config, types, utils, exceptions
 *   `docs/latest/`: Living documentation (SSOT)
 *   `docs/releases/vX.Y.Z/`: Release snapshots (frozen)
 *   `docs/steering/`: Governance & guides
@@ -43,7 +41,7 @@ To act autonomously, always verify changes using these commands:
 *   **Install/Sync**: `uv sync`
 *   **Run Server (Manual)**:
     ```bash
-    SKILLS_DIR=.agent/skills EMBEDDING_PROVIDER=none uv run skillpod-mcp  # or: uv run skillpod
+    SKILLPOD_SKILLS_DIR=.agent/skills SKILLPOD_EMBEDDING_PROVIDER=none uv run skillpod
     ```
 *   **Verify Functionality (Critical)**:
     ```bash

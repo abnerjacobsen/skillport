@@ -1,10 +1,10 @@
-# SkillPod MCP
+# SkillPod
 
 <div align="center">
 
-**Search, Scope, Share — Agent Skills for Every MCP Client**
+**Agent Skills Management for MCP**
 
-Hybrid search across 100+ skills. Scoped access per agent. Works everywhere.
+Install, organize, and deliver Agent Skills to any MCP client.
 
 [![MCP](https://img.shields.io/badge/MCP-Enabled-green)](https://modelcontextprotocol.io)
 [![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://python.org)
@@ -12,33 +12,36 @@ Hybrid search across 100+ skills. Scoped access per agent. Works everywhere.
 
 </div>
 
+## What are Agent Skills?
+
+[Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) are folders of instructions, scripts, and resources that AI agents load on demand. Instead of cramming everything into a system prompt, skills let agents search for and load only what they need.
+
+**SkillPod** brings Agent Skills to any MCP-compatible client (Cursor, Windsurf, Claude Desktop, etc.) with full lifecycle management.
+
 ## Why SkillPod?
 
-[Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) bring **progressive disclosure** to AI agents — expert knowledge loads only when needed. SkillPod brings this to the MCP ecosystem with **search** and **scoping**.
-
-| Challenge | SkillPod Solution |
-|-----------|-------------------|
-| Skills only work in Claude Code | MCP-native — works with Cursor, Windsurf, Copilot, any MCP client |
-| 100+ skills bloat system prompts | Hybrid search — agents find and load only what they need |
-| Same skills for every agent | Scoped access — dev tools for IDE, writing skills for chat |
-| Manual skill installation | One command — `skillpod add https://github.com/...` |
+| Need | SkillPod Solution |
+|------|-------------------|
+| Use Agent Skills in Cursor/Windsurf | MCP server delivers skills to any client |
+| Add skills from GitHub | `skillpod add https://github.com/...` |
+| Organize by team or project | Categories and namespaces |
+| Different skills for different clients | Filter by category, namespace, or skill ID |
+| Scale to 100+ skills | FTS search + optional vector search |
 
 ```
-        IDEs                    Chat                    CLI
-┌─────────────────┐     ┌───────────────┐     ┌─────────────────┐
-│ Cursor, Windsurf│     │Claude Desktop │     │ Claude Code     │
-│ Copilot, Kiro   │     │  Claude.ai    │     │ Codex, Gemini   │
-└────────┬────────┘     └───────┬───────┘     └────────┬────────┘
-         │                      │                      │
-         └──────────────────────┼──────────────────────┘
-                                │ MCP
-                         ┌──────▼──────┐
-                         │  SkillPod   │  search → load → execute
-                         └──────┬──────┘
-                                │
-                         ┌──────▼──────┐
-                         │ SKILLS_DIR  │  Git repo, local folder,
-                         └─────────────┘  or shared drive
+┌─────────────────────────────────────────────┐
+│  Your AI Agent (Cursor, Windsurf, etc.)     │
+└──────────────────────┬──────────────────────┘
+                       │ MCP
+              ┌────────▼────────┐
+              │    SkillPod     │
+              │  search → load  │
+              └────────┬────────┘
+                       │
+              ┌────────▼────────┐
+              │   Your Skills   │
+              │ (GitHub, local) │
+              └─────────────────┘
 ```
 
 ## Quick Start
@@ -91,64 +94,115 @@ The agent will:
 2. `load_skill("hello-world")` — get instructions + path
 3. Follow the instructions using its tools
 
-## Core Features
+## Key Features
 
-### Hybrid Search
+### Deliver: MCP Server
 
-Find skills by intent, not exact keywords. Full-text search works out of the box; add OpenAI/Gemini for vector search.
+Three tools for progressive skill loading:
+
+| Tool | Purpose |
+|------|---------|
+| `search_skills(query)` | Find skills by task description |
+| `load_skill(skill_id)` | Get full instructions and filesystem path |
+| `read_skill_file(skill_id, path)` | Read templates and configs |
+
+### Manage: CLI
+
+Full lifecycle management from the command line:
 
 ```bash
-# Search by description
-search_skills("code review checklist")
-
-# List all skills
-search_skills("")
+skillpod add <source>      # GitHub URL, local path, or built-in name
+skillpod list              # See installed skills
+skillpod search <query>    # Find skills by description
+skillpod show <id>         # View skill details
+skillpod lint [id]         # Validate skill files
+skillpod remove <id>       # Uninstall a skill
 ```
 
-### Scoped Access
+**GitHub Integration:**
 
-Expose different skills to different agents:
+```bash
+# Add from GitHub
+skillpod add https://github.com/user/repo/tree/main/skills/code-review
+
+# Add entire repository
+skillpod add https://github.com/user/repo
+```
+
+### Organize: Categories & Namespaces
+
+Structure your skills and control what each client sees:
+
+```yaml
+# SKILL.md frontmatter
+metadata:
+  skillpod:
+    category: development
+    tags: [testing, quality]
+    alwaysApply: true  # Core Skills - always available
+```
+
+**Client-Based Skill Filtering:**
+
+Expose different skills to different AI agents:
 
 ```json
 {
   "mcpServers": {
-    "skillpod-dev": {
+    "skillpod-ide": {
+      "command": "uv",
+      "args": ["run", "skillpod-mcp"],
       "env": { "SKILLPOD_ENABLED_CATEGORIES": "development,testing" }
     },
     "skillpod-writing": {
-      "env": { "SKILLPOD_ENABLED_SKILLS": "summarizer,translator" }
+      "command": "uv",
+      "args": ["run", "skillpod-mcp"],
+      "env": { "SKILLPOD_ENABLED_CATEGORIES": "writing,research" }
     }
   }
 }
 ```
 
-### GitHub Integration
+Filter options:
+- `SKILLPOD_ENABLED_SKILLS` — Specific skill IDs
+- `SKILLPOD_ENABLED_CATEGORIES` — By category
+- `SKILLPOD_ENABLED_NAMESPACES` — By directory prefix
 
-Install skills directly from GitHub:
+### Scale: Smart Search
+
+**Full-Text Search (Default)**
+
+Works out of the box with no API keys. BM25-based search via Tantivy indexes skill names, descriptions, tags, and categories.
 
 ```bash
-skillpod add https://github.com/user/repo/tree/main/skills/code-review
+# No configuration needed
+SKILLPOD_EMBEDDING_PROVIDER=none  # default
 ```
+
+**Vector Search (Optional)**
+
+For semantic search across large skill collections:
+
+```bash
+# OpenAI
+export SKILLPOD_EMBEDDING_PROVIDER=openai
+export SKILLPOD_OPENAI_API_KEY=sk-...
+
+# Gemini
+export SKILLPOD_EMBEDDING_PROVIDER=gemini
+export SKILLPOD_GEMINI_API_KEY=...
+```
+
+**Fallback Chain**: vector → FTS → substring (always returns results)
 
 ## Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `SKILLS_DIR` | Skills directory | `~/.skillpod/skills` |
-| `EMBEDDING_PROVIDER` | `none`, `openai`, `gemini` | `none` |
+| `EMBEDDING_PROVIDER` | `none`, `openai`, or `gemini` | `none` |
 
 [Full Configuration Guide →](guide/configuration.md)
-
-## CLI
-
-```bash
-skillpod add <source>      # Add skills (local, GitHub, built-in)
-skillpod list              # List installed skills
-skillpod remove <id>       # Remove a skill
-skillpod lint              # Validate skills
-```
-
-[CLI Reference →](guide/cli.md)
 
 ## Creating Skills
 
@@ -156,6 +210,10 @@ skillpod lint              # Validate skills
 ---
 name: my-skill
 description: What this skill does
+metadata:
+  skillpod:
+    category: development
+    tags: [example]
 ---
 # My Skill
 
@@ -164,28 +222,20 @@ Instructions for the AI agent.
 
 [Skill Authoring Guide →](guide/creating-skills.md)
 
-## MCP Tools
-
-| Tool | Purpose |
-|------|---------|
-| `search_skills(query)` | Find skills by description |
-| `load_skill(skill_id)` | Get full instructions and path |
-| `read_skill_file(skill_id, path)` | Read templates/configs |
-
 ## Learn More
 
-- [Configuration Guide](guide/configuration.md) — All options, filtering, multi-instance setup
+- [Configuration Guide](guide/configuration.md) — Filtering, search options, multi-client setup
+- [Creating Skills](guide/creating-skills.md) — SKILL.md format and best practices
 - [CLI Reference](guide/cli.md) — Full command documentation
-- [Creating Skills](guide/creating-skills.md) — SKILL.md format, best practices
 - [Design Philosophy](guide/philosophy.md) — Why skills work this way
 
 ## Development
 
 ```bash
-git clone https://github.com/gotalab/skillpod-mcp.git
-cd skillpod-mcp
+git clone https://github.com/gotalab/skillpod.git
+cd skillpod
 uv sync
-SKILLS_DIR=.agent/skills uv run skillpod-mcp
+SKILLPOD_SKILLS_DIR=.agent/skills uv run skillpod serve
 ```
 
 ## License

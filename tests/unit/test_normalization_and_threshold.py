@@ -1,47 +1,26 @@
 from pathlib import Path
-from tempfile import TemporaryDirectory
-from unittest.mock import patch
 
 from hypothesis import given, settings, strategies as st
 
-from skillpod_mcp.db import SkillDB
-
+from skillpod.modules.indexing.internal.lancedb import IndexStore
+from skillpod.modules.indexing.internal.search_service import SearchService
+from skillpod.shared.config import Config
+from skillpod.shared.utils import normalize_token
 
 THRESHOLD = 0.2
 
 
-class DummySettings:
-    def __init__(self, base_dir, threshold=THRESHOLD):
-        self.search_threshold = threshold
-        self.embedding_provider = "none"
-        self.skillpod_enabled_skills = []
-        self.skillpod_enabled_categories = []
-        self.skillpod_enabled_namespaces = []
-        self.skills_dir = base_dir / "skills"
-        self.db_path = base_dir / "db.lancedb"
-
-    def get_effective_skills_dir(self):
-        return self.skills_dir
-
-    def get_effective_db_path(self):
-        return self.db_path
-
-    def get_enabled_skills(self):
-        return self.skillpod_enabled_skills
-
-    def get_enabled_categories(self):
-        return self.skillpod_enabled_categories
-
-    def get_enabled_namespaces(self):
-        return self.skillpod_enabled_namespaces
-
-
 class DummyTable:
-    def __init__(self, data):
+    def __init__(self, data, fail_fts=False):
         self.data = data
+        self.fail_fts = fail_fts
         self._limit = None
+        self.query_type = None
 
     def search(self, *args, **kwargs):
+        self.query_type = kwargs.get("query_type")
+        if self.query_type == "fts" and self.fail_fts:
+            raise RuntimeError("fts failure")
         return self
 
     def where(self, *args, **kwargs):
@@ -52,49 +31,36 @@ class DummyTable:
         return self
 
     def to_list(self):
-        if self._limit is None:
-            return list(self.data)
-        return list(self.data)[: self._limit]
-
-
-class DummyDB:
-    def __init__(self, data):
-        self.data = data
-
-    def table_names(self):
-        return ["skills"]
-
-    def open_table(self, name):
-        return DummyTable(self.data)
-
-
-def make_db(base_dir: Path, data):
-    dummy_settings = DummySettings(base_dir)
-    dummy_db = DummyDB(data)
-    with patch("skillpod_mcp.db.search.settings", dummy_settings), patch(
-        "skillpod_mcp.db.search.lancedb.connect", lambda path: dummy_db
-    ), patch("skillpod_mcp.db.search.get_embedding", lambda query: None):
-        return SkillDB()
+        data = list(self.data)
+        if self._limit is not None:
+            data = data[: self._limit]
+        return data
 
 
 @settings(max_examples=150)
 @given(st.text())
-def test_s1_query_normalization(text):
-    """WHEN query has extra whitespace THEN it is trimmed/space-compressed before search (EARS:S1)."""
-    with TemporaryDirectory() as tmp:
-        db = make_db(Path(tmp), [])
+def test_query_normalization(text):
+    """Normalize queries by trimming/compressing whitespace."""
+    cfg = Config(skills_dir=Path("/tmp/skills"), db_path=Path("/tmp/db.lancedb"))
+    # Patch lancedb.connect to avoid real IO
+    from unittest.mock import patch
+
+    class DummyDB:
+        def table_names(self):
+            return []
+
+    with patch("skillpod.modules.indexing.internal.lancedb.lancedb.connect", lambda path: DummyDB()):
+        store = IndexStore(cfg)
         expected = " ".join(text.strip().split())
-        assert db._normalize(text) == expected
+        assert store._normalize_query(text) == expected
 
 
 @settings(max_examples=150)
 @given(st.text())
-def test_s2_category_tag_normalization(text):
-    """WHEN category/tags include mixed case/whitespace THEN they are lowercase-trimmed (EARS:S2)."""
-    with TemporaryDirectory() as tmp:
-        db = make_db(Path(tmp), [])
-        expected = " ".join(text.strip().split()).lower()
-        assert db._norm_token(text) == expected
+def test_category_tag_normalization(text):
+    """Normalization helper lowercases and trims."""
+    expected = " ".join(text.strip().split()).lower()
+    assert normalize_token(text) == expected
 
 
 @settings(max_examples=120)
@@ -105,12 +71,14 @@ def test_s2_category_tag_normalization(text):
         max_size=25,
     )
 )
-def test_s5_threshold_filters_low_scores(scores):
-    """WHEN hits are fetched THEN threshold drops low scores and caps to limit (EARS:S5)."""
+def test_threshold_filters_low_scores(scores):
+    """SearchService drops results below threshold and respects limit."""
     scores_sorted = sorted(scores, reverse=True)
     top = scores_sorted[0]
     expected = [s for s in scores_sorted if s / top >= THRESHOLD][:5]
-    with TemporaryDirectory() as tmp:
-        db = make_db(Path(tmp), [{"_score": s} for s in scores_sorted])
-        results = db.search("anything", limit=5)
-        assert [r["_score"] for r in results] == expected
+
+    table = DummyTable([{"_score": s} for s in scores_sorted])
+    service = SearchService(search_threshold=THRESHOLD, embed_fn=lambda q: None)
+
+    results = service.search(table=table, query="anything", limit=5, prefilter="", normalize_query=lambda q: q)
+    assert [r["_score"] for r in results] == expected

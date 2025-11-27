@@ -1,6 +1,6 @@
 # CLI Reference
 
-SkillPod provides a command-line interface for managing skills and running the MCP server.
+SkillPod provides a command-line interface for managing [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) and running the MCP server.
 
 ## Overview
 
@@ -8,7 +8,7 @@ SkillPod provides a command-line interface for managing skills and running the M
 skillpod <command> [options]
 ```
 
-> **Note**: `skillpod` is an alias for `skillpod-mcp`. Both work identically.
+> **Note**: `skillpod-mcp` is a legacy alias for `skillpod`. Both work identically.
 
 ## Commands
 
@@ -313,7 +313,11 @@ CLI commands respect these environment variables:
 
 | Variable | Description |
 |----------|-------------|
-| `SKILLS_DIR` | Default skills directory |
+| `SKILLPOD_SKILLS_DIR` | Default skills directory |
 | `GITHUB_TOKEN` | GitHub authentication for private repos |
 
-See [Configuration Guide](configuration.md) for all options.
+## See Also
+
+- [Configuration Guide](configuration.md) — All options, filtering, search
+- [Creating Skills](creating-skills.md) — SKILL.md format
+- [Design Philosophy](philosophy.md) — Why things work this way

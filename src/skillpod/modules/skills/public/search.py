@@ -1,0 +1,45 @@
+from __future__ import annotations
+
+from typing import List
+
+from skillpod.modules.indexing import list_all as idx_list_all, search as idx_search
+from skillpod.shared.config import Config
+from skillpod.shared.filters import is_skill_enabled, normalize_token
+from .types import SearchResult, SkillSummary
+
+
+def search_skills(query: str, *, limit: int = 10, config: Config) -> SearchResult:
+    """Search for skills via indexing module with filters applied."""
+    effective_limit = limit or config.search_limit
+    normalized_query = query or ""
+    is_list_all = not normalized_query.strip() or normalized_query.strip() == "*"
+
+    raw_results: List[dict]
+    if is_list_all:
+        raw_results = idx_list_all(limit=effective_limit * 2, config=config)
+    else:
+        raw_results = idx_search(normalized_query, limit=effective_limit, config=config)
+
+    skills: List[SkillSummary] = []
+    for row in raw_results:
+        skill_id = row.get("id") or row.get("name")
+        category = row.get("category", "")
+        if not skill_id:
+            continue
+        if not is_skill_enabled(skill_id, category, config=config):
+            continue
+        score = float(row.get("_score", 0.0))
+        score = max(0.0, min(score, 1.0)) if score else 0.0
+        skills.append(
+            SkillSummary(
+                id=skill_id,
+                name=row.get("name", skill_id),
+                description=row.get("description", ""),
+                category=normalize_token(category),
+                score=score,
+            )
+        )
+        if len(skills) >= effective_limit:
+            break
+
+    return SearchResult(skills=skills, total=len(skills), query=query)

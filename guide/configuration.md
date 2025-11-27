@@ -1,52 +1,75 @@
 # Configuration
 
-This guide covers all configuration options for SkillPod MCP.
+This guide covers all configuration options for SkillPod.
 
 ## Environment Variables
+
+All environment variables are prefixed with `SKILLPOD_`. The prefix is optional for common variables like `SKILLS_DIR`.
 
 ### Core Settings
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SKILLS_DIR` | Path to skills directory | `~/.skillpod/skills` |
-| `DB_PATH` | Path to LanceDB index | `~/.skillpod/indexes/default/` |
+| `SKILLPOD_SKILLS_DIR` | Path to skills directory | `~/.skillpod/skills` |
+| `SKILLPOD_DB_PATH` | Path to LanceDB index | `~/.skillpod/indexes/default/` |
 
-### Search & Embedding
+### Search
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `EMBEDDING_PROVIDER` | Search mode: `none`, `openai`, or `gemini` | `none` |
-| `SEARCH_LIMIT` | Maximum search results | `10` |
-| `SEARCH_THRESHOLD` | Minimum score threshold (0-1) | `0.2` |
+| `SKILLPOD_EMBEDDING_PROVIDER` | Search mode: `none`, `openai`, or `gemini` | `none` |
+| `SKILLPOD_SEARCH_LIMIT` | Maximum search results | `10` |
+| `SKILLPOD_SEARCH_THRESHOLD` | Minimum score threshold (0-1) | `0.2` |
 
-When `EMBEDDING_PROVIDER=none` (default), search uses Full-Text Search only. This is fast, requires no API keys, and keeps all data local.
+#### Full-Text Search (Default)
 
-#### OpenAI Embedding
+When `SKILLPOD_EMBEDDING_PROVIDER=none` (default), search uses BM25-based full-text search via Tantivy. This is:
 
-```bash
-export EMBEDDING_PROVIDER=openai
-export OPENAI_API_KEY=sk-...
-export EMBEDDING_MODEL=text-embedding-3-small  # optional
-```
-
-#### Gemini Embedding
+- **Fast** — no external API calls
+- **Private** — all data stays local
+- **Reliable** — no API keys needed
 
 ```bash
-export EMBEDDING_PROVIDER=gemini
-export GEMINI_API_KEY=...
-export GEMINI_EMBEDDING_MODEL=gemini-embedding-001  # optional
+# No configuration needed — this is the default
+SKILLPOD_EMBEDDING_PROVIDER=none
 ```
+
+#### Vector Search (Optional)
+
+For semantic search across large skill collections, enable vector embeddings:
+
+**OpenAI:**
+```bash
+export SKILLPOD_EMBEDDING_PROVIDER=openai
+export SKILLPOD_OPENAI_API_KEY=sk-...
+export SKILLPOD_OPENAI_EMBEDDING_MODEL=text-embedding-3-small  # optional
+```
+
+**Gemini:**
+```bash
+export SKILLPOD_EMBEDDING_PROVIDER=gemini
+export SKILLPOD_GEMINI_API_KEY=...
+export SKILLPOD_GEMINI_EMBEDDING_MODEL=gemini-embedding-001  # optional
+```
+
+#### Fallback Chain
+
+Search always returns results through a fallback chain:
+
+1. **Vector search** (if enabled) — semantic matching
+2. **FTS (BM25)** — keyword matching
+3. **Substring match** — last resort
 
 ### Execution Limits
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `EXEC_TIMEOUT_SECONDS` | Command execution timeout | `60` |
-| `MAX_FILE_BYTES` | Max file read size | `65536` |
+| `SKILLPOD_EXEC_TIMEOUT_SECONDS` | Command execution timeout | `60` |
+| `SKILLPOD_MAX_FILE_BYTES` | Max file read size | `65536` |
 
-## Skill Filtering
+## Client-Based Skill Filtering
 
-Expose different skills to different agents by running multiple SkillPod instances with filters.
+Expose different skills to different AI agents by configuring filter environment variables.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -56,10 +79,12 @@ Expose different skills to different agents by running multiple SkillPod instanc
 
 ### Filter Priority
 
-1. If `SKILLPOD_ENABLED_SKILLS` is set, only those skills are available
-2. Otherwise, if `SKILLPOD_ENABLED_CATEGORIES` is set, only matching categories
-3. Otherwise, if `SKILLPOD_ENABLED_NAMESPACES` is set, only matching namespaces
-4. If none are set, all skills are available
+Filters are evaluated in order of specificity:
+
+1. If `SKILLPOD_ENABLED_SKILLS` is set → only those exact skill IDs
+2. Otherwise, if `SKILLPOD_ENABLED_NAMESPACES` is set → only matching prefixes
+3. Otherwise, if `SKILLPOD_ENABLED_CATEGORIES` is set → only matching categories
+4. If none are set → all skills available
 
 ### Examples
 
@@ -78,9 +103,9 @@ export SKILLPOD_ENABLED_SKILLS=hello-world,code-review,my-namespace/my-skill
 export SKILLPOD_ENABLED_NAMESPACES=my-tools,team-skills
 ```
 
-## Multi-Instance Setup
+## Per-Client Setup
 
-Run different SkillPod instances for different agents:
+Run different SkillPod configurations for different AI agents:
 
 ```json
 {
@@ -89,6 +114,7 @@ Run different SkillPod instances for different agents:
       "command": "uv",
       "args": ["run", "skillpod-mcp"],
       "env": {
+        "SKILLPOD_SKILLS_DIR": "~/.skillpod/skills",
         "SKILLPOD_ENABLED_CATEGORIES": "development,testing"
       }
     },
@@ -96,12 +122,15 @@ Run different SkillPod instances for different agents:
       "command": "uv",
       "args": ["run", "skillpod-mcp"],
       "env": {
-        "SKILLPOD_ENABLED_SKILLS": "writing-assistant,summarizer,translator"
+        "SKILLPOD_SKILLS_DIR": "~/.skillpod/skills",
+        "SKILLPOD_ENABLED_CATEGORIES": "writing,research"
       }
     }
   }
 }
 ```
+
+This gives each AI agent a different view of the same skill repository.
 
 ## GitHub Integration
 
@@ -150,10 +179,10 @@ SkillPod automatically reindexes when:
 
 ```bash
 # Force reindex on server start
-skillpod --reindex
+skillpod serve --reindex
 
 # Skip auto-reindex check
-skillpod --skip-auto-reindex
+skillpod serve --skip-auto-reindex
 # or
 export SKILLPOD_SKIP_AUTO_REINDEX=1
 ```
@@ -179,7 +208,7 @@ Or manually add to `~/.cursor/mcp.json`:
     "skillpod": {
       "command": "uv",
       "args": ["run", "skillpod-mcp"],
-      "env": { "SKILLS_DIR": "~/.skillpod/skills" }
+      "env": { "SKILLPOD_SKILLS_DIR": "~/.skillpod/skills" }
     }
   }
 }
@@ -195,7 +224,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
     "skillpod": {
       "command": "uv",
       "args": ["run", "skillpod-mcp"],
-      "env": { "SKILLS_DIR": "~/.skillpod/skills" }
+      "env": { "SKILLPOD_SKILLS_DIR": "~/.skillpod/skills" }
     }
   }
 }
@@ -211,7 +240,7 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
     "skillpod": {
       "command": "uv",
       "args": ["run", "skillpod-mcp"],
-      "env": { "SKILLS_DIR": "~/.skillpod/skills" }
+      "env": { "SKILLPOD_SKILLS_DIR": "~/.skillpod/skills" }
     }
   }
 }
@@ -222,9 +251,15 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 ```bash
 claude mcp add skillpod -- uv run skillpod-mcp
 # With custom skills directory:
-claude mcp add --env SKILLS_DIR=~/.skillpod/skills skillpod -- uv run skillpod-mcp
+claude mcp add --env SKILLPOD_SKILLS_DIR=~/.skillpod/skills skillpod -- uv run skillpod-mcp
 ```
 
 ### Kiro
 
-[![Add to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=skillpod&config=%7B%22command%22%3A%20%22uv%22%2C%20%22args%22%3A%20%5B%22run%22%2C%20%22skillpod-mcp%22%5D%2C%20%22env%22%3A%20%7B%22SKILLS_DIR%22%3A%20%22~/.skillpod/skills%22%7D%2C%20%22disabled%22%3A%20false%2C%20%22autoApprove%22%3A%20%5B%5D%7D)
+[![Add to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=skillpod&config=%7B%22command%22%3A%20%22uv%22%2C%20%22args%22%3A%20%5B%22run%22%2C%20%22skillpod-mcp%22%5D%2C%20%22env%22%3A%20%7B%22SKILLPOD_SKILLS_DIR%22%3A%20%22~/.skillpod/skills%22%7D%2C%20%22disabled%22%3A%20false%2C%20%22autoApprove%22%3A%20%5B%5D%7D)
+
+## See Also
+
+- [CLI Reference](cli.md) — Command documentation
+- [Creating Skills](creating-skills.md) — SKILL.md format
+- [Design Philosophy](philosophy.md) — Why things work this way

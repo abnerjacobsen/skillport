@@ -1,6 +1,6 @@
 # Creating Skills
 
-This guide covers how to create and structure Agent Skills for SkillPod.
+This guide covers how to create and structure [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) for SkillPod.
 
 ## Quick Start
 
@@ -388,6 +388,6 @@ skillpod add https://github.com/user/pdf-extractor
 
 ## See Also
 
-- [CLI Reference](cli.md) - `add`, `lint`, `list` commands
-- [Configuration](configuration.md) - Categories, filtering
-- [Design Philosophy](philosophy.md) - Why skills work this way
+- [CLI Reference](cli.md) — Command documentation
+- [Configuration](configuration.md) — Categories, filtering, search options
+- [Design Philosophy](philosophy.md) — Why skills work this way
