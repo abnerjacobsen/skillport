@@ -5,13 +5,50 @@ to be passed explicitly (no global singleton). Environment variables are
 prefixed with SKILLPOD_ (e.g., SKILLPOD_SKILLS_DIR).
 """
 
+import json
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal, Tuple, Type
 
 from pydantic import AliasChoices, Field, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic.fields import FieldInfo
+from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource
+from pydantic_settings.sources import EnvSettingsSource
+
+
+def _parse_comma_or_json(value: str) -> list[str]:
+    """Parse as JSON array or comma-separated string."""
+    if not value:
+        return []
+    # Try JSON first (e.g., '["a","b"]')
+    if value.startswith("["):
+        try:
+            result = json.loads(value)
+            if isinstance(result, list):
+                return [str(x).strip() for x in result if str(x).strip()]
+        except json.JSONDecodeError:
+            pass
+    # Fallback to comma-separated
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+class CommaListEnvSettingsSource(EnvSettingsSource):
+    """Custom env source that handles comma-separated lists for list[str] fields."""
+
+    def prepare_field_value(
+        self, field_name: str, field: FieldInfo, value: Any, value_is_complex: bool
+    ) -> Any:
+        # For list[str] fields, parse comma-separated or JSON
+        if value is not None and isinstance(value, str):
+            origin = getattr(field.annotation, "__origin__", None)
+            if origin is list:
+                return _parse_comma_or_json(value)
+        return super().prepare_field_value(field_name, field, value, value_is_complex)
+
 
 SKILLPOD_HOME = Path("~/.skillpod").expanduser()
+
+# Upper bound for skill enumeration (total count, not returned results)
+MAX_SKILLS = 10000
 
 
 class Config(BaseSettings):
@@ -67,7 +104,7 @@ class Config(BaseSettings):
         default=0.2, ge=0.0, le=1.0, description="Minimum relevance score"
     )
 
-    # Filters
+    # Filters (comma-separated strings from env, e.g., "cat1,cat2")
     enabled_skills: list[str] = Field(
         default_factory=list, description="Whitelist of skill IDs"
     )
@@ -99,21 +136,27 @@ class Config(BaseSettings):
     )
     max_file_bytes: int = Field(default=65536, description="Max file size to read")
 
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: Type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> Tuple[PydanticBaseSettingsSource, ...]:
+        """Use custom env source that handles comma-separated lists."""
+        return (
+            init_settings,
+            CommaListEnvSettingsSource(settings_cls),
+            dotenv_settings,
+            file_secret_settings,
+        )
+
     @field_validator("skills_dir", "db_path", mode="before")
     @classmethod
     def expand_path(cls, value: str | Path) -> Path:
         return Path(value).expanduser().resolve()
-
-    @field_validator(
-        "enabled_skills", "enabled_categories", "enabled_namespaces", mode="before"
-    )
-    @classmethod
-    def parse_comma_list(cls, value):
-        if value is None:
-            return []
-        if isinstance(value, str):
-            return [item.strip() for item in value.split(",") if item.strip()]
-        return list(value)
 
     @model_validator(mode="after")
     def validate_provider_keys(self):
@@ -132,4 +175,4 @@ class Config(BaseSettings):
         return self.model_copy(update=kwargs)
 
 
-__all__ = ["Config", "SKILLPOD_HOME"]
+__all__ = ["Config", "SKILLPOD_HOME", "MAX_SKILLS"]

@@ -41,6 +41,7 @@ skillpod add <source> [options]
 | Option | Description | Default |
 |--------|-------------|---------|
 | `--force`, `-f` | Overwrite existing skills | `false` |
+| `--yes`, `-y` | Skip interactive prompts (for CI/automation) | `false` |
 | `--keep-structure/--no-keep-structure` | Preserve directory structure as namespace | Interactive |
 | `--namespace`, `-n` | Custom namespace | source directory name |
 | `--name` | Override skill name (single skill only) | from SKILL.md |
@@ -163,15 +164,11 @@ skillpod list --json
 
 **Default (table view):**
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                       Skills (5)                            │
-├──────────────────────┬─────────────┬────────────────────────┤
-│ ID                   │ Category    │ Description            │
-├──────────────────────┼─────────────┼────────────────────────┤
-│ hello-world          │ example     │ A simple hello world…  │
-│ pdf                  │ document    │ Extract text from PDF  │
-│ team/code-review     │ development │ Code review checklist  │
-└──────────────────────┴─────────────┴────────────────────────┘
+                       Skills (5)
+ ID                    Description
+ hello-world           A simple hello world skill for testing…
+ pdf                   Extract text from PDF files
+ team/code-review      Code review checklist and guidelines
 ```
 
 **JSON:**
@@ -263,6 +260,7 @@ skillpod remove <skill-id> [options]
 | Option | Description | Default |
 |--------|-------------|---------|
 | `--force`, `-f` | Skip confirmation | `false` |
+| `--yes`, `-y` | Skip confirmation (alias for --force) | `false` |
 
 #### Examples
 
@@ -285,8 +283,14 @@ skillpod remove team-tools/code-review --force
 Validate skill files.
 
 ```bash
-skillpod lint [skill-id]
+skillpod lint [skill-id] [options]
 ```
+
+#### Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--json` | Output as JSON (for scripting/AI agents) | `false` |
 
 #### Validation Rules
 

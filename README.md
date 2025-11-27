@@ -50,11 +50,11 @@ Install, organize, and deliver Agent Skills to any MCP client.
 
 **Cursor** (one-click)
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=skillpod&config=eyJjb21tYW5kIjoidXYiLCJhcmdzIjpbInJ1biIsInNraWxscG9kLW1jcCJdLCJlbnYiOnsiU0tJTExTX0RJUiI6In4vLnNraWxscG9kL3NraWxscyJ9fQ==)
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=skillpod&config=eyJjb21tYW5kIjoidXYiLCJhcmdzIjpbInJ1biIsInNraWxscG9kLW1jcCJdLCJlbnYiOnsiU0tJTExQT0RfU0tJTExTX0RJUiI6In4vLnNraWxscG9kL3NraWxscyJ9fQ==)
 
 **Kiro** (one-click)
 
-[![Add to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=skillpod&config=%7B%22command%22%3A%20%22uv%22%2C%20%22args%22%3A%20%5B%22run%22%2C%20%22skillpod-mcp%22%5D%2C%20%22env%22%3A%20%7B%22SKILLS_DIR%22%3A%20%22~/.skillpod/skills%22%7D%2C%20%22disabled%22%3A%20false%2C%20%22autoApprove%22%3A%20%5B%5D%7D)
+[![Add to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=skillpod&config=%7B%22command%22%3A%20%22uv%22%2C%20%22args%22%3A%20%5B%22run%22%2C%20%22skillpod-mcp%22%5D%2C%20%22env%22%3A%20%7B%22SKILLPOD_SKILLS_DIR%22%3A%20%22~/.skillpod/skills%22%7D%2C%20%22disabled%22%3A%20false%2C%20%22autoApprove%22%3A%20%5B%5D%7D)
 
 **Other Clients**
 
@@ -149,12 +149,20 @@ Expose different skills to different AI agents:
 ```json
 {
   "mcpServers": {
-    "skillpod-ide": {
+    "skillpod-development": {
       "command": "uv",
       "args": ["run", "skillpod-mcp"],
       "env": { "SKILLPOD_ENABLED_CATEGORIES": "development,testing" }
-    },
-    "skillpod-writing": {
+    }
+  }
+}
+```
+
+
+```json
+{
+  "mcpServers": {
+    "writing-skills": {
       "command": "uv",
       "args": ["run", "skillpod-mcp"],
       "env": { "SKILLPOD_ENABLED_CATEGORIES": "writing,research" }

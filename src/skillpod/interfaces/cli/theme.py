@@ -7,6 +7,7 @@ This module provides:
 """
 
 import os
+from importlib.metadata import version, PackageNotFoundError
 from typing import Any
 
 from rich.console import Console
@@ -15,8 +16,11 @@ from rich.table import Table
 from rich.theme import Theme
 
 
-# Version from pyproject.toml
-VERSION = "0.1.0"
+# Version from package metadata (pyproject.toml)
+try:
+    VERSION = version("skillpod")
+except PackageNotFoundError:
+    VERSION = "0.0.0"  # Fallback for development
 
 
 # Color scheme

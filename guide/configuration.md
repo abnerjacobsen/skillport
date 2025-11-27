@@ -41,15 +41,15 @@ For semantic search across large skill collections, enable vector embeddings:
 **OpenAI:**
 ```bash
 export SKILLPOD_EMBEDDING_PROVIDER=openai
-export SKILLPOD_OPENAI_API_KEY=sk-...
-export SKILLPOD_OPENAI_EMBEDDING_MODEL=text-embedding-3-small  # optional
+export OPENAI_API_KEY=sk-...
+export OPENAI_EMBEDDING_MODEL=text-embedding-3-small  # optional
 ```
 
 **Gemini:**
 ```bash
 export SKILLPOD_EMBEDDING_PROVIDER=gemini
-export SKILLPOD_GEMINI_API_KEY=...
-export SKILLPOD_GEMINI_EMBEDDING_MODEL=gemini-embedding-001  # optional
+export GEMINI_API_KEY=...
+export GEMINI_EMBEDDING_MODEL=gemini-embedding-001  # optional
 ```
 
 #### Fallback Chain
@@ -183,8 +183,6 @@ skillpod serve --reindex
 
 # Skip auto-reindex check
 skillpod serve --skip-auto-reindex
-# or
-export SKILLPOD_SKIP_AUTO_REINDEX=1
 ```
 
 ### Index Location
@@ -198,7 +196,7 @@ export SKILLPOD_SKIP_AUTO_REINDEX=1
 
 ### Cursor
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=skillpod&config=eyJjb21tYW5kIjoidXYiLCJhcmdzIjpbInJ1biIsInNraWxscG9kLW1jcCJdLCJlbnYiOnsiU0tJTExTX0RJUiI6In4vLnNraWxscG9kL3NraWxscyJ9fQ==)
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=skillpod&config=eyJjb21tYW5kIjoidXYiLCJhcmdzIjpbInJ1biIsInNraWxscG9kLW1jcCJdLCJlbnYiOnsiU0tJTExQT0RfU0tJTExTX0RJUiI6In4vLnNraWxscG9kL3NraWxscyJ9fQ==)
 
 Or manually add to `~/.cursor/mcp.json`:
 

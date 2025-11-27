@@ -11,24 +11,17 @@ def register_tools(mcp: FastMCP, config: Config):
 
     @mcp.tool(name="search_skills")
     def search_skills_tool(query: str) -> Dict[str, Any]:
-        """Find Agent Skills relevant to a task description.
+        """Find skills relevant to a task description.
 
-        When to use:
-          - You need a capability and don’t know which skill to load yet.
-        When NOT to use:
-          - You already have a skill id: go straight to load_skill.
-          - You’re browsing files: use read_skill_file after load_skill instead.
-
-        Flow:
-          1) Call search_skills with the task text.
-          2) Choose a skill `id` from results.
-          3) Call load_skill(id) to get executable instructions and path.
+        Use this to discover skills. If you already have a skill_id, skip to load_skill.
+        If too many results, refine your query with more specific terms instead of loading more.
 
         Args:
-            query: Natural-language task (e.g., "extract PDF text"). Use "" or "*" to list all enabled skills.
+            query: Natural-language task (e.g., "extract PDF text"). Use "" or "*" to list all.
 
         Returns:
-            skills: List of {id, description, score, name?}. name is omitted if same as id. Higher score = better match.
+            skills: Top matches as {id, description, score}. Higher score = better match.
+            total: Total matching skills. If high, use a more specific query.
         """
         result = search_skills(query, limit=config.search_limit, config=config)
         skills_list = []
@@ -42,28 +35,20 @@ def register_tools(mcp: FastMCP, config: Config):
             if s.name != s.id:
                 item["name"] = s.name
             skills_list.append(item)
-        return {"skills": skills_list}
+        return {"skills": skills_list, "total": result.total}
 
     @mcp.tool(name="load_skill")
     def load_skill_tool(skill_id: str) -> Dict[str, Any]:
-        """Load a skill’s instructions and absolute filesystem path.
+        """Load a skill's instructions and absolute filesystem path.
 
-        Why `path` matters:
-          - It is the authoritative location of the skill’s files (scripts, templates, data).
-          - Use it when running scripts in your terminal (e.g., `python {path}/script.py`).
-          - Do not guess paths or reuse old paths after moving skills—call load_skill again.
-
-        When to use:
-          - Right after selecting an id from search_skills.
-        When NOT to use:
-          - You only need metadata: search_skills is cheaper.
-          - You need a specific file’s contents: call read_skill_file after this.
+        Call this after selecting an id from search_skills. The returned `path` is
+        required for executing scripts (e.g., `python {path}/script.py`).
 
         Args:
-            skill_id: Skill identifier (e.g., "hello-world" or "group/skill").
+            skill_id: Skill identifier (e.g., "hello-world" or "namespace/skill").
 
         Returns:
-            id, name, description, instructions, path (absolute dir on disk).
+            id, name, description, instructions, path (absolute directory).
         """
         detail = load_skill(skill_id, config=config)
         return {
@@ -76,24 +61,17 @@ def register_tools(mcp: FastMCP, config: Config):
 
     @mcp.tool(name="read_skill_file")
     def read_skill_file_tool(skill_id: str, file_path: str) -> Dict[str, Any]:
-        """Read a text file inside a loaded skill (templates/configs).
+        """Read a text file inside a skill (templates, configs).
 
-        When to use:
-          - You need template/config content to include in context (e.g., a prompt template).
-        When NOT to use:
-          - Executing code: run the script directly using the `path` from load_skill instead of reading it.
-          - Large/binary assets: rejected to protect context (UTF-8 only, max size SKILLPOD_MAX_FILE_BYTES ≈64KB).
-
-        Safety:
-          - `file_path` must be relative to the skill root; "../" is rejected to prevent traversal.
-          - Returns absolute `path` for transparency; do not execute it here—execute in your terminal if needed.
+        Use when instructions reference a file. For scripts, execute via path instead of reading.
+        Rejects "../" traversal. UTF-8 only, max ~64KB.
 
         Args:
             skill_id: Skill identifier from load_skill.
             file_path: Relative path (e.g., "templates/config.json").
 
         Returns:
-            content: UTF-8 text, path: absolute path, size: byte length.
+            content (UTF-8 text), path (absolute), size (bytes).
         """
         content = read_skill_file(skill_id, file_path, config=config)
         return {"content": content.content, "path": content.path, "size": content.size}

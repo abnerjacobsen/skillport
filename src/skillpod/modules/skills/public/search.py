@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List
 
 from skillpod.modules.indexing import list_all as idx_list_all, search as idx_search
-from skillpod.shared.config import Config
+from skillpod.shared.config import Config, MAX_SKILLS
 from skillpod.shared.filters import is_skill_enabled, normalize_token
 from .types import SearchResult, SkillSummary
 
@@ -14,13 +14,15 @@ def search_skills(query: str, *, limit: int = 10, config: Config) -> SearchResul
     normalized_query = query or ""
     is_list_all = not normalized_query.strip() or normalized_query.strip() == "*"
 
+    # Fetch up to MAX_SKILLS to count total filtered results
     raw_results: List[dict]
     if is_list_all:
-        raw_results = idx_list_all(limit=effective_limit * 2, config=config)
+        raw_results = idx_list_all(limit=MAX_SKILLS, config=config)
     else:
-        raw_results = idx_search(normalized_query, limit=effective_limit, config=config)
+        raw_results = idx_search(normalized_query, limit=MAX_SKILLS, config=config)
 
-    skills: List[SkillSummary] = []
+    # Filter and collect all matching skills
+    all_matching: List[SkillSummary] = []
     for row in raw_results:
         skill_id = row.get("id") or row.get("name")
         category = row.get("category", "")
@@ -30,7 +32,7 @@ def search_skills(query: str, *, limit: int = 10, config: Config) -> SearchResul
             continue
         score = float(row.get("_score", 0.0))
         score = max(0.0, min(score, 1.0)) if score else 0.0
-        skills.append(
+        all_matching.append(
             SkillSummary(
                 id=skill_id,
                 name=row.get("name", skill_id),
@@ -39,7 +41,10 @@ def search_skills(query: str, *, limit: int = 10, config: Config) -> SearchResul
                 score=score,
             )
         )
-        if len(skills) >= effective_limit:
-            break
 
-    return SearchResult(skills=skills, total=len(skills), query=query)
+    # Return limited results but total count of all matching
+    return SearchResult(
+        skills=all_matching[:effective_limit],
+        total=len(all_matching),
+        query=query,
+    )
