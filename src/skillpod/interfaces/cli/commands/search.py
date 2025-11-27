@@ -1,18 +1,33 @@
+"""Search for skills command."""
+
 import typer
-from rich.console import Console
-from rich.table import Table
 
 from skillpod.modules.skills import search_skills, SearchResult
 from skillpod.shared.config import Config
-
-console = Console()
+from ..theme import console, no_results_panel, create_skills_table, format_score
 
 
 def search(
-    query: str = typer.Argument(..., help="Search query"),
-    limit: int = typer.Option(10, "--limit", "-n", help="Max results"),
-    json_output: bool = typer.Option(False, "--json", help="Output JSON"),
+    query: str = typer.Argument(
+        ...,
+        help="Search query (natural language supported)",
+        show_default=False,
+    ),
+    limit: int = typer.Option(
+        10,
+        "--limit",
+        "-n",
+        help="Maximum number of results",
+        min=1,
+        max=100,
+    ),
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Output as JSON (for scripting/AI agents)",
+    ),
 ):
+    """Search for skills matching a query."""
     config = Config()
     result: SearchResult = search_skills(query, limit=limit, config=config)
 
@@ -20,15 +35,23 @@ def search(
         console.print_json(data=result.model_dump())
         return
 
-    table = Table(title=f"Search: {query}")
-    table.add_column("ID", style="cyan")
-    table.add_column("Name")
-    table.add_column("Description")
-    table.add_column("Score", justify="right")
+    # No results with suggestions
+    if not result.skills:
+        console.print(no_results_panel(query))
+        return
 
+    # Create styled table with scores
+    table = create_skills_table(f"Search: {query}", show_score=True, show_category=False)
     for skill in result.skills:
+        desc = skill.description[:45] + "..." if len(skill.description) > 45 else skill.description
         table.add_row(
-            skill.id, skill.name, skill.description[:50], f"{skill.score:.2f}"
+            skill.id,
+            desc,
+            format_score(skill.score),
         )
 
     console.print(table)
+
+    # Show result count
+    if len(result.skills) == limit:
+        console.print(f"[dim]Showing top {limit} results. Use --limit to see more.[/dim]")

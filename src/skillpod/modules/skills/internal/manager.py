@@ -210,6 +210,7 @@ def add_builtin(name: str, *, config: Config, force: bool) -> AddResult:
                 success=False,
                 skill_id=name,
                 message=f"Skill '{name}' exists. Use --force to overwrite.",
+                skipped=[name],
             )
         shutil.rmtree(dest)
 
@@ -217,7 +218,10 @@ def add_builtin(name: str, *, config: Config, force: bool) -> AddResult:
     content = _ensure_frontmatter_name(BUILTIN_SKILLS[name], name)
     (dest / "SKILL.md").write_text(content, encoding="utf-8")
     return AddResult(
-        success=True, skill_id=name, message=f"Added '{name}' to {dest_root}"
+        success=True,
+        skill_id=name,
+        message=f"Added '{name}' to {dest_root}",
+        added=[name],
     )
 
 
