@@ -48,7 +48,7 @@ async def run_test():
             # 4. Test load_skill
             print("\n--- Testing load_skill ---")
             try:
-                load_result = await session.call_tool("load_skill", arguments={"skill_name": "hello-world"})
+                load_result = await session.call_tool("load_skill", arguments={"skill_id": "hello-world"})
                 print(f"Load Result: {load_result.content[0].text[:50]}...") # Show first 50 chars
             except Exception as e:
                 print(f"❌ load_skill failed: {e}")
@@ -56,7 +56,7 @@ async def run_test():
             # 5. Test read_skill_file
             print("\n--- Testing read_skill_file ---")
             try:
-                read_result = await session.call_tool("read_skill_file", arguments={"skill_name": "hello-world", "file_path": "hello.py"})
+                read_result = await session.call_tool("read_skill_file", arguments={"skill_id": "hello-world", "file_path": "hello.py"})
                 print(f"Read Result: {read_result.content[0].text}")
             except Exception as e:
                 print(f"❌ read_skill_file failed: {e}")
