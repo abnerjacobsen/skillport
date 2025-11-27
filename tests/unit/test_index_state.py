@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from skillhub_mcp.db import search as search_mod
+from skillpod_mcp.db import search as search_mod
 
 
 class DummySettings:
@@ -9,9 +9,9 @@ class DummySettings:
         self.search_threshold = 0.2
         self.search_limit = 5
         self.embedding_provider = "none"
-        self.skillhub_enabled_skills = []
-        self.skillhub_enabled_categories = []
-        self.skillhub_enabled_namespaces = []
+        self.skillpod_enabled_skills = []
+        self.skillpod_enabled_categories = []
+        self.skillpod_enabled_namespaces = []
         self.skills_dir = base_dir / "skills"
         self.db_path = base_dir / "db.lancedb"
 
@@ -22,13 +22,13 @@ class DummySettings:
         return self.db_path
 
     def get_enabled_skills(self):
-        return self.skillhub_enabled_skills
+        return self.skillpod_enabled_skills
 
     def get_enabled_categories(self):
-        return self.skillhub_enabled_categories
+        return self.skillpod_enabled_categories
 
     def get_enabled_namespaces(self):
-        return self.skillhub_enabled_namespaces
+        return self.skillpod_enabled_namespaces
 
 
 class DummyDB:

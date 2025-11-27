@@ -1,4 +1,4 @@
-"""Skill validation and UI elements for SkillHub.
+"""Skill validation and UI elements for SkillPod.
 
 This module provides:
 - Validation logic for Agent Skills spec compliance
@@ -22,13 +22,13 @@ DESCRIPTION_MAX_LENGTH = 1024
 XML_TAG_PATTERN = re.compile(r"<[^>]+>")
 
 # --- ASCII Art ---
-SKILLHUB_BANNER = """
-  ███████╗██╗  ██╗██╗██╗     ██╗     ██╗  ██╗██╗   ██╗██████╗
-  ██╔════╝██║ ██╔╝██║██║     ██║     ██║  ██║██║   ██║██╔══██╗
-  ███████╗█████╔╝ ██║██║     ██║     ███████║██║   ██║██████╔╝
-  ╚════██║██╔═██╗ ██║██║     ██║     ██╔══██║██║   ██║██╔══██╗
-  ███████║██║  ██╗██║███████╗███████╗██║  ██║╚██████╔╝██████╔╝
-  ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝
+SKILLPOD_BANNER = r"""
+░██████╗██╗░░██╗██╗██╗░░░░░██╗░░░░░██████╗░░█████╗░██████╗░
+██╔════╝██║░██╔╝██║██║░░░░░██║░░░░░██╔══██╗██╔══██╗██╔══██╗
+╚█████╗░█████═╝░██║██║░░░░░██║░░░░░██████╔╝██║░░██║██║░░██║
+░╚═══██╗██╔═██╗░██║██║░░░░░██║░░░░░██╔═══╝░██║░░██║██║░░██║
+██████╔╝██║░╚██╗██║███████╗███████╗██║░░░░░╚█████╔╝██████╔╝
+╚═════╝░╚═╝░░╚═╝╚═╝╚══════╝╚══════╝╚═╝░░░░░░╚════╝░╚═════╝░
 """
 
 TROPHY_ART = """
@@ -140,7 +140,7 @@ def report_skill_status(db: SkillDB) -> None:
             if ok_count > 0:
                 print(f"\n✓ {ok_count} skill(s) OK", file=sys.stderr)
 
-            print("\nRun 'skillhub-mcp --lint' for full report.", file=sys.stderr)
+            print("\nRun 'skillpod-mcp --lint' for full report.", file=sys.stderr)
         else:
             # All skills pass - celebration!
             print(f"""{TROPHY_ART}

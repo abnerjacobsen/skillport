@@ -1,5 +1,5 @@
 
-from skillhub_mcp.skill_manager import origin as origin_mod
+from skillpod_mcp.skill_manager import origin as origin_mod
 
 
 def test_record_and_remove_origin(tmp_path, monkeypatch):

@@ -157,16 +157,16 @@ class SkillDB:
 
             name = meta.get("name") or skill_path.name
             description = meta.get("description") or ""
-            skillhub_meta = metadata_block.get("skillhub", {})
-            if not isinstance(skillhub_meta, dict):
-                skillhub_meta = {}
+            skillpod_meta = metadata_block.get("skillpod", {})
+            if not isinstance(skillpod_meta, dict):
+                skillpod_meta = {}
 
-            # New layout only: metadata.skillhub.*
-            category = skillhub_meta.get("category", "")
-            tags = skillhub_meta.get("tags", [])
+            # New layout only: metadata.skillpod.*
+            category = skillpod_meta.get("category", "")
+            tags = skillpod_meta.get("tags", [])
 
             # Prefer camelCase alwaysApply, accept snake_case as secondary
-            always_apply = skillhub_meta.get("alwaysApply", skillhub_meta.get("always_apply", False))
+            always_apply = skillpod_meta.get("alwaysApply", skillpod_meta.get("always_apply", False))
             if not isinstance(always_apply, bool):
                 always_apply = False
 
@@ -207,7 +207,7 @@ class SkillDB:
                 path=str(skill_path.absolute()),
                 lines=line_count,
                 metadata=json.dumps(
-                    self._canonical_metadata(meta, metadata_block, skillhub_meta, category, tags, always_apply)
+                    self._canonical_metadata(meta, metadata_block, skillpod_meta, category, tags, always_apply)
                 ),
                 vector=vec,
             )
@@ -266,38 +266,38 @@ class SkillDB:
         self,
         original_meta: Dict[str, Any],
         metadata_block: Dict[str, Any],
-        skillhub_meta: Dict[str, Any],
+        skillpod_meta: Dict[str, Any],
         category: Any,
         tags: Any,
         always_apply: bool,
     ) -> Dict[str, Any]:
         """
         Builds a normalized metadata dict to store in DB.
-        - Ensures `metadata` exists and carries category/tags/skillhub.
+        - Ensures `metadata` exists and carries category/tags/skillpod.
         - Avoids mutating the original parsed frontmatter.
         """
         meta_copy = dict(original_meta)
 
         meta_metadata = dict(metadata_block) if isinstance(metadata_block, dict) else {}
-        skillhub = dict(skillhub_meta) if isinstance(skillhub_meta, dict) else {}
+        skillpod = dict(skillpod_meta) if isinstance(skillpod_meta, dict) else {}
 
-        # Set skillhub fields canonically (but preserve parsed values if present)
+        # Set skillpod fields canonically (but preserve parsed values if present)
         if category is not None:
-            skillhub["category"] = category
+            skillpod["category"] = category
         if tags is not None:
-            skillhub["tags"] = tags
+            skillpod["tags"] = tags
         # store as camelCase in metadata
-        skillhub["alwaysApply"] = bool(skillhub.get("alwaysApply", skillhub.get("always_apply", always_apply)))
-        skillhub.pop("always_apply", None)
+        skillpod["alwaysApply"] = bool(skillpod.get("alwaysApply", skillpod.get("always_apply", always_apply)))
+        skillpod.pop("always_apply", None)
 
         # Remove deprecated fields
-        skillhub.pop("env_version", None)
-        skillhub.pop("requires_setup", None)
-        skillhub.pop("requiresSetup", None)
-        skillhub.pop("runtime", None)
+        skillpod.pop("env_version", None)
+        skillpod.pop("requires_setup", None)
+        skillpod.pop("requiresSetup", None)
+        skillpod.pop("runtime", None)
 
-        # Attach skillhub under metadata
-        meta_metadata["skillhub"] = skillhub
+        # Attach skillpod under metadata
+        meta_metadata["skillpod"] = skillpod
 
         meta_copy["metadata"] = meta_metadata
 

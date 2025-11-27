@@ -17,19 +17,19 @@ BUILTIN_SKILLS = {
     "hello-world": """\
 ---
 name: hello-world
-description: A simple hello world skill for testing SkillHub.
+description: A simple hello world skill for testing SkillPod.
 metadata:
-  skillhub:
+  skillpod:
     category: examples
     tags: [hello, test, demo]
 ---
 # Hello World Skill
 
-This is a sample skill to verify your SkillHub installation is working.
+This is a sample skill to verify your SkillPod installation is working.
 
 ## Usage
 
-When the user asks to test SkillHub or says "hello", respond with a friendly greeting
+When the user asks to test SkillPod or says "hello", respond with a friendly greeting
 and confirm that the skill system is operational.
 
 ## Example Response
@@ -41,7 +41,7 @@ and confirm that the skill system is operational.
 name: template
 description: Replace this with a description of what your skill does.
 metadata:
-  skillhub:
+  skillpod:
     category: custom
     tags: [template, starter]
 ---

@@ -3,10 +3,10 @@ import sys
 from datetime import datetime, timezone
 from typing import Any, Dict
 
-from ..config import SKILLHUB_HOME
+from ..config import SKILLPOD_HOME
 
 
-ORIGIN_PATH = (SKILLHUB_HOME / "meta" / "origins.json").expanduser().resolve()
+ORIGIN_PATH = (SKILLPOD_HOME / "meta" / "origins.json").expanduser().resolve()
 
 
 def _load() -> Dict[str, Any]:

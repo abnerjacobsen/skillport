@@ -12,8 +12,8 @@
 
 ## 2. Project Context
 ### Architecture
-*   **Brand**: SkillHub
-*   **Package & CLI**: `skillhub-mcp` (alias: `skillhub`)
+*   **Brand**: SkillPod
+*   **Package & CLI**: `skillpod-mcp` (alias: `skillpod`)
 *   **Type**: MCP Server (Model Context Protocol)
 *   **Stack**:
     *   **Runtime**: Python 3.10+
@@ -23,7 +23,7 @@
     *   **Config**: `pydantic-settings`
 
 ### Directory Structure
-*   `src/skillhub_mcp/`: Source code
+*   `src/skillpod_mcp/`: Source code
     *   `server.py`: Server initialization
     *   `tools/`: Tool implementations (discovery, loading, execution)
     *   `db/`: Database & Search package (search.py, models.py, embeddings.py, state.py, search_service.py)
@@ -43,7 +43,7 @@ To act autonomously, always verify changes using these commands:
 *   **Install/Sync**: `uv sync`
 *   **Run Server (Manual)**:
     ```bash
-    SKILLS_DIR=.agent/skills EMBEDDING_PROVIDER=none uv run skillhub-mcp  # or: uv run skillhub
+    SKILLS_DIR=.agent/skills EMBEDDING_PROVIDER=none uv run skillpod-mcp  # or: uv run skillpod
     ```
 *   **Verify Functionality (Critical)**:
     ```bash

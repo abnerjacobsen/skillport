@@ -90,7 +90,7 @@ def download_tarball(parsed: ParsedGitHubURL, token: Optional[str]) -> Path:
 
 def extract_tarball(tar_path: Path, parsed: ParsedGitHubURL) -> Path:
     target_prefix: Optional[str] = None
-    dest_root = Path(tempfile.mkdtemp(prefix="skillhub-gh-"))
+    dest_root = Path(tempfile.mkdtemp(prefix="skillpod-gh-"))
 
     with tarfile.open(tar_path, "r:gz") as tar:
         # Find root folder name first (owner-repo-commit)

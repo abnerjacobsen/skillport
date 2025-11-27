@@ -1,4 +1,4 @@
-"""CLI-only modes for SkillHub (lint, list, add, remove).
+"""CLI-only modes for SkillPod (lint, list, add, remove).
 
 This module handles CLI flags and standalone commands that don't start the server.
 """
@@ -38,7 +38,7 @@ def parse_flags() -> Dict[str, Any]:
 
     flags = {
         "force_reindex": "--reindex" in argv,
-        "skip_auto": ("--skip-auto-reindex" in argv) or (os.getenv("SKILLHUB_SKIP_AUTO_REINDEX") == "1"),
+        "skip_auto": ("--skip-auto-reindex" in argv) or (os.getenv("SKILLPOD_SKIP_AUTO_REINDEX") == "1"),
     }
     # strip known flags so FastMCP doesn't see them
     sys.argv = [sys.argv[0]] + [a for a in argv if a not in KNOWN_FLAGS]
@@ -242,7 +242,7 @@ def _prompt_structure_choice(skills: List[SkillInfo], source_name: str):
 
 def run_add_cli(argv: List[str]) -> int:
     """Add skills from built-ins or local paths."""
-    parser = argparse.ArgumentParser(prog="skillhub add", add_help=True)
+    parser = argparse.ArgumentParser(prog="skillpod add", add_help=True)
     parser.add_argument("source", help="Built-in skill name, local path, or GitHub URL")
     parser.add_argument("--dir", dest="target_dir", help="Install destination (default: SKILLS_DIR)")
     parser.add_argument("--force", action="store_true", help="Overwrite without confirmation")
@@ -405,7 +405,7 @@ def run_add_cli(argv: List[str]) -> int:
 
 def run_remove_cli(argv: List[str]) -> int:
     """Remove a skill by id."""
-    parser = argparse.ArgumentParser(prog="skillhub remove", add_help=True)
+    parser = argparse.ArgumentParser(prog="skillpod remove", add_help=True)
     parser.add_argument("skill_id", help="Skill id (e.g., hello-world or group/skill)")
     parser.add_argument("--dir", dest="target_dir", help="Skills directory (default: SKILLS_DIR)")
     parser.add_argument("--force", action="store_true", help="Delete without confirmation")
@@ -443,7 +443,7 @@ def run_remove_cli(argv: List[str]) -> int:
 
 def run_list_cli(argv: List[str]) -> int:
     """List installed skills (optionally as JSON)."""
-    parser = argparse.ArgumentParser(prog="skillhub list", add_help=True)
+    parser = argparse.ArgumentParser(prog="skillpod list", add_help=True)
     parser.add_argument("--dir", dest="target_dir", help="Skills directory (default: SKILLS_DIR)")
     parser.add_argument("--category", dest="category", help="Filter by category")
     parser.add_argument("--json", dest="as_json", action="store_true", help="Output JSON")
@@ -480,7 +480,7 @@ def run_list_cli(argv: List[str]) -> int:
 
 def run_lint_cli(argv: List[str]) -> int:
     """Validate skills (lint check)."""
-    parser = argparse.ArgumentParser(prog="skillhub lint", add_help=True)
+    parser = argparse.ArgumentParser(prog="skillpod lint", add_help=True)
     parser.add_argument("skill_id", nargs="?", help="Skill id to lint (e.g., hello-world or group/skill). Lints all if omitted")
     parser.add_argument("--dir", dest="target_dir", help="Skills directory (default: SKILLS_DIR)")
 

@@ -1,4 +1,4 @@
-"""SkillHub MCP Server.
+"""SkillPod MCP Server.
 
 This module handles server creation and the main entry point.
 CLI modes (--lint, --list) are handled by cli.py.
@@ -9,7 +9,7 @@ import sys
 from fastmcp import FastMCP
 from .db import SkillDB
 from .cli import parse_flags, handle_cli_mode
-from .validation import SKILLHUB_BANNER, report_skill_status
+from .validation import SKILLPOD_BANNER, report_skill_status
 from .tools.discovery import DiscoveryTools
 from .tools.loading import LoadingTools
 from .tools.execution import ExecutionTools
@@ -20,7 +20,7 @@ def create_server() -> FastMCP:
     flags = parse_flags()
 
     # Show banner at startup
-    print(SKILLHUB_BANNER, file=sys.stderr)
+    print(SKILLPOD_BANNER, file=sys.stderr)
 
     # Instantiate DB explicitly so lifecycle is tied to the server instance.
     db = SkillDB()
@@ -43,7 +43,7 @@ def create_server() -> FastMCP:
     # Generate Instructions for AI agents
     core_skills = db.get_core_skills()
 
-    instructions = """SkillHub provides reusable Agent Skills that load progressively to save context.
+    instructions = """SkillPod provides reusable Agent Skills that load progressively to save context.
 
 Workflow: search_skills → load_skill (by skill_id) → execute in your terminal
 
@@ -58,7 +58,7 @@ When instructions say "run script.py", use the path from load_skill: `python {pa
     print(f"[DEBUG] Server Instructions:\n{instructions}", file=sys.stderr)
 
     # Create MCP Server
-    mcp = FastMCP("skillhub-mcp", version="0.0.0", instructions=instructions)
+    mcp = FastMCP("skillpod-mcp", version="0.0.0", instructions=instructions)
 
     # Register Tools (methods preserve __name__/__doc__)
     discovery_tools = DiscoveryTools(db)
@@ -75,7 +75,7 @@ When instructions say "run script.py", use the path from load_skill: `python {pa
 
 
 def main():
-    """Main entry point for SkillHub MCP."""
+    """Main entry point for SkillPod MCP."""
     # Handle CLI-only modes (--lint, --list)
     handle_cli_mode()
 

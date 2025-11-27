@@ -1,5 +1,5 @@
 
-from skillhub_mcp.skill_manager.add import detect_skills, add_local
+from skillpod_mcp.skill_manager.add import detect_skills, add_local
 
 
 def test_add_local_custom_namespace(tmp_path):

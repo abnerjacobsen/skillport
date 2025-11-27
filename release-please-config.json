@@ -2,7 +2,7 @@
   "packages": {
     ".": {
       "release-type": "python",
-      "package-name": "skillhub-mcp",
+      "package-name": "skillpod-mcp",
       "changelog-path": "CHANGELOG.md",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true

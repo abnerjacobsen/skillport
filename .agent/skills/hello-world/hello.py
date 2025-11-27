@@ -1,1 +1,1 @@
-print("Hello from SkillHub!")
+print("Hello from SkillPod!")

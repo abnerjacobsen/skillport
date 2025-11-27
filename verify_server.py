@@ -12,12 +12,12 @@ server_env["LOG_LEVEL"] = "ERROR" # Reduce noise
 # Define server parameters
 server_params = StdioServerParameters(
     command="uv",
-    args=["run", "skillhub-mcp"],
+    args=["run", "skillpod-mcp"],
     env=server_env
 )
 
 async def run_test():
-    print("Starting SkillHub MCP Client Verification...")
+    print("Starting SkillPod MCP Client Verification...")
     
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:

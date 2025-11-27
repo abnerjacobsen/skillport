@@ -1,5 +1,5 @@
 [project]
-name = "skillhub-mcp"
+name = "skillpod-mcp"
 version = "0.1.0"
 description = "MCP server for Agent Skills"
 readme = "README.md"
@@ -33,8 +33,8 @@ filterwarnings = [
 ]
 
 [project.scripts]
-skillhub-mcp = "skillhub_mcp.server:main"
-skillhub = "skillhub_mcp.server:main"
+skillpod-mcp = "skillpod_mcp.server:main"
+skillpod = "skillpod_mcp.server:main"
 
 [tool.ruff]
 exclude = [

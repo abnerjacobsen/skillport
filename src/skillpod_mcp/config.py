@@ -16,18 +16,18 @@ def _parse_comma_list(v: Any) -> List[str]:
         return [item.strip() for item in v.split(",") if item.strip()]
     return []
 
-# Default base directory: ~/.skillhub/
+# Default base directory: ~/.skillpod/
 # This follows the common CLI tool convention (~/.npm, ~/.cargo, ~/.docker, etc.)
 # and is easy for users to find and manage their skills.
-SKILLHUB_HOME = Path("~/.skillhub").expanduser()
+SKILLPOD_HOME = Path("~/.skillpod").expanduser()
 
 
 class Settings(BaseSettings):
-    # Paths - all under ~/.skillhub/ by default
-    # ~/.skillhub/skills/  - user's skill files
-    # ~/.skillhub/indexes/ - database/index files (auto-generated per skills_dir)
-    skills_dir: Path = Field(default=SKILLHUB_HOME / "skills")
-    db_path: Path = Field(default=SKILLHUB_HOME / "indexes" / "default" / "skills.lancedb")
+    # Paths - all under ~/.skillpod/ by default
+    # ~/.skillpod/skills/  - user's skill files
+    # ~/.skillpod/indexes/ - database/index files (auto-generated per skills_dir)
+    skills_dir: Path = Field(default=SKILLPOD_HOME / "skills")
+    db_path: Path = Field(default=SKILLPOD_HOME / "indexes" / "default" / "skills.lancedb")
 
     # Embedding / AI
     embedding_provider: str = Field(default="none")  # openai, gemini, none
@@ -48,20 +48,20 @@ class Settings(BaseSettings):
     log_level: str = Field(default="INFO")
 
     # Filter Settings (comma-separated strings)
-    skillhub_enabled_skills: str = Field(default="")
-    skillhub_enabled_categories: str = Field(default="")
-    skillhub_enabled_namespaces: str = Field(default="")
+    skillpod_enabled_skills: str = Field(default="")
+    skillpod_enabled_categories: str = Field(default="")
+    skillpod_enabled_namespaces: str = Field(default="")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     def get_enabled_skills(self) -> List[str]:
-        return _parse_comma_list(self.skillhub_enabled_skills)
+        return _parse_comma_list(self.skillpod_enabled_skills)
 
     def get_enabled_categories(self) -> List[str]:
-        return _parse_comma_list(self.skillhub_enabled_categories)
+        return _parse_comma_list(self.skillpod_enabled_categories)
 
     def get_enabled_namespaces(self) -> List[str]:
-        return _parse_comma_list(self.skillhub_enabled_namespaces)
+        return _parse_comma_list(self.skillpod_enabled_namespaces)
 
     def model_post_init(self, __context: Any):
         """
@@ -98,19 +98,20 @@ class Settings(BaseSettings):
         return self.skills_dir.expanduser().resolve()
 
     def get_effective_db_path(self) -> Path:
-        # If DB_PATH is explicitly set, use it
-        if os.getenv("DB_PATH"):
-            return self.db_path.expanduser().resolve()
+        # If an explicit DB path is set via env, prefer it
+        env_db_path = os.getenv("SKILLPOD_DB_PATH") or os.getenv("DB_PATH")
+        if env_db_path:
+            return Path(env_db_path).expanduser().resolve()
 
         skills_dir = self.get_effective_skills_dir()
-        default_skills_dir = (SKILLHUB_HOME / "skills").resolve()
+        default_skills_dir = (SKILLPOD_HOME / "skills").resolve()
 
         # Default skills dir -> default index path
         if skills_dir == default_skills_dir:
-            return (SKILLHUB_HOME / "indexes" / "default" / "skills.lancedb").resolve()
+            return (SKILLPOD_HOME / "indexes" / "default" / "skills.lancedb").resolve()
 
         # Custom skills dir -> hash-based index path
         dir_hash = hashlib.sha256(str(skills_dir).encode()).hexdigest()[:12]
-        return (SKILLHUB_HOME / "indexes" / dir_hash / "skills.lancedb").resolve()
+        return (SKILLPOD_HOME / "indexes" / dir_hash / "skills.lancedb").resolve()
 
 settings = Settings()

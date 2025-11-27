@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from skillhub_mcp.skill_manager.github import (
+from skillpod_mcp.skill_manager.github import (
     parse_github_url,
     extract_tarball,
     ParsedGitHubURL,

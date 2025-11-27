@@ -3,13 +3,13 @@ from types import SimpleNamespace
 
 import pytest
 
-from skillhub_mcp.db import search as search_mod
-import skillhub_mcp.tools.discovery as discovery
-import skillhub_mcp.tools.execution as execution
-from skillhub_mcp.tools.discovery import DiscoveryTools
-from skillhub_mcp.tools.execution import ExecutionTools
-from skillhub_mcp.tools.loading import LoadingTools
-from skillhub_mcp import utils
+from skillpod_mcp.db import search as search_mod
+import skillpod_mcp.tools.discovery as discovery
+import skillpod_mcp.tools.execution as execution
+from skillpod_mcp.tools.discovery import DiscoveryTools
+from skillpod_mcp.tools.execution import ExecutionTools
+from skillpod_mcp.tools.loading import LoadingTools
+from skillpod_mcp import utils
 
 
 class DummySettings:
@@ -22,9 +22,9 @@ class DummySettings:
         self.gemini_api_key = None
         self.embedding_model = None
         self.gemini_embedding_model = None
-        self.skillhub_enabled_skills = []
-        self.skillhub_enabled_categories = []
-        self.skillhub_enabled_namespaces = []
+        self.skillpod_enabled_skills = []
+        self.skillpod_enabled_categories = []
+        self.skillpod_enabled_namespaces = []
         self.allowed_commands = ["python", "python3", "uv", "node", "cat", "ls", "grep", "echo"]
         self.exec_timeout_seconds = 2
         self.exec_max_output_bytes = 16
@@ -40,13 +40,13 @@ class DummySettings:
         return self.db_path
 
     def get_enabled_skills(self):
-        return self.skillhub_enabled_skills
+        return self.skillpod_enabled_skills
 
     def get_enabled_categories(self):
-        return self.skillhub_enabled_categories
+        return self.skillpod_enabled_categories
 
     def get_enabled_namespaces(self):
-        return self.skillhub_enabled_namespaces
+        return self.skillpod_enabled_namespaces
 
 
 class DummyTable:
@@ -200,7 +200,7 @@ def test_s3b_fts_failure_falls_back_to_substring(tmp_path, monkeypatch):
 
 def test_s4_filter_respects_enabled_categories_with_normalization(tmp_path, monkeypatch):
     settings = DummySettings(tmp_path)
-    settings.skillhub_enabled_categories = ["  ML  "]  # mixed case + whitespace
+    settings.skillpod_enabled_categories = ["  ML  "]  # mixed case + whitespace
     _patch_settings(monkeypatch, settings)
 
     rows = [
@@ -272,7 +272,7 @@ def test_namespace_ids_added_to_index(tmp_path, monkeypatch):
 name: code-review
 description: Code review checklist
 metadata:
-  skillhub:
+  skillpod:
     category: dev
 ---
 body
@@ -526,7 +526,7 @@ def test_s7_whitespace_only_query_treated_as_empty(tmp_path, monkeypatch):
 def test_s7_empty_query_respects_enabled_filter(tmp_path, monkeypatch):
     """S7: Empty query still respects enabled_skills filter."""
     settings = DummySettings(tmp_path)
-    settings.skillhub_enabled_skills = ["allowed"]
+    settings.skillpod_enabled_skills = ["allowed"]
     _patch_settings(monkeypatch, settings)
 
     rows = [
@@ -547,7 +547,7 @@ def test_s7_empty_query_respects_enabled_filter(tmp_path, monkeypatch):
 
 def test_enabled_namespace_filters_results(tmp_path, monkeypatch):
     settings = DummySettings(tmp_path)
-    settings.skillhub_enabled_namespaces = ["group/"]
+    settings.skillpod_enabled_namespaces = ["group/"]
     _patch_settings(monkeypatch, settings)
 
     rows = [

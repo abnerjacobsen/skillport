@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from hypothesis import given, settings, strategies as st
 
-from skillhub_mcp.db import SkillDB
+from skillpod_mcp.db import SkillDB
 
 
 THRESHOLD = 0.2
@@ -14,9 +14,9 @@ class DummySettings:
     def __init__(self, base_dir, threshold=THRESHOLD):
         self.search_threshold = threshold
         self.embedding_provider = "none"
-        self.skillhub_enabled_skills = []
-        self.skillhub_enabled_categories = []
-        self.skillhub_enabled_namespaces = []
+        self.skillpod_enabled_skills = []
+        self.skillpod_enabled_categories = []
+        self.skillpod_enabled_namespaces = []
         self.skills_dir = base_dir / "skills"
         self.db_path = base_dir / "db.lancedb"
 
@@ -27,13 +27,13 @@ class DummySettings:
         return self.db_path
 
     def get_enabled_skills(self):
-        return self.skillhub_enabled_skills
+        return self.skillpod_enabled_skills
 
     def get_enabled_categories(self):
-        return self.skillhub_enabled_categories
+        return self.skillpod_enabled_categories
 
     def get_enabled_namespaces(self):
-        return self.skillhub_enabled_namespaces
+        return self.skillpod_enabled_namespaces
 
 
 class DummyTable:
@@ -71,9 +71,9 @@ class DummyDB:
 def make_db(base_dir: Path, data):
     dummy_settings = DummySettings(base_dir)
     dummy_db = DummyDB(data)
-    with patch("skillhub_mcp.db.search.settings", dummy_settings), patch(
-        "skillhub_mcp.db.search.lancedb.connect", lambda path: dummy_db
-    ), patch("skillhub_mcp.db.search.get_embedding", lambda query: None):
+    with patch("skillpod_mcp.db.search.settings", dummy_settings), patch(
+        "skillpod_mcp.db.search.lancedb.connect", lambda path: dummy_db
+    ), patch("skillpod_mcp.db.search.get_embedding", lambda query: None):
         return SkillDB()
 
 

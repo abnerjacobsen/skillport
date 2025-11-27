@@ -1869,8 +1869,8 @@ wheels = [
 ]
 
 [[package]]
-name = "skillhub-mcp"
-version = "0.0.1"
+name = "skillpod-mcp"
+version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "fastmcp" },

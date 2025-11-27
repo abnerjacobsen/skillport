@@ -1,6 +1,6 @@
 import pytest
 
-from skillhub_mcp.config import Settings
+from skillpod_mcp.config import Settings
 
 
 def test_c1_openai_requires_key(monkeypatch):
