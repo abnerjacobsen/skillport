@@ -43,5 +43,11 @@ Thumbs.db
 # Logs
 *.log
 
+# Additional Python artifacts
+*.egg
+.dmypy.json
+.cache/
+coverage.xml
+
 # documents (local only, not tracked in remote)
 docs/
