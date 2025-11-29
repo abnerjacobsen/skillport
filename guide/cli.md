@@ -45,6 +45,7 @@ skillport add <source> [options]
 | `--keep-structure/--no-keep-structure` | Preserve directory structure as namespace | Interactive |
 | `--namespace`, `-n` | Custom namespace | source directory name |
 | `--name` | Override skill name (single skill only) | from SKILL.md |
+| `--json` | Output as JSON (for scripting/AI agents) | `false` |
 
 #### Interactive Mode
 

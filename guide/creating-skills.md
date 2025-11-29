@@ -50,6 +50,12 @@ Detailed instructions for the AI agent.
 
 ### Optional Metadata
 
+The `metadata` field follows the [Anthropic Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) specification. SkillPort uses `metadata.skillport` for:
+
+- **Search** — `category` and `tags` improve search relevance
+- **Filtering** — Control which skills each client sees (see [Configuration](configuration.md#client-based-skill-filtering))
+- **Core Skills** — `alwaysApply: true` loads skills without searching
+
 ```yaml
 ---
 name: code-review

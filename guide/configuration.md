@@ -120,8 +120,8 @@ If you already have skills in `.claude/skills/`, point SkillPort to that directo
 {
   "mcpServers": {
     "skillport": {
-      "command": "uv",
-      "args": ["run", "skillport-mcp"],
+      "command": "uvx",
+      "args": ["skillport"],
       "env": {
         "SKILLPORT_SKILLS_DIR": "/absolute/path/to/project/.claude/skills"
       }
@@ -142,16 +142,16 @@ Give each AI agent a different view of the same skill repository:
 {
   "mcpServers": {
     "skillport-dev": {
-      "command": "uv",
-      "args": ["run", "skillport-mcp"],
+      "command": "uvx",
+      "args": ["skillport"],
       "env": {
         "SKILLPORT_SKILLS_DIR": "~/.skillport/skills",
         "SKILLPORT_ENABLED_CATEGORIES": "development,testing"
       }
     },
     "skillport-writing": {
-      "command": "uv",
-      "args": ["run", "skillport-mcp"],
+      "command": "uvx",
+      "args": ["skillport"],
       "env": {
         "SKILLPORT_SKILLS_DIR": "~/.skillport/skills",
         "SKILLPORT_ENABLED_CATEGORIES": "writing,research"
@@ -225,7 +225,7 @@ skillport serve --skip-auto-reindex
 
 ### Cursor
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=skillport&config=eyJjb21tYW5kIjoidXYiLCJhcmdzIjpbInJ1biIsInNraWxscG9kLW1jcCJdLCJlbnYiOnsiU0tJTExQT0RfU0tJTExTX0RJUiI6In4vLnNraWxscG9kL3NraWxscyJ9fQ==)
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=skillport&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJza2lsbHBvcnQiXSwiZW52Ijp7IlNLSUxMUE9SVF9TS0lMTFNfRElSIjoifi8uc2tpbGxwb3J0L3NraWxscyJ9fQ==)
 
 Or manually add to `~/.cursor/mcp.json`:
 
@@ -233,8 +233,8 @@ Or manually add to `~/.cursor/mcp.json`:
 {
   "mcpServers": {
     "skillport": {
-      "command": "uv",
-      "args": ["run", "skillport-mcp"],
+      "command": "uvx",
+      "args": ["skillport"],
       "env": { "SKILLPORT_SKILLS_DIR": "~/.skillport/skills" }
     }
   }
@@ -249,8 +249,8 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 {
   "mcpServers": {
     "skillport": {
-      "command": "uv",
-      "args": ["run", "skillport-mcp"],
+      "command": "uvx",
+      "args": ["skillport"],
       "env": { "SKILLPORT_SKILLS_DIR": "~/.skillport/skills" }
     }
   }
@@ -265,8 +265,8 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 {
   "mcpServers": {
     "skillport": {
-      "command": "uv",
-      "args": ["run", "skillport-mcp"],
+      "command": "uvx",
+      "args": ["skillport"],
       "env": { "SKILLPORT_SKILLS_DIR": "~/.skillport/skills" }
     }
   }
@@ -276,14 +276,15 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 ### Claude Code
 
 ```bash
-claude mcp add skillport -- uv run skillport-mcp
+claude mcp add skillport -- uvx skillport
+
 # With custom skills directory:
-claude mcp add --env SKILLPORT_SKILLS_DIR=~/.skillport/skills skillport -- uv run skillport-mcp
+claude mcp add skillport --env SKILLPORT_SKILLS_DIR=~/.skillport/skills -- uvx skillport
 ```
 
 ### Kiro
 
-[![Add to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=skillport&config=%7B%22command%22%3A%20%22uv%22%2C%20%22args%22%3A%20%5B%22run%22%2C%20%22skillport-mcp%22%5D%2C%20%22env%22%3A%20%7B%22SKILLPORT_SKILLS_DIR%22%3A%20%22~/.skillport/skills%22%7D%2C%20%22disabled%22%3A%20false%2C%20%22autoApprove%22%3A%20%5B%5D%7D)
+[![Add to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=skillport&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22skillport%22%5D%2C%22env%22%3A%7B%22SKILLPORT_SKILLS_DIR%22%3A%22~/.skillport/skills%22%7D%2C%22disabled%22%3Afalse%2C%22autoApprove%22%3A%5B%5D%7D)
 
 ## See Also
 

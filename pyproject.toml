@@ -1,6 +1,6 @@
 [project]
 name = "skillport"
-version = "0.1.0"
+version = "0.0.0"
 description = "MCP server for Agent Skills"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -11,7 +11,7 @@ dependencies = [
     "pyyaml>=6.0",
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
-    "tantivy>=0.20.0", # Often needed for lancedb FTS
+    "tantivy>=0.20.0", # needed for lancedb FTS
     "google-genai>=1.52.0",
     "requests>=2.32.0",
     "typer>=0.12.5",
