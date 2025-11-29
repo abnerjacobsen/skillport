@@ -3,9 +3,9 @@
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from skillsouko.modules.skills import remove_skill
-from skillsouko.modules.indexing import build_index
-from skillsouko.shared.config import Config
+from skillport.modules.skills import remove_skill
+from skillport.modules.indexing import build_index
+from skillport.shared.config import Config
 from ..theme import console, stderr_console, print_error, print_success, is_interactive
 
 
@@ -78,6 +78,6 @@ def remove(
         print_error(
             result.message,
             code="SKILL_NOT_FOUND" if "not found" in result.message.lower() else "REMOVE_FAILED",
-            suggestion="Run 'skillsouko list' to see available skills",
+            suggestion="Run 'skillport list' to see available skills",
         )
         raise typer.Exit(code=1)

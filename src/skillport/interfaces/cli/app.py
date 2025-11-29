@@ -1,6 +1,6 @@
 """Typer-based CLI entry point.
 
-SkillSouko CLI provides commands to manage AI agent skills:
+SkillPort CLI provides commands to manage AI agent skills:
 - search: Find skills by query
 - show: Display skill details
 - add: Install skills from various sources
@@ -29,13 +29,13 @@ from .theme import VERSION, console
 def version_callback(value: bool):
     """Print version and exit."""
     if value:
-        console.print(f"skillsouko [info]{VERSION}[/info]")
+        console.print(f"skillport [info]{VERSION}[/info]")
         raise typer.Exit()
 
 
 app = typer.Typer(
-    name="skillsouko",
-    help="[bold]SkillSouko[/bold] - Manage AI agent skills\n\n"
+    name="skillport",
+    help="[bold]SkillPort[/bold] - Manage AI agent skills\n\n"
          "A CLI and MCP server for organizing, searching, and serving skills to AI agents.",
     rich_markup_mode="rich",
     no_args_is_help=False,
@@ -56,7 +56,7 @@ def main(
         help="Show version and exit",
     ),
 ):
-    """SkillSouko - Manage AI agent skills."""
+    """SkillPort - Manage AI agent skills."""
     # If no command given, run serve (legacy behavior)
     if ctx.invoked_subcommand is None:
         serve()
@@ -67,18 +67,18 @@ app.command(
     "search",
     help="Search for skills matching a query.\n\n"
          "[bold]Examples:[/bold]\n\n"
-         "  skillsouko search 'PDF extraction'\n\n"
-         "  skillsouko search code --limit 5\n\n"
-         "  skillsouko search test --json",
+         "  skillport search 'PDF extraction'\n\n"
+         "  skillport search code --limit 5\n\n"
+         "  skillport search test --json",
 )(search)
 
 app.command(
     "show",
     help="Show skill details and instructions.\n\n"
          "[bold]Examples:[/bold]\n\n"
-         "  skillsouko show hello-world\n\n"
-         "  skillsouko show team/code-review\n\n"
-         "  skillsouko show pdf --json",
+         "  skillport show hello-world\n\n"
+         "  skillport show team/code-review\n\n"
+         "  skillport show pdf --json",
 )(show)
 
 app.command(
@@ -89,52 +89,52 @@ app.command(
          "  [dim]Local:[/dim]     ./my-skill/, ./collection/\n\n"
          "  [dim]GitHub:[/dim]    https://github.com/user/repo\n\n"
          "[bold]Examples:[/bold]\n\n"
-         "  skillsouko add hello-world\n\n"
-         "  skillsouko add ./my-skills/ --namespace team\n\n"
-         "  skillsouko add https://github.com/user/repo --yes",
+         "  skillport add hello-world\n\n"
+         "  skillport add ./my-skills/ --namespace team\n\n"
+         "  skillport add https://github.com/user/repo --yes",
 )(add)
 
 app.command(
     "list",
     help="List installed skills.\n\n"
          "[bold]Examples:[/bold]\n\n"
-         "  skillsouko list\n\n"
-         "  skillsouko list --limit 20\n\n"
-         "  skillsouko list --json",
+         "  skillport list\n\n"
+         "  skillport list --limit 20\n\n"
+         "  skillport list --json",
 )(list_cmd)
 
 app.command(
     "remove",
     help="Remove an installed skill.\n\n"
          "[bold]Examples:[/bold]\n\n"
-         "  skillsouko remove hello-world\n\n"
-         "  skillsouko remove team/skill --force",
+         "  skillport remove hello-world\n\n"
+         "  skillport remove team/skill --force",
 )(remove)
 
 app.command(
     "lint",
     help="Validate skill definitions.\n\n"
          "[bold]Examples:[/bold]\n\n"
-         "  skillsouko lint\n\n"
-         "  skillsouko lint hello-world",
+         "  skillport lint\n\n"
+         "  skillport lint hello-world",
 )(lint)
 
 app.command(
     "serve",
     help="Start the MCP server.\n\n"
          "[bold]Examples:[/bold]\n\n"
-         "  skillsouko serve\n\n"
-         "  skillsouko serve --reindex",
+         "  skillport serve\n\n"
+         "  skillport serve --reindex",
 )(serve)
 
 app.command(
     "sync",
     help="Sync skills to AGENTS.md for non-MCP agents.\n\n"
          "[bold]Examples:[/bold]\n\n"
-         "  skillsouko sync\n\n"
-         "  skillsouko sync -o .claude/AGENTS.md\n\n"
-         "  skillsouko sync --category development,testing\n\n"
-         "  skillsouko sync --format markdown",
+         "  skillport sync\n\n"
+         "  skillport sync -o .claude/AGENTS.md\n\n"
+         "  skillport sync --category development,testing\n\n"
+         "  skillport sync --format markdown",
 )(sync)
 
 

@@ -3,9 +3,9 @@ import sys
 from datetime import datetime, timezone
 from typing import Any, Dict
 
-from skillsouko.shared.config import SKILLSOUKO_HOME
+from skillport.shared.config import SKILLPORT_HOME
 
-ORIGIN_PATH = (SKILLSOUKO_HOME / "meta" / "origins.json").expanduser().resolve()
+ORIGIN_PATH = (SKILLPORT_HOME / "meta" / "origins.json").expanduser().resolve()
 
 
 def _load() -> Dict[str, Any]:

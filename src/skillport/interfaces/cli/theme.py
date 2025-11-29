@@ -18,7 +18,7 @@ from rich.theme import Theme
 
 # Version from package metadata (pyproject.toml)
 try:
-    VERSION = version("skillsouko")
+    VERSION = version("skillport")
 except PackageNotFoundError:
     VERSION = "0.0.0"  # Fallback for development
 
@@ -46,7 +46,7 @@ stderr_console = Console(stderr=True, theme=THEME)
 
 def is_interactive() -> bool:
     """Check if running in interactive mode."""
-    if os.environ.get("SKILLSOUKO_NO_INTERACTIVE"):
+    if os.environ.get("SKILLPORT_NO_INTERACTIVE"):
         return False
     if os.environ.get("CI"):
         return False
@@ -105,9 +105,9 @@ def empty_skills_panel() -> Panel:
     return Panel(
         "[warning]No skills installed yet.[/warning]\n\n"
         "Get started:\n"
-        "  [info]skillsouko add hello-world[/info]  Add sample skill\n"
-        "  [info]skillsouko add template[/info]     Create your own skill\n\n"
-        "[dim]Learn more: skillsouko --help[/dim]",
+        "  [info]skillport add hello-world[/info]  Add sample skill\n"
+        "  [info]skillport add template[/info]     Create your own skill\n\n"
+        "[dim]Learn more: skillport --help[/dim]",
         title="Skills (0)",
         border_style="dim",
     )
@@ -120,7 +120,7 @@ def no_results_panel(query: str) -> Panel:
         "Suggestions:\n"
         "  [dim]-[/dim] Try a different query\n"
         "  [dim]-[/dim] Use broader terms\n"
-        "  [dim]-[/dim] Run [info]skillsouko list[/info] to see all skills",
+        "  [dim]-[/dim] Run [info]skillport list[/info] to see all skills",
         title="Search Results (0)",
         border_style="dim",
     )

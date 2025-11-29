@@ -1901,7 +1901,7 @@ wheels = [
 ]
 
 [[package]]
-name = "skillsouko"
+name = "skillport"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

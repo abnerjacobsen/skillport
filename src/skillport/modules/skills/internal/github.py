@@ -12,8 +12,9 @@ GITHUB_URL_RE = re.compile(
     r"^https://github\.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)(?:/tree/(?P<ref>[^/]+)(?P<path>/.*)?)?/?$"
 )
 
-MAX_FILE_BYTES = 1_000_000  # 1MB per file
-MAX_TOTAL_BYTES = 10_000_000  # 10MB per directory
+MAX_FILE_BYTES = 5_000_000  # 5MB per file (fonts, images, etc.)
+MAX_DOWNLOAD_BYTES = 200_000_000  # 200MB tarball download limit
+MAX_EXTRACTED_BYTES = 10_000_000  # 10MB extracted skill limit
 EXCLUDE_NAMES = {".git", ".env", ".DS_Store", "__pycache__"}
 
 
@@ -108,8 +109,8 @@ def download_tarball(parsed: ParsedGitHubURL, token: Optional[str]) -> Path:
         for chunk in resp.iter_content(chunk_size=8192):
             if chunk:
                 total += len(chunk)
-                if total > MAX_TOTAL_BYTES:
-                    raise ValueError("Repository exceeds 10MB limit")
+                if total > MAX_DOWNLOAD_BYTES:
+                    raise ValueError("Repository exceeds 200MB download limit")
                 tmp.write(chunk)
         tmp.flush()
         return Path(tmp.name)
@@ -118,7 +119,7 @@ def download_tarball(parsed: ParsedGitHubURL, token: Optional[str]) -> Path:
 
 
 def extract_tarball(tar_path: Path, parsed: ParsedGitHubURL) -> Path:
-    dest_root = Path(tempfile.mkdtemp(prefix="skillsouko-gh-"))
+    dest_root = Path(tempfile.mkdtemp(prefix="skillport-gh-"))
     with tarfile.open(tar_path, "r:gz") as tar:
         roots = {
             member.name.split("/")[0] for member in tar.getmembers() if member.name
@@ -159,8 +160,8 @@ def extract_tarball(tar_path: Path, parsed: ParsedGitHubURL) -> Path:
                 continue
             data = extracted.read()
             total_bytes += len(data)
-            if total_bytes > MAX_TOTAL_BYTES:
-                raise ValueError("Extracted content exceeds 10MB limit")
+            if total_bytes > MAX_EXTRACTED_BYTES:
+                raise ValueError("Extracted skill exceeds 10MB limit")
             with open(dest_path, "wb") as f:
                 f.write(data)
     return dest_root

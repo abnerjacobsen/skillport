@@ -10,12 +10,12 @@ from typing import Optional
 
 import typer
 
-from skillsouko.modules.skills import list_skills, SkillSummary
-from skillsouko.shared.config import Config
+from skillport.modules.skills import list_skills, SkillSummary
+from skillport.shared.config import Config
 from ..theme import console
 
-MARKER_START = "<!-- SKILLSOUKO_START -->"
-MARKER_END = "<!-- SKILLSOUKO_END -->"
+MARKER_START = "<!-- SKILLPORT_START -->"
+MARKER_END = "<!-- SKILLPORT_END -->"
 
 
 def _truncate_description(desc: str, max_len: int = 50) -> str:
@@ -28,7 +28,7 @@ def _truncate_description(desc: str, max_len: int = 50) -> str:
 
 
 CLI_INSTRUCTIONS = """
-## SkillSouko Skills
+## SkillPort Skills
 
 Skills are reusable expert knowledge that help you complete tasks effectively.
 Each skill contains step-by-step instructions, templates, and scripts.
@@ -36,7 +36,7 @@ Each skill contains step-by-step instructions, templates, and scripts.
 ### Workflow
 
 1. **Find a skill** - Check the table below for a skill matching your task
-2. **Get instructions** - Run `skillsouko show <skill-id>` to load full instructions
+2. **Get instructions** - Run `skillport show <skill-id>` to load full instructions
 3. **Follow the instructions** - Execute the steps using your available tools
 
 ### Tips
@@ -47,7 +47,7 @@ Each skill contains step-by-step instructions, templates, and scripts.
 """.strip()
 
 MCP_INSTRUCTIONS = """
-## SkillSouko Skills
+## SkillPort Skills
 
 Skills are reusable expert knowledge that help you complete tasks effectively.
 Each skill contains step-by-step instructions, templates, and scripts.
@@ -191,7 +191,7 @@ def sync(
         "cli",
         "--mode",
         "-m",
-        help="Target agent type: cli (skillsouko show) or mcp (MCP tools)",
+        help="Target agent type: cli (skillport show) or mcp (MCP tools)",
     ),
     force: bool = typer.Option(
         False,

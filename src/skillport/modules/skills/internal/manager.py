@@ -9,10 +9,10 @@ from typing import List, Tuple
 
 import yaml
 
-from skillsouko.shared.config import Config
-from skillsouko.shared.types import SourceType
-from skillsouko.shared.utils import parse_frontmatter, resolve_inside
-from skillsouko.modules.skills.public.types import AddResult, RemoveResult
+from skillport.shared.config import Config
+from skillport.shared.types import SourceType
+from skillport.shared.utils import parse_frontmatter, resolve_inside
+from skillport.modules.skills.public.types import AddResult, RemoveResult
 from .validation import validate_skill_record
 
 # Built-in skills
@@ -20,19 +20,19 @@ BUILTIN_SKILLS = {
     "hello-world": """\
 ---
 name: hello-world
-description: A simple hello world skill for testing SkillSouko.
+description: A simple hello world skill for testing SkillPort.
 metadata:
-  skillsouko:
+  skillport:
     category: examples
     tags: [hello, test, demo]
 ---
 # Hello World Skill
 
-This is a sample skill to verify your SkillSouko installation is working.
+This is a sample skill to verify your SkillPort installation is working.
 
 ## Usage
 
-When the user asks to test SkillSouko or says "hello", respond with a friendly greeting
+When the user asks to test SkillPort or says "hello", respond with a friendly greeting
 and confirm that the skill system is operational.
 
 ## Example Response
@@ -44,7 +44,7 @@ and confirm that the skill system is operational.
 name: template
 description: Replace this with a description of what your skill does.
 metadata:
-  skillsouko:
+  skillport:
     category: custom
     tags: [template, starter]
 ---

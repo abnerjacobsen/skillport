@@ -1,8 +1,8 @@
-"""SkillSouko package entry."""
+"""SkillPort package entry."""
 
-from skillsouko.shared.config import Config
-from skillsouko.shared import exceptions
-from skillsouko.modules import (
+from skillport.shared.config import Config
+from skillport.shared import exceptions
+from skillport.modules import (
     search_skills,
     load_skill,
     add_skill,

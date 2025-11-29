@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Optional
 
-from skillsouko.shared.config import Config
+from skillport.shared.config import Config
 from ..internal.lancedb import IndexStore
 
 

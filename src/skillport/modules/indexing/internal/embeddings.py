@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 from typing import List, Optional
 
-from skillsouko.shared.config import Config
+from skillport.shared.config import Config
 
 
 def get_embedding(text: str, config: Config) -> Optional[List[float]]:

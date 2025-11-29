@@ -3,9 +3,9 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from skillsouko.shared.config import Config
-from skillsouko.shared.types import SourceType
-from skillsouko.modules.skills.internal import (
+from skillport.shared.config import Config
+from skillport.shared.types import SourceType
+from skillport.modules.skills.internal import (
     resolve_source,
     detect_skills,
     add_builtin as _add_builtin,
@@ -60,7 +60,7 @@ def add_skill(
         skills = detect_skills(source_path)
 
         # When fetching from GitHub, the temporary extraction directory is a
-        # random mkdtemp path (skillsouko-gh-*). For single-skill repos, the
+        # random mkdtemp path (skillport-gh-*). For single-skill repos, the
         # SKILL.md frontmatter name is expected to match the directory name,
         # so we rename the temp dir to the skill name to satisfy validation
         # before adding it to the local catalog.

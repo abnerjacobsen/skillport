@@ -10,7 +10,7 @@ import string
 
 from hypothesis import given, strategies as st, assume, settings
 
-from skillsouko.modules.skills.internal.validation import (
+from skillport.modules.skills.internal.validation import (
     NAME_PATTERN,
     NAME_MAX_LENGTH,
     NAME_RESERVED_WORDS,

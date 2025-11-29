@@ -4,11 +4,11 @@ import base64
 import mimetypes
 from pathlib import Path
 
-from skillsouko.modules.indexing import get_by_id as idx_get_by_id
-from skillsouko.shared.config import Config
-from skillsouko.shared.exceptions import SkillNotFoundError
-from skillsouko.shared.filters import is_skill_enabled
-from skillsouko.shared.utils import resolve_inside
+from skillport.modules.indexing import get_by_id as idx_get_by_id
+from skillport.shared.config import Config
+from skillport.shared.exceptions import SkillNotFoundError
+from skillport.shared.filters import is_skill_enabled
+from skillport.shared.utils import resolve_inside
 from .types import FileContent
 
 # Extensions that should be treated as text even if mimetypes doesn't recognize them

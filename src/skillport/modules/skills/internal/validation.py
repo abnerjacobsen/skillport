@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Dict, List
 
-from skillsouko.shared.types import ValidationIssue
+from skillport.shared.types import ValidationIssue
 
 SKILL_LINE_THRESHOLD = 500
 NAME_MAX_LENGTH = 64

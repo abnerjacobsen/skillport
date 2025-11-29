@@ -1,30 +1,30 @@
 # CLI Reference
 
-SkillSouko provides a command-line interface for managing [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) and running the MCP server.
+SkillPort provides a command-line interface for managing [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) and running the MCP server.
 
 ## Overview
 
 ```bash
-skillsouko <command> [options]
+skillport <command> [options]
 ```
 
-> **Note**: `skillsouko-mcp` is a legacy alias for `skillsouko`. Both work identically.
+> **Note**: `skillport-mcp` is a legacy alias for `skillport`. Both work identically.
 
 ## Commands
 
-### skillsouko add
+### skillport add
 
 Add skills from various sources.
 
 ```bash
-skillsouko add <source> [options]
+skillport add <source> [options]
 ```
 
 #### Sources
 
 | Type | Example | Description |
 |------|---------|-------------|
-| Built-in | `hello-world` | Sample skill bundled with SkillSouko |
+| Built-in | `hello-world` | Sample skill bundled with SkillPort |
 | Built-in | `template` | Starter template for creating skills |
 | Local | `./my-skill/` | Single skill directory |
 | Local | `./my-collection/` | Directory containing multiple skills |
@@ -51,7 +51,7 @@ skillsouko add <source> [options]
 ローカルパスまたは GitHub URL を指定し、`--keep-structure` も `--namespace` も指定しない場合、対話モードでスキルの追加先を選択できます。
 
 ```
-$ skillsouko add ./my-collection/
+$ skillport add ./my-collection/
 
 Found 3 skill(s): skill-a, skill-b, skill-c
 Where to add?
@@ -74,43 +74,43 @@ Choice [1/2/3] (1):
 **Built-in skills:**
 ```bash
 # Add sample skill
-skillsouko add hello-world
+skillport add hello-world
 
 # Add template for creating your own
-skillsouko add template
+skillport add template
 ```
 
 **Local directory:**
 ```bash
 # Single skill
-skillsouko add ./my-skill/
+skillport add ./my-skill/
 
 # Multiple skills - interactive mode
-skillsouko add ./my-collection/
+skillport add ./my-collection/
 
 # Multiple skills - flat (skip interactive)
-skillsouko add ./my-collection/ --no-keep-structure
+skillport add ./my-collection/ --no-keep-structure
 # → skills/skill-a/, skills/skill-b/, skills/skill-c/
 
 # Multiple skills - preserve structure
-skillsouko add ./my-collection/ --keep-structure
+skillport add ./my-collection/ --keep-structure
 # → skills/my-collection/skill-a/, skills/my-collection/skill-b/
 
 # Multiple skills - custom namespace
-skillsouko add ./my-collection/ --keep-structure --namespace team-tools
+skillport add ./my-collection/ --keep-structure --namespace team-tools
 # → skills/team-tools/skill-a/, skills/team-tools/skill-b/
 ```
 
 **GitHub:**
 ```bash
 # Specific skill from repository
-skillsouko add https://github.com/user/repo/tree/main/skills/code-review
+skillport add https://github.com/user/repo/tree/main/skills/code-review
 
 # All skills from repository
-skillsouko add https://github.com/user/repo
+skillport add https://github.com/user/repo
 
 # Force overwrite existing
-skillsouko add https://github.com/user/repo --force
+skillport add https://github.com/user/repo --force
 ```
 
 #### Output
@@ -132,12 +132,12 @@ Added 1, skipped 2 (use --force to overwrite)
 
 ---
 
-### skillsouko list
+### skillport list
 
 List installed skills.
 
 ```bash
-skillsouko list [options]
+skillport list [options]
 ```
 
 #### Options
@@ -151,13 +151,13 @@ skillsouko list [options]
 
 ```bash
 # List all skills
-skillsouko list
+skillport list
 
 # Limit results
-skillsouko list --limit 20
+skillport list --limit 20
 
 # JSON output for scripting
-skillsouko list --json
+skillport list --json
 ```
 
 #### Output Format
@@ -188,12 +188,12 @@ skillsouko list --json
 
 ---
 
-### skillsouko search
+### skillport search
 
 Search for skills.
 
 ```bash
-skillsouko search <query> [options]
+skillport search <query> [options]
 ```
 
 #### Options
@@ -207,23 +207,23 @@ skillsouko search <query> [options]
 
 ```bash
 # Search by description
-skillsouko search "PDF text extraction"
+skillport search "PDF text extraction"
 
 # Limit results
-skillsouko search "code review" --limit 5
+skillport search "code review" --limit 5
 
 # JSON output
-skillsouko search "testing" --json
+skillport search "testing" --json
 ```
 
 ---
 
-### skillsouko show
+### skillport show
 
 Show skill details.
 
 ```bash
-skillsouko show <skill-id> [options]
+skillport show <skill-id> [options]
 ```
 
 #### Options
@@ -236,23 +236,23 @@ skillsouko show <skill-id> [options]
 
 ```bash
 # Show skill details
-skillsouko show hello-world
+skillport show hello-world
 
 # Show namespaced skill
-skillsouko show team-tools/code-review
+skillport show team-tools/code-review
 
 # JSON output
-skillsouko show pdf --json
+skillport show pdf --json
 ```
 
 ---
 
-### skillsouko remove
+### skillport remove
 
 Remove installed skills.
 
 ```bash
-skillsouko remove <skill-id> [options]
+skillport remove <skill-id> [options]
 ```
 
 #### Options
@@ -266,24 +266,24 @@ skillsouko remove <skill-id> [options]
 
 ```bash
 # Remove with confirmation
-skillsouko remove hello-world
+skillport remove hello-world
 # → Remove 'hello-world'? [y/N]
 
 # Remove without confirmation
-skillsouko remove hello-world --force
+skillport remove hello-world --force
 
 # Remove namespaced skill
-skillsouko remove team-tools/code-review --force
+skillport remove team-tools/code-review --force
 ```
 
 ---
 
-### skillsouko lint
+### skillport lint
 
 Validate skill files.
 
 ```bash
-skillsouko lint [skill-id] [options]
+skillport lint [skill-id] [options]
 ```
 
 #### Options
@@ -317,10 +317,10 @@ skillsouko lint [skill-id] [options]
 
 ```bash
 # Lint all skills
-skillsouko lint
+skillport lint
 
 # Lint specific skill
-skillsouko lint hello-world
+skillport lint hello-world
 ```
 
 #### Output
@@ -348,12 +348,12 @@ broken-skill
 
 ---
 
-### skillsouko serve
+### skillport serve
 
 Start the MCP server.
 
 ```bash
-skillsouko serve [options]
+skillport serve [options]
 ```
 
 #### Options
@@ -370,23 +370,23 @@ skillsouko serve [options]
 
 | Mode | Command | Tools |
 |------|---------|-------|
-| **Local** (stdio) | `skillsouko serve` | `search_skills`, `load_skill` |
-| **Remote** (HTTP) | `skillsouko serve --http` | + `read_skill_file` |
+| **Local** (stdio) | `skillport serve` | `search_skills`, `load_skill` |
+| **Remote** (HTTP) | `skillport serve --http` | + `read_skill_file` |
 
 #### Examples
 
 ```bash
 # Local mode (stdio) - for Claude Code, Cursor
-skillsouko serve
+skillport serve
 
 # Remote mode (HTTP) - for network access
-skillsouko serve --http
+skillport serve --http
 
 # Remote mode with custom host/port
-skillsouko serve --http --host 0.0.0.0 --port 8000
+skillport serve --http --host 0.0.0.0 --port 8000
 
 # Start with forced reindex
-skillsouko serve --reindex
+skillport serve --reindex
 ```
 
 #### Local vs Remote Mode
@@ -398,20 +398,20 @@ skillsouko serve --reindex
 
 ```bash
 # 以下は同等 (後方互換)
-skillsouko
-skillsouko serve
+skillport
+skillport serve
 ```
 
-> **Note**: `skillsouko --reindex` は **サポートしない**。常に `skillsouko serve --reindex` を使用すること。
+> **Note**: `skillport --reindex` は **サポートしない**。常に `skillport serve --reindex` を使用すること。
 
 ---
 
-### skillsouko sync
+### skillport sync
 
 Sync installed skills to AGENTS.md for non-MCP agents (e.g., Claude Code without MCP).
 
 ```bash
-skillsouko sync [options]
+skillport sync [options]
 ```
 
 #### Options
@@ -430,57 +430,57 @@ skillsouko sync [options]
 
 | Mode | Description |
 |------|-------------|
-| `cli` | For agents using CLI commands (`skillsouko show <id>`) |
+| `cli` | For agents using CLI commands (`skillport show <id>`) |
 | `mcp` | For agents using MCP tools (`search_skills`, `load_skill`) |
 
 #### Examples
 
 ```bash
 # Sync all skills to ./AGENTS.md
-skillsouko sync
+skillport sync
 
 # Sync to specific file
-skillsouko sync -o .claude/AGENTS.md
+skillport sync -o .claude/AGENTS.md
 
 # Force overwrite without confirmation
-skillsouko sync -f
+skillport sync -f
 
 # Filter by category
-skillsouko sync --category development,testing
+skillport sync --category development,testing
 
 # Filter by skill IDs
-skillsouko sync --skills pdf,code-review
+skillport sync --skills pdf,code-review
 
 # Use markdown format (no XML tags)
-skillsouko sync --format markdown
+skillport sync --format markdown
 
 # Generate for MCP-enabled agents
-skillsouko sync --mode mcp
+skillport sync --mode mcp
 
 # Replace entire file instead of appending
-skillsouko sync --replace
+skillport sync --replace
 ```
 
 #### Output Format
 
 The generated block includes:
-1. **Markers** — `<!-- SKILLSOUKO_START -->` and `<!-- SKILLSOUKO_END -->` for safe updates
+1. **Markers** — `<!-- SKILLPORT_START -->` and `<!-- SKILLPORT_END -->` for safe updates
 2. **Instructions** — Workflow and tips for agents
 3. **Skills Table** — ID, Description, Category
 
 **CLI mode output:**
 ```markdown
-<!-- SKILLSOUKO_START -->
+<!-- SKILLPORT_START -->
 <available_skills>
 
-## SkillSouko Skills
+## SkillPort Skills
 
 Skills are reusable expert knowledge...
 
 ### Workflow
 
 1. **Find a skill** - Check the table below...
-2. **Get instructions** - Run `skillsouko show <skill-id>`...
+2. **Get instructions** - Run `skillport show <skill-id>`...
 3. **Follow the instructions** - Execute the steps...
 
 ### Tips
@@ -493,15 +493,15 @@ Skills are reusable expert knowledge...
 | pdf | Extract text from PDF files | tools |
 
 </available_skills>
-<!-- SKILLSOUKO_END -->
+<!-- SKILLPORT_END -->
 ```
 
 **MCP mode output:**
 ```markdown
-<!-- SKILLSOUKO_START -->
+<!-- SKILLPORT_START -->
 <available_skills>
 
-## SkillSouko Skills
+## SkillPort Skills
 ...
 
 ### Workflow
@@ -523,7 +523,7 @@ Skills are reusable expert knowledge...
 ...
 
 </available_skills>
-<!-- SKILLSOUKO_END -->
+<!-- SKILLPORT_END -->
 ```
 
 #### Update Behavior
@@ -550,7 +550,7 @@ CLI commands respect these environment variables:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SKILLSOUKO_SKILLS_DIR` | Skills directory | `~/.skillsouko/skills` |
+| `SKILLPORT_SKILLS_DIR` | Skills directory | `~/.skillport/skills` |
 | `GITHUB_TOKEN` | GitHub authentication for private repos | |
 
 ## See Also

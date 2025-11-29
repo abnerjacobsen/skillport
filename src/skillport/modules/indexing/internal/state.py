@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional, List
 
-from skillsouko.shared.config import Config
+from skillport.shared.config import Config
 
 
 class IndexStateStore:

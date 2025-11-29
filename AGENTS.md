@@ -12,8 +12,8 @@
 
 ## 2. Project Context
 ### Architecture
-*   **Brand**: SkillSouko
-*   **Package & CLI**: `skillsouko` (legacy alias: `skillsouko-mcp`)
+*   **Brand**: SkillPort
+*   **Package & CLI**: `skillport` (legacy alias: `skillport-mcp`)
 *   **Type**: MCP Server (Model Context Protocol)
 *   **Stack**:
     *   **Runtime**: Python 3.10+
@@ -23,7 +23,7 @@
     *   **Config**: `pydantic-settings`
 
 ### Directory Structure
-*   `src/skillsouko/`: Source code (modular monolith)
+*   `src/skillport/`: Source code (modular monolith)
     *   `interfaces/cli/`: Typer CLI adapter
     *   `interfaces/mcp/`: FastMCP server adapter
     *   `modules/skills/`: Skill management public/internal APIs
@@ -41,7 +41,7 @@ To act autonomously, always verify changes using these commands:
 *   **Install/Sync**: `uv sync`
 *   **Run Server (Manual)**:
     ```bash
-    SKILLSOUKO_SKILLS_DIR=.agent/skills SKILLSOUKO_EMBEDDING_PROVIDER=none uv run skillsouko
+    SKILLPORT_SKILLS_DIR=.agent/skills SKILLPORT_EMBEDDING_PROVIDER=none uv run skillport
     ```
 *   **Verify Functionality (Critical)**:
     ```bash
@@ -55,10 +55,10 @@ To act autonomously, always verify changes using these commands:
     *   **ALWAYS** use `sys.stderr` for logs/prints.
 *   **Logs**: If `verify_server.py` fails, check the `stderr` output captured in the tool result.
 
-<!-- SKILLSOUKO_START -->
+<!-- SKILLPORT_START -->
 <available_skills>
 
-## SkillSouko Skills
+## SkillPort Skills
 
 Skills are reusable expert knowledge that help you complete tasks effectively.
 Each skill contains step-by-step instructions, templates, and scripts.
@@ -66,7 +66,7 @@ Each skill contains step-by-step instructions, templates, and scripts.
 ### Workflow
 
 1. **Find a skill** - Check the table below for a skill matching your task
-2. **Get instructions** - Run `skillsouko show <skill-id>` to load full instructions
+2. **Get instructions** - Run `skillport show <skill-id>` to load full instructions
 3. **Follow the instructions** - Execute the steps using your available tools
 
 ### Tips
@@ -93,4 +93,4 @@ Each skill contains step-by-step instructions, templates, and scripts.
 | anthropics-skills/web-artifacts-builder | Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using modern frontend web technologies (React, Tailwind CSS, shadcn/ui). Use for complex artifacts requiring state management, routing, or shadcn/ui components - not for simple single-file HTML/JSX artifacts. | - |
 
 </available_skills>
-<!-- SKILLSOUKO_END -->
+<!-- SKILLPORT_END -->

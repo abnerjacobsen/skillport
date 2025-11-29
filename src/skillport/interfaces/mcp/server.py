@@ -3,10 +3,10 @@ from typing import Literal
 
 from fastmcp import FastMCP
 
-from skillsouko.interfaces.mcp.instructions import build_xml_instructions
-from skillsouko.interfaces.mcp.tools import register_tools
-from skillsouko.modules.indexing import build_index, should_reindex
-from skillsouko.shared.config import Config
+from skillport.interfaces.mcp.instructions import build_xml_instructions
+from skillport.interfaces.mcp.tools import register_tools
+from skillport.modules.indexing import build_index, should_reindex
+from skillport.shared.config import Config
 
 BANNER = r"""
 ░██████╗██╗░░██╗██╗██╗░░░░░██╗░░░░░██████╗░░█████╗░██████╗░
@@ -50,7 +50,7 @@ def create_mcp_server(*, config: Config, is_remote: bool = False) -> FastMCP:
     registered_tools = _get_registered_tools_list(is_remote)
     instructions = build_xml_instructions(config, registered_tools)
 
-    mcp = FastMCP("skillsouko", version="0.0.0", instructions=instructions)
+    mcp = FastMCP("skillport", version="0.0.0", instructions=instructions)
     register_tools(mcp, config, is_remote=is_remote)
 
     return mcp

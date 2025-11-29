@@ -3,8 +3,8 @@
 
 import typer
 
-from skillsouko.interfaces.mcp.server import run_server
-from skillsouko.shared.config import Config
+from skillport.interfaces.mcp.server import run_server
+from skillport.shared.config import Config
 from ..theme import stderr_console, VERSION
 
 
@@ -44,7 +44,7 @@ def serve(
     transport = "http" if http else "stdio"
 
     # Log startup info to stderr (stdout is reserved for MCP JSON-RPC)
-    stderr_console.print(f"[dim]SkillSouko MCP Server v{VERSION}[/dim]", highlight=False)
+    stderr_console.print(f"[dim]SkillPort MCP Server v{VERSION}[/dim]", highlight=False)
     stderr_console.print(f"[dim]Skills: {config.skills_dir}[/dim]", highlight=False)
     stderr_console.print(f"[dim]Index:  {config.db_path}[/dim]", highlight=False)
     stderr_console.print(f"[dim]Provider: {config.embedding_provider}[/dim]", highlight=False)

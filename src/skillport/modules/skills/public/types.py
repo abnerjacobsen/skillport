@@ -2,7 +2,7 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from skillsouko.shared.types import FrozenModel, ValidationIssue
+from skillport.shared.types import FrozenModel, ValidationIssue
 
 
 class SkillSummary(FrozenModel):

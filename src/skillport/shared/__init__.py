@@ -1,8 +1,8 @@
-"""Shared infrastructure for SkillSouko."""
+"""Shared infrastructure for SkillPort."""
 
-from .config import Config, SKILLSOUKO_HOME
+from .config import Config, SKILLPORT_HOME
 from .exceptions import (
-    SkillSoukoError,
+    SkillPortError,
     SkillNotFoundError,
     AmbiguousSkillError,
     ValidationError,
@@ -23,8 +23,8 @@ from .utils import parse_frontmatter, resolve_inside
 
 __all__ = [
     "Config",
-    "SKILLSOUKO_HOME",
-    "SkillSoukoError",
+    "SKILLPORT_HOME",
+    "SkillPortError",
     "SkillNotFoundError",
     "AmbiguousSkillError",
     "ValidationError",

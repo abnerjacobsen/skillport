@@ -1,22 +1,22 @@
 # Creating Skills
 
-This guide covers how to create and structure [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) for SkillSouko.
+This guide covers how to create and structure [Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview) for SkillPort.
 
 ## Quick Start
 
 ```bash
 # Add the template skill
-skillsouko add template
+skillport add template
 
 # Edit the template
-# ~/.skillsouko/skills/template/SKILL.md
+# ~/.skillport/skills/template/SKILL.md
 ```
 
 Or create from scratch:
 
 ```bash
-mkdir -p ~/.skillsouko/skills/my-skill
-cat > ~/.skillsouko/skills/my-skill/SKILL.md << 'EOF'
+mkdir -p ~/.skillport/skills/my-skill
+cat > ~/.skillport/skills/my-skill/SKILL.md << 'EOF'
 ---
 name: my-skill
 description: What this skill does (used for search)
@@ -55,7 +55,7 @@ Detailed instructions for the AI agent.
 name: code-review
 description: Systematic code review checklist for pull requests
 metadata:
-  skillsouko:
+  skillport:
     category: development
     tags: [code-review, pr, quality]
     alwaysApply: false
@@ -77,14 +77,14 @@ Skills with `alwaysApply: true` are loaded into every conversation:
 name: team-standards
 description: Our team's coding standards
 metadata:
-  skillsouko:
+  skillport:
     alwaysApply: true
 ---
 ```
 
 Use sparingly - these consume context in every conversation.
 
-> **Tip:** Core Skills can be controlled per-client via `SKILLSOUKO_CORE_SKILLS_MODE`.
+> **Tip:** Core Skills can be controlled per-client via `SKILLPORT_CORE_SKILLS_MODE`.
 > See [Configuration](configuration.md#core-skills-control) for details.
 
 ## Directory Structure
@@ -247,7 +247,7 @@ The `name` field must match the directory name:
 ✗ skills/code-review/SKILL.md  →  name: review-code
 ```
 
-Validate with: `skillsouko lint`
+Validate with: `skillport lint`
 
 ### 2. Write Searchable Descriptions
 
@@ -267,7 +267,7 @@ Help users find your skill:
 
 ```yaml
 metadata:
-  skillsouko:
+  skillport:
     category: data-processing
     tags: [pdf, text-extraction, documents]
 ```
@@ -281,7 +281,7 @@ metadata:
 
 ```bash
 # Validate structure
-skillsouko lint my-skill
+skillport lint my-skill
 
 # Test in real conversation
 # Ask: "Search for my-skill"
@@ -320,7 +320,7 @@ description: Guidelines for writing good git commit messages
 name: pdf-extractor
 description: Extract text and metadata from PDF documents
 metadata:
-  skillsouko:
+  skillport:
     category: data-processing
     tags: [pdf, text-extraction, documents]
 ---
@@ -371,7 +371,7 @@ my-skills-repo/
 
 Users install with:
 ```bash
-skillsouko add https://github.com/user/my-skills-repo
+skillport add https://github.com/user/my-skills-repo
 ```
 
 ### Single Skill Repository
@@ -386,7 +386,7 @@ pdf-extractor/
 
 Users install with:
 ```bash
-skillsouko add https://github.com/user/pdf-extractor
+skillport add https://github.com/user/pdf-extractor
 ```
 
 ## See Also

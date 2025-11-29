@@ -4,11 +4,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from skillsouko.interfaces.mcp.instructions import (
+from skillport.interfaces.mcp.instructions import (
     build_xml_instructions,
     _escape_xml,
 )
-from skillsouko.shared.config import Config
+from skillport.shared.config import Config
 
 
 class TestXmlEscaping:
@@ -43,7 +43,7 @@ class TestBuildXmlInstructionsStructure:
         config = Config(core_skills_mode="none")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(config)
@@ -56,7 +56,7 @@ class TestBuildXmlInstructionsStructure:
         config = Config(core_skills_mode="none")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(config)
@@ -69,7 +69,7 @@ class TestBuildXmlInstructionsStructure:
         config = Config(core_skills_mode="none")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(config)
@@ -83,7 +83,7 @@ class TestBuildXmlInstructionsStructure:
         config = Config(core_skills_mode="none")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             # With read_skill_file registered
@@ -101,7 +101,7 @@ class TestBuildXmlInstructionsNoCoreSkills:
         config = Config(core_skills_mode="none")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(config)
@@ -114,7 +114,7 @@ class TestBuildXmlInstructionsNoCoreSkills:
         config = Config(core_skills_mode="none")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(config)
@@ -130,7 +130,7 @@ class TestBuildXmlInstructionsWithCoreSkills:
         config = Config(core_skills_mode="auto")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[
                 {"id": "skill-a", "description": "Skill A description"},
             ],
@@ -145,7 +145,7 @@ class TestBuildXmlInstructionsWithCoreSkills:
         config = Config(core_skills_mode="auto")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[
                 {"id": "skill-a", "description": "First skill"},
                 {"id": "skill-b", "description": "Second skill"},
@@ -161,7 +161,7 @@ class TestBuildXmlInstructionsWithCoreSkills:
         config = Config(core_skills_mode="auto")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[
                 {"id": "my-skill", "description": "My description"},
             ],
@@ -175,7 +175,7 @@ class TestBuildXmlInstructionsWithCoreSkills:
         config = Config(core_skills_mode="auto")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[
                 {"id": "my-skill", "description": "My description"},
             ],
@@ -189,7 +189,7 @@ class TestBuildXmlInstructionsWithCoreSkills:
         config = Config(core_skills_mode="auto")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[
                 {"name": "fallback-name", "description": "Description"},
             ],
@@ -203,7 +203,7 @@ class TestBuildXmlInstructionsWithCoreSkills:
         config = Config(core_skills_mode="auto")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[
                 {"id": "no-desc", "description": ""},
             ],
@@ -222,7 +222,7 @@ class TestBuildXmlInstructionsEscaping:
         config = Config(core_skills_mode="auto")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[
                 {"id": "foo<bar>", "description": "Test"},
             ],
@@ -236,7 +236,7 @@ class TestBuildXmlInstructionsEscaping:
         config = Config(core_skills_mode="auto")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[
                 {"id": "test", "description": "Use & enjoy <skills>"},
             ],
@@ -253,7 +253,7 @@ class TestDynamicInstructionContent:
         """Generated instructions contain Workflow section."""
         config = Config(core_skills_mode="none")
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(config)
@@ -263,7 +263,7 @@ class TestDynamicInstructionContent:
         """Generated instructions contain Tools section."""
         config = Config(core_skills_mode="none")
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(config)
@@ -273,7 +273,7 @@ class TestDynamicInstructionContent:
         """Generated instructions contain Tips section."""
         config = Config(core_skills_mode="none")
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(config)
@@ -283,7 +283,7 @@ class TestDynamicInstructionContent:
         """Generated instructions document search_skills tool."""
         config = Config(core_skills_mode="none")
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(config)
@@ -293,7 +293,7 @@ class TestDynamicInstructionContent:
         """Generated instructions document load_skill tool."""
         config = Config(core_skills_mode="none")
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(config)
@@ -303,7 +303,7 @@ class TestDynamicInstructionContent:
         """Generated instructions mention {path} placeholder usage."""
         config = Config(core_skills_mode="none")
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(config)

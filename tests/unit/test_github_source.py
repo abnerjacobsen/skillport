@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from skillsouko.modules.skills.internal.github import (
+from skillport.modules.skills.internal.github import (
     parse_github_url,
     extract_tarball,
     ParsedGitHubURL,

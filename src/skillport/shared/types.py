@@ -1,4 +1,4 @@
-"""Shared types for SkillSouko."""
+"""Shared types for SkillPort."""
 
 from enum import Enum
 from typing import Annotated, Literal

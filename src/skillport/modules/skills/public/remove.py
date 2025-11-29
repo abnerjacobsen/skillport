@@ -1,5 +1,5 @@
-from skillsouko.shared.config import Config
-from skillsouko.modules.skills.internal import (
+from skillport.shared.config import Config
+from skillport.modules.skills.internal import (
     remove_skill as _remove_skill_internal,
     remove_origin_record,
 )

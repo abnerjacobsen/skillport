@@ -7,8 +7,8 @@ from typing import Any, Dict, List, Optional
 
 import lancedb
 
-from skillsouko.shared.config import Config
-from skillsouko.shared.utils import normalize_token, parse_frontmatter
+from skillport.shared.config import Config
+from skillport.shared.utils import normalize_token, parse_frontmatter
 from .embeddings import get_embedding
 from .models import SkillRecord
 from .search_service import SearchService
@@ -88,30 +88,30 @@ class IndexStore:
         self,
         original_meta: Dict[str, Any],
         metadata_block: Dict[str, Any],
-        skillsouko_meta: Dict[str, Any],
+        skillport_meta: Dict[str, Any],
         category: Any,
         tags: Any,
         always_apply: bool,
     ) -> Dict[str, Any]:
         meta_copy = dict(original_meta)
         meta_metadata = dict(metadata_block) if isinstance(metadata_block, dict) else {}
-        skillsouko = dict(skillsouko_meta) if isinstance(skillsouko_meta, dict) else {}
+        skillport = dict(skillport_meta) if isinstance(skillport_meta, dict) else {}
 
         if category is not None:
-            skillsouko["category"] = category
+            skillport["category"] = category
         if tags is not None:
-            skillsouko["tags"] = tags
-        skillsouko["alwaysApply"] = bool(
-            skillsouko.get("alwaysApply", skillsouko.get("always_apply", always_apply))
+            skillport["tags"] = tags
+        skillport["alwaysApply"] = bool(
+            skillport.get("alwaysApply", skillport.get("always_apply", always_apply))
         )
-        skillsouko.pop("always_apply", None)
+        skillport.pop("always_apply", None)
 
-        skillsouko.pop("env_version", None)
-        skillsouko.pop("requires_setup", None)
-        skillsouko.pop("requiresSetup", None)
-        skillsouko.pop("runtime", None)
+        skillport.pop("env_version", None)
+        skillport.pop("requires_setup", None)
+        skillport.pop("requiresSetup", None)
+        skillport.pop("runtime", None)
 
-        meta_metadata["skillsouko"] = skillsouko
+        meta_metadata["skillport"] = skillport
         meta_copy["metadata"] = meta_metadata
         return meta_copy
 
@@ -185,18 +185,18 @@ class IndexStore:
 
             name = meta.get("name") or skill_path.name
             description = meta.get("description") or ""
-            skillsouko_meta = (
-                metadata_block.get("skillsouko", {})
+            skillport_meta = (
+                metadata_block.get("skillport", {})
                 if isinstance(metadata_block, dict)
                 else {}
             )
-            if not isinstance(skillsouko_meta, dict):
-                skillsouko_meta = {}
+            if not isinstance(skillport_meta, dict):
+                skillport_meta = {}
 
-            category = skillsouko_meta.get("category", "")
-            tags = skillsouko_meta.get("tags", [])
-            always_apply = skillsouko_meta.get(
-                "alwaysApply", skillsouko_meta.get("always_apply", False)
+            category = skillport_meta.get("category", "")
+            tags = skillport_meta.get("tags", [])
+            always_apply = skillport_meta.get(
+                "alwaysApply", skillport_meta.get("always_apply", False)
             )
             if not isinstance(always_apply, bool):
                 always_apply = False
@@ -245,7 +245,7 @@ class IndexStore:
                     self._canonical_metadata(
                         meta,
                         metadata_block,
-                        skillsouko_meta,
+                        skillport_meta,
                         category,
                         tags,
                         always_apply,

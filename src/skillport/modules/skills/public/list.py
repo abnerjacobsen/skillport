@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import List
 
-from skillsouko.modules.indexing import list_all as idx_list_all
-from skillsouko.shared.config import Config
-from skillsouko.shared.filters import is_skill_enabled, normalize_token
+from skillport.modules.indexing import list_all as idx_list_all
+from skillport.shared.config import Config
+from skillport.shared.filters import is_skill_enabled, normalize_token
 from .types import ListResult, SkillSummary
 
 

@@ -3,8 +3,8 @@
 import typer
 from rich.table import Table
 
-from skillsouko.modules.skills import list_skills, ListResult
-from skillsouko.shared.config import Config
+from skillport.modules.skills import list_skills, ListResult
+from skillport.shared.config import Config
 from ..theme import console, empty_skills_panel
 
 

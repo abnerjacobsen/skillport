@@ -10,9 +10,9 @@ from pathlib import Path
 import pytest
 from fastmcp.client import Client
 
-from skillsouko.interfaces.mcp.server import create_mcp_server
-from skillsouko.modules.indexing import build_index
-from skillsouko.shared.config import Config
+from skillport.interfaces.mcp.server import create_mcp_server
+from skillport.modules.indexing import build_index
+from skillport.shared.config import Config
 
 
 def _create_test_skill(skills_dir: Path, skill_id: str, content: str = "Test content") -> None:
@@ -24,7 +24,7 @@ def _create_test_skill(skills_dir: Path, skill_id: str, content: str = "Test con
 name: {skill_id}
 description: Test skill {skill_id}
 metadata:
-  skillsouko:
+  skillport:
     category: test
     tags: [test]
 ---
@@ -178,8 +178,8 @@ class TestInstructions:
         # Get server info which includes instructions
         # Note: FastMCP Client may not expose instructions directly,
         # so we test via the server creation
-        from skillsouko.interfaces.mcp.instructions import build_xml_instructions
-        from skillsouko.shared.config import Config
+        from skillport.interfaces.mcp.instructions import build_xml_instructions
+        from skillport.shared.config import Config
 
         config = Config(core_skills_mode="none")
         instructions = build_xml_instructions(config, ["search_skills", "load_skill"])
@@ -189,8 +189,8 @@ class TestInstructions:
 
     async def test_remote_mode_instructions_mention_read_skill_file(self, remote_client: Client):
         """Remote mode instructions should mention read_skill_file."""
-        from skillsouko.interfaces.mcp.instructions import build_xml_instructions
-        from skillsouko.shared.config import Config
+        from skillport.interfaces.mcp.instructions import build_xml_instructions
+        from skillport.shared.config import Config
 
         config = Config(core_skills_mode="none")
         instructions = build_xml_instructions(

@@ -2,7 +2,7 @@ from typing import Any
 
 from pydantic import Field
 
-from skillsouko.shared.types import FrozenModel
+from skillport.shared.types import FrozenModel
 
 
 class IndexBuildResult(FrozenModel):

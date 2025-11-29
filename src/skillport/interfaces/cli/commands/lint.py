@@ -3,9 +3,9 @@
 import typer
 from rich.panel import Panel
 
-from skillsouko.modules.indexing import list_all
-from skillsouko.modules.skills.public.validation import validate_skill
-from skillsouko.shared.config import Config
+from skillport.modules.indexing import list_all
+from skillport.modules.skills.public.validation import validate_skill
+from skillport.shared.config import Config
 from ..theme import console, print_success, print_warning
 
 

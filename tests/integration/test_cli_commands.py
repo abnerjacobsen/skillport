@@ -10,9 +10,9 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from skillsouko.interfaces.cli.app import app
-from skillsouko.modules.indexing import build_index
-from skillsouko.shared.config import Config
+from skillport.interfaces.cli.app import app
+from skillport.modules.indexing import build_index
+from skillport.shared.config import Config
 
 
 runner = CliRunner()
@@ -30,7 +30,7 @@ def _create_skill(path: Path, name: str, description: str = "Test skill") -> Pat
     skill_dir = path / name
     skill_dir.mkdir(parents=True, exist_ok=True)
     (skill_dir / "SKILL.md").write_text(
-        f"---\nname: {name}\ndescription: {description}\nmetadata:\n  skillsouko:\n    category: test\n---\n# {name}\n\nInstructions here.",
+        f"---\nname: {name}\ndescription: {description}\nmetadata:\n  skillport:\n    category: test\n---\n# {name}\n\nInstructions here.",
         encoding="utf-8"
     )
     return skill_dir
@@ -48,14 +48,14 @@ def skills_env(tmp_path: Path, monkeypatch) -> SkillsEnv:
     skills = tmp_path / "skills"
     skills.mkdir()
     db_path = tmp_path / "db.lancedb"
-    monkeypatch.setenv("SKILLSOUKO_SKILLS_DIR", str(skills))
-    monkeypatch.setenv("SKILLSOUKO_DB_PATH", str(db_path))
-    monkeypatch.setenv("SKILLSOUKO_EMBEDDING_PROVIDER", "none")
+    monkeypatch.setenv("SKILLPORT_SKILLS_DIR", str(skills))
+    monkeypatch.setenv("SKILLPORT_DB_PATH", str(db_path))
+    monkeypatch.setenv("SKILLPORT_EMBEDDING_PROVIDER", "none")
     return SkillsEnv(skills_dir=skills, db_path=db_path)
 
 
 class TestListCommand:
-    """skillsouko list tests."""
+    """skillport list tests."""
 
     def test_list_empty_skills_dir(self, skills_env: SkillsEnv):
         """Empty skills dir → shows 0 skills."""
@@ -104,7 +104,7 @@ class TestListCommand:
 
 
 class TestSearchCommand:
-    """skillsouko search tests."""
+    """skillport search tests."""
 
     def test_search_finds_match(self, skills_env: SkillsEnv):
         """Query matches → returns results."""
@@ -153,7 +153,7 @@ class TestSearchCommand:
 
 
 class TestShowCommand:
-    """skillsouko show tests."""
+    """skillport show tests."""
 
     def test_show_existing_skill(self, skills_env: SkillsEnv):
         """Existing skill → shows details."""
@@ -190,7 +190,7 @@ class TestShowCommand:
 
 
 class TestAddCommand:
-    """skillsouko add tests.
+    """skillport add tests.
 
     Note: Built-in skill add returns AddResult with empty `added` list,
     causing CLI to exit 1 despite successful file creation. This is a
@@ -250,7 +250,7 @@ class TestAddCommand:
 
 
 class TestRemoveCommand:
-    """skillsouko remove tests."""
+    """skillport remove tests."""
 
     def test_remove_existing_skill(self, skills_env: SkillsEnv):
         """Remove existing skill → success."""
@@ -271,7 +271,7 @@ class TestRemoveCommand:
 
 
 class TestLintCommand:
-    """skillsouko lint tests."""
+    """skillport lint tests."""
 
     def test_lint_valid_skills(self, skills_env: SkillsEnv):
         """Valid skills → "All pass" (exit 0)."""
@@ -329,7 +329,7 @@ class TestLintCommand:
 
 
 class TestServeCommand:
-    """skillsouko serve tests."""
+    """skillport serve tests."""
 
     def test_serve_help(self, skills_env: SkillsEnv):
         """serve --help → shows help (exit 0)."""
@@ -451,7 +451,7 @@ class TestAutoReindex:
 
 
 class TestSyncCommand:
-    """skillsouko sync tests."""
+    """skillport sync tests."""
 
     def test_sync_creates_agents_md(self, skills_env: SkillsEnv, tmp_path: Path):
         """sync creates AGENTS.md file."""
@@ -465,8 +465,8 @@ class TestSyncCommand:
         assert output.exists()
         content = output.read_text()
         assert "test-skill" in content
-        assert "<!-- SKILLSOUKO_START -->" in content
-        assert "<!-- SKILLSOUKO_END -->" in content
+        assert "<!-- SKILLPORT_START -->" in content
+        assert "<!-- SKILLPORT_END -->" in content
 
     def test_sync_xml_format(self, skills_env: SkillsEnv, tmp_path: Path):
         """sync --format xml includes <available_skills> tag."""
@@ -492,7 +492,7 @@ class TestSyncCommand:
         assert result.exit_code == 0
         content = output.read_text()
         assert "<available_skills>" not in content
-        assert "## SkillSouko Skills" in content
+        assert "## SkillPort Skills" in content
 
     def test_sync_with_skills_filter(self, skills_env: SkillsEnv, tmp_path: Path):
         """sync --skills filters to specific skills."""
@@ -518,13 +518,13 @@ class TestSyncCommand:
         skill_a = skills_env.skills_dir / "skill-a"
         skill_a.mkdir()
         (skill_a / "SKILL.md").write_text(
-            "---\nname: skill-a\ndescription: Skill A\nmetadata:\n  skillsouko:\n    category: dev\n---\nbody"
+            "---\nname: skill-a\ndescription: Skill A\nmetadata:\n  skillport:\n    category: dev\n---\nbody"
         )
 
         skill_b = skills_env.skills_dir / "skill-b"
         skill_b.mkdir()
         (skill_b / "SKILL.md").write_text(
-            "---\nname: skill-b\ndescription: Skill B\nmetadata:\n  skillsouko:\n    category: test\n---\nbody"
+            "---\nname: skill-b\ndescription: Skill B\nmetadata:\n  skillport:\n    category: test\n---\nbody"
         )
         _rebuild_index(skills_env)
 
@@ -564,14 +564,14 @@ class TestSyncCommand:
         assert "test-skill" in content
 
     def test_sync_replaces_existing_block(self, skills_env: SkillsEnv, tmp_path: Path):
-        """sync replaces existing SkillSouko block."""
+        """sync replaces existing SkillPort block."""
         _create_skill(skills_env.skills_dir, "new-skill")
         _rebuild_index(skills_env)
 
         output = tmp_path / "AGENTS.md"
         output.write_text(
             "# Header\n\n"
-            "<!-- SKILLSOUKO_START -->\nold content\n<!-- SKILLSOUKO_END -->\n\n"
+            "<!-- SKILLPORT_START -->\nold content\n<!-- SKILLPORT_END -->\n\n"
             "# Footer\n"
         )
 

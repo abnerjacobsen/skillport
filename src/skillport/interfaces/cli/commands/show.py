@@ -4,9 +4,9 @@ import typer
 from rich.markdown import Markdown
 from rich.panel import Panel
 
-from skillsouko.modules.skills import load_skill
-from skillsouko.shared.config import Config
-from skillsouko.shared.exceptions import SkillNotFoundError
+from skillport.modules.skills import load_skill
+from skillport.shared.config import Config
+from skillport.shared.exceptions import SkillNotFoundError
 from ..theme import console, print_error
 
 
@@ -31,7 +31,7 @@ def show(
         print_error(
             f"Skill '{skill_id}' not found",
             code="SKILL_NOT_FOUND",
-            suggestion="Run 'skillsouko list' to see available skills",
+            suggestion="Run 'skillport list' to see available skills",
             json_output=json_output,
         )
         raise typer.Exit(code=1)

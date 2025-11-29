@@ -5,21 +5,21 @@ from mcp.client.stdio import stdio_client
 
 # Configure environment for the server
 server_env = os.environ.copy()
-server_env["SKILLSOUKO_SKILLS_DIR"] = os.path.abspath(".agent/skills")
-server_env["SKILLSOUKO_EMBEDDING_PROVIDER"] = "none"
-server_env["SKILLSOUKO_LOG_LEVEL"] = "ERROR"  # Reduce noise
+server_env["SKILLPORT_SKILLS_DIR"] = os.path.abspath(".agent/skills")
+server_env["SKILLPORT_EMBEDDING_PROVIDER"] = "none"
+server_env["SKILLPORT_LOG_LEVEL"] = "ERROR"  # Reduce noise
 
 # Define server parameters (stdio = Local mode)
-# For Remote mode, use: skillsouko serve --http
+# For Remote mode, use: skillport serve --http
 server_params = StdioServerParameters(
     command="uv",
-    args=["run", "skillsouko"],
+    args=["run", "skillport"],
     env=server_env
 )
 
 async def run_test():
-    print("Starting SkillSouko MCP Client Verification (stdio/Local mode)...")
-    print("Note: For HTTP/Remote mode, run: skillsouko serve --http")
+    print("Starting SkillPort MCP Client Verification (stdio/Local mode)...")
+    print("Note: For HTTP/Remote mode, run: skillport serve --http")
     print()
 
     async with stdio_client(server_params) as (read, write):

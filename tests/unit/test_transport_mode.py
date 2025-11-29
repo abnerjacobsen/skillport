@@ -5,10 +5,10 @@ from unittest.mock import patch
 
 import pytest
 
-from skillsouko.interfaces.mcp.instructions import build_xml_instructions
-from skillsouko.interfaces.mcp.server import _get_registered_tools_list
-from skillsouko.modules.skills.public.types import FileContent
-from skillsouko.shared.config import Config
+from skillport.interfaces.mcp.instructions import build_xml_instructions
+from skillport.interfaces.mcp.server import _get_registered_tools_list
+from skillport.modules.skills.public.types import FileContent
+from skillport.shared.config import Config
 
 
 class TestRegisteredToolsList:
@@ -35,7 +35,7 @@ class TestDynamicInstructions:
         tools = ["search_skills", "load_skill"]
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(cfg, tools)
@@ -62,7 +62,7 @@ class TestDynamicInstructions:
         tools = ["search_skills", "load_skill", "read_skill_file"]
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(cfg, tools)
@@ -77,7 +77,7 @@ class TestDynamicInstructions:
         cfg = Config(core_skills_mode="none")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             local = build_xml_instructions(cfg, ["search_skills", "load_skill"])
@@ -93,7 +93,7 @@ class TestDynamicInstructions:
         cfg = Config(core_skills_mode="none")
 
         with patch(
-            "skillsouko.interfaces.mcp.instructions.get_core_skills",
+            "skillport.interfaces.mcp.instructions.get_core_skills",
             return_value=[],
         ):
             result = build_xml_instructions(cfg, None)
@@ -157,10 +157,10 @@ class TestReadSkillFileBinarySupport:
         }
 
         with patch(
-            "skillsouko.modules.skills.public.read.idx_get_by_id",
+            "skillport.modules.skills.public.read.idx_get_by_id",
             return_value=skill_record,
         ):
-            from skillsouko.modules.skills.public.read import read_skill_file
+            from skillport.modules.skills.public.read import read_skill_file
 
             cfg = Config()
             result = read_skill_file("test-skill", "readme.txt", config=cfg)
@@ -186,10 +186,10 @@ class TestReadSkillFileBinarySupport:
         }
 
         with patch(
-            "skillsouko.modules.skills.public.read.idx_get_by_id",
+            "skillport.modules.skills.public.read.idx_get_by_id",
             return_value=skill_record,
         ):
-            from skillsouko.modules.skills.public.read import read_skill_file
+            from skillport.modules.skills.public.read import read_skill_file
 
             cfg = Config()
             result = read_skill_file("test-skill", "image.png", config=cfg)
@@ -214,10 +214,10 @@ class TestReadSkillFileBinarySupport:
         }
 
         with patch(
-            "skillsouko.modules.skills.public.read.idx_get_by_id",
+            "skillport.modules.skills.public.read.idx_get_by_id",
             return_value=skill_record,
         ):
-            from skillsouko.modules.skills.public.read import read_skill_file
+            from skillport.modules.skills.public.read import read_skill_file
 
             cfg = Config()
             result = read_skill_file("test-skill", "config.json", config=cfg)
@@ -239,10 +239,10 @@ class TestReadSkillFileBinarySupport:
         }
 
         with patch(
-            "skillsouko.modules.skills.public.read.idx_get_by_id",
+            "skillport.modules.skills.public.read.idx_get_by_id",
             return_value=skill_record,
         ):
-            from skillsouko.modules.skills.public.read import read_skill_file
+            from skillport.modules.skills.public.read import read_skill_file
 
             cfg = Config()
             result = read_skill_file("test-skill", "config.yaml", config=cfg)
@@ -265,10 +265,10 @@ class TestReadSkillFileBinarySupport:
         }
 
         with patch(
-            "skillsouko.modules.skills.public.read.idx_get_by_id",
+            "skillport.modules.skills.public.read.idx_get_by_id",
             return_value=skill_record,
         ):
-            from skillsouko.modules.skills.public.read import read_skill_file
+            from skillport.modules.skills.public.read import read_skill_file
 
             cfg = Config()
             result = read_skill_file("test-skill", "data.qqqxxx", config=cfg)

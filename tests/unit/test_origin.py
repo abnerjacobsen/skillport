@@ -1,5 +1,5 @@
 
-from skillsouko.modules.skills.internal import origin as origin_mod
+from skillport.modules.skills.internal import origin as origin_mod
 
 
 def test_record_and_remove_origin(tmp_path, monkeypatch):

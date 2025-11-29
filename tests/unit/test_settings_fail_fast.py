@@ -1,6 +1,6 @@
 import pytest
 
-from skillsouko.shared.config import Config
+from skillport.shared.config import Config
 
 
 def test_openai_requires_key(monkeypatch):

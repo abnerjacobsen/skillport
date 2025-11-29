@@ -4,14 +4,14 @@ from pathlib import Path
 
 import pytest
 
-from skillsouko.interfaces.cli.commands.sync import (
+from skillport.interfaces.cli.commands.sync import (
     generate_skills_block,
     update_agents_md,
     _truncate_description,
     MARKER_START,
     MARKER_END,
 )
-from skillsouko.modules.skills import SkillSummary
+from skillport.modules.skills import SkillSummary
 
 
 class TestTruncateDescription:
@@ -83,7 +83,7 @@ class TestGenerateSkillsBlockXml:
         ]
         result = generate_skills_block(skills, format="xml")
         assert "### Workflow" in result
-        assert "skillsouko show" in result
+        assert "skillport show" in result
         # Should explain what skills are
         assert "expert knowledge" in result.lower() or "instructions" in result.lower()
 
@@ -163,7 +163,7 @@ class TestGenerateSkillsBlockMcpMode:
         ]
         result = generate_skills_block(skills, format="xml", mode="cli")
         assert "search_skills" not in result
-        assert "skillsouko show" in result
+        assert "skillport show" in result
 
 
 class TestGenerateSkillsBlockMarkdown:
@@ -192,7 +192,7 @@ class TestGenerateSkillsBlockMarkdown:
             SkillSummary(id="test", name="test", description="Test skill", category="test"),
         ]
         result = generate_skills_block(skills, format="markdown")
-        assert "## SkillSouko Skills" in result
+        assert "## SkillPort Skills" in result
 
 
 class TestUpdateAgentsMd:

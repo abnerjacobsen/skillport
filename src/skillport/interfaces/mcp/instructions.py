@@ -5,8 +5,8 @@ Implements SPEC4: Dynamic instructions based on registered tools.
 Compatible with Claude Code's <skills_system> format and other MCP clients.
 """
 
-from skillsouko.modules.indexing import get_core_skills
-from skillsouko.shared.config import Config
+from skillport.modules.indexing import get_core_skills
+from skillport.shared.config import Config
 
 
 def _escape_xml(text: str) -> str:
@@ -38,7 +38,7 @@ def build_xml_instructions(config: Config, registered_tools: list[str] | None = 
     has_file_read = "read_skill_file" in registered_tools
 
     lines = ["<skills_system>", "", "<usage>"]
-    lines.append("SkillSouko provides Agent Skills that load on demand.")
+    lines.append("SkillPort provides Agent Skills that load on demand.")
     lines.append("")
 
     # Workflow - conditional based on registered tools

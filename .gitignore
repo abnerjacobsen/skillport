@@ -23,11 +23,11 @@ wheels/
 # Environment Variables
 .env
 
-# SkillSouko / MCP Specific
+# SkillPort / MCP Specific
 # Local database storage & state
 *.lancedb/
 *.lance/
-.skillsouko/
+.skillport/
 # Legacy path (pre-rename)
 .skillpod/
 

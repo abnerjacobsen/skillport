@@ -1,8 +1,8 @@
-"""Shared configuration for SkillSouko.
+"""Shared configuration for SkillPort.
 
 The Config class is immutable, validated via pydantic-settings, and designed
 to be passed explicitly (no global singleton). Environment variables are
-prefixed with SKILLSOUKO_ (e.g., SKILLSOUKO_SKILLS_DIR).
+prefixed with SKILLPORT_ (e.g., SKILLPORT_SKILLS_DIR).
 """
 
 import json
@@ -45,7 +45,7 @@ class CommaListEnvSettingsSource(EnvSettingsSource):
         return super().prepare_field_value(field_name, field, value, value_is_complex)
 
 
-SKILLSOUKO_HOME = Path("~/.skillsouko").expanduser()
+SKILLPORT_HOME = Path("~/.skillport").expanduser()
 
 # Upper bound for skill enumeration (total count, not returned results)
 MAX_SKILLS = 10000
@@ -55,7 +55,7 @@ class Config(BaseSettings):
     """Application configuration with environment variable support."""
 
     model_config = SettingsConfigDict(
-        env_prefix="SKILLSOUKO_",
+        env_prefix="SKILLPORT_",
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
@@ -64,11 +64,11 @@ class Config(BaseSettings):
 
     # Paths
     skills_dir: Path = Field(
-        default=SKILLSOUKO_HOME / "skills",
+        default=SKILLPORT_HOME / "skills",
         description="Directory containing skill definitions",
     )
     db_path: Path = Field(
-        default=SKILLSOUKO_HOME / "indexes" / "default" / "skills.lancedb",
+        default=SKILLPORT_HOME / "indexes" / "default" / "skills.lancedb",
         description="LanceDB database path",
     )
 
@@ -185,4 +185,4 @@ class Config(BaseSettings):
         return self.model_copy(update=kwargs)
 
 
-__all__ = ["Config", "SKILLSOUKO_HOME", "MAX_SKILLS"]
+__all__ = ["Config", "SKILLPORT_HOME", "MAX_SKILLS"]

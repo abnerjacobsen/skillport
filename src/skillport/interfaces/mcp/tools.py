@@ -2,8 +2,8 @@ from typing import Any, Dict
 
 from fastmcp import FastMCP
 
-from skillsouko.modules.skills import load_skill, read_skill_file, search_skills
-from skillsouko.shared.config import Config
+from skillport.modules.skills import load_skill, read_skill_file, search_skills
+from skillport.shared.config import Config
 
 
 def register_tools(mcp: FastMCP, config: Config, *, is_remote: bool = False) -> list[str]:

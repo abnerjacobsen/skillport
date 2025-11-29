@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from skillsouko.modules.skills.internal import validate_skill_record
+from skillport.modules.skills.internal import validate_skill_record
 from .types import SkillSummary, ValidationResult
 
 

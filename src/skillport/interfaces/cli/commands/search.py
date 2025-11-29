@@ -2,8 +2,8 @@
 
 import typer
 
-from skillsouko.modules.skills import search_skills, SearchResult
-from skillsouko.shared.config import Config
+from skillport.modules.skills import search_skills, SearchResult
+from skillport.shared.config import Config
 from ..theme import console, no_results_panel, create_skills_table, format_score
 
 

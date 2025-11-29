@@ -1,6 +1,6 @@
 """Index build-related public APIs."""
 
-from skillsouko.shared.config import Config
+from skillport.shared.config import Config
 from ..internal.lancedb import IndexStore
 from .types import IndexBuildResult, ReindexDecision
 

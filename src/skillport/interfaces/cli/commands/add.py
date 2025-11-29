@@ -7,10 +7,10 @@ import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.prompt import Prompt
 
-from skillsouko.modules.skills import add_skill
-from skillsouko.modules.skills.internal import detect_skills, fetch_github_source, parse_github_url
-from skillsouko.modules.indexing import build_index
-from skillsouko.shared.config import Config
+from skillport.modules.skills import add_skill
+from skillport.modules.skills.internal import detect_skills, fetch_github_source, parse_github_url
+from skillport.modules.indexing import build_index
+from skillport.shared.config import Config
 from ..theme import console, stderr_console, is_interactive, print_error, print_success, print_warning
 
 
@@ -24,6 +24,14 @@ def _get_source_name(source: str) -> str:
     if source.startswith("https://"):
         parsed = parse_github_url(source)
         return Path(parsed.normalized_path or parsed.repo).name
+    return Path(source.rstrip("/")).name
+
+
+def _get_default_namespace(source: str) -> str:
+    """Get default namespace for source (repo name for GitHub)."""
+    if source.startswith("https://"):
+        parsed = parse_github_url(source)
+        return parsed.repo
     return Path(source.rstrip("/")).name
 
 
@@ -120,7 +128,7 @@ def add(
                     keep_structure = False
                 else:
                     keep_structure = True
-                    namespace = namespace or source_name
+                    namespace = namespace or _get_default_namespace(source)
             else:
                 # Interactive mode
                 skill_display = skill_names[0] if is_single else ", ".join(skill_names[:3]) + ("..." if len(skill_names) > 3 else "")
@@ -143,7 +151,7 @@ def add(
                     keep_structure = False
                 if choice == "2":
                     keep_structure = True
-                    namespace = Prompt.ask("Namespace", default=source_name)
+                    namespace = Prompt.ask("Namespace", default=_get_default_namespace(source))
 
         config = Config()
         result = add_skill(

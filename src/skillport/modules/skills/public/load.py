@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import json
 
-from skillsouko.modules.indexing import get_by_id as idx_get_by_id
-from skillsouko.shared.config import Config
-from skillsouko.shared.exceptions import AmbiguousSkillError, SkillNotFoundError
-from skillsouko.shared.filters import is_skill_enabled, normalize_token
+from skillport.modules.indexing import get_by_id as idx_get_by_id
+from skillport.shared.config import Config
+from skillport.shared.exceptions import AmbiguousSkillError, SkillNotFoundError
+from skillport.shared.filters import is_skill_enabled, normalize_token
 from .types import SkillDetail
 
 

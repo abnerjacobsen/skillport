@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from skillsouko.shared.config import Config
-from skillsouko.modules.indexing.public.query import get_core_skills
+from skillport.shared.config import Config
+from skillport.modules.indexing.public.query import get_core_skills
 
 
 class TestGetCoreSkillsAutoMode:
@@ -21,7 +21,7 @@ class TestGetCoreSkillsAutoMode:
         ]
 
         with patch(
-            "skillsouko.modules.indexing.public.query.IndexStore",
+            "skillport.modules.indexing.public.query.IndexStore",
             return_value=mock_store,
         ):
             result = get_core_skills(config=config)
@@ -45,7 +45,7 @@ class TestGetCoreSkillsExplicitMode:
         }
 
         with patch(
-            "skillsouko.modules.indexing.public.query.IndexStore",
+            "skillport.modules.indexing.public.query.IndexStore",
             return_value=mock_store,
         ):
             result = get_core_skills(config=config)
@@ -65,7 +65,7 @@ class TestGetCoreSkillsExplicitMode:
         ]
 
         with patch(
-            "skillsouko.modules.indexing.public.query.IndexStore",
+            "skillport.modules.indexing.public.query.IndexStore",
             return_value=mock_store,
         ):
             result = get_core_skills(config=config)
@@ -86,7 +86,7 @@ class TestGetCoreSkillsExplicitMode:
         )
 
         with patch(
-            "skillsouko.modules.indexing.public.query.IndexStore",
+            "skillport.modules.indexing.public.query.IndexStore",
             return_value=mock_store,
         ):
             result = get_core_skills(config=config)
@@ -108,7 +108,7 @@ class TestGetCoreSkillsNoneMode:
         ]
 
         with patch(
-            "skillsouko.modules.indexing.public.query.IndexStore",
+            "skillport.modules.indexing.public.query.IndexStore",
             return_value=mock_store,
         ):
             result = get_core_skills(config=config)
