@@ -204,7 +204,7 @@ skillport add https://github.com/anthropics/skills
 skillport add https://github.com/wshobson/agents/tree/main/plugins/developer-essentials/skills
 ```
 
-**Discover more:** [Awesome Claude Skills](https://github.com/ComposioHQ/awesome-claude-skills) ・ [Kubernetes Operations](https://github.com/wshobson/agents/tree/main/plugins/kubernetes-operations/skills)
+**Discover more:** [Awesome Claude Skills](https://github.com/ComposioHQ/awesome-claude-skills) [Claude Scientific Skills](https://github.com/K-Dense-AI/claude-scientific-skills)・ [Kubernetes Operations](https://github.com/wshobson/agents/tree/main/plugins/kubernetes-operations/skills) ・ [Notion Skills](https://github.com/gotalab/skillport/.agent/skills/notion-skills)
 
 ### Organize: Categories & Namespaces
 

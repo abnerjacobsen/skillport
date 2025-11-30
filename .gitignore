@@ -29,10 +29,10 @@ wheels/
 *.lance/
 .skillport/
 # Legacy path (pre-rename)
-.skillpod/
+.skillport/
 
 # Local Agent / Skills Directory (runtime data)
-.agent/
+# .agent/
 
 # IDE / OS
 .vscode/

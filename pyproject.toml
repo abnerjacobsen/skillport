@@ -1,7 +1,7 @@
 [project]
 name = "skillport"
 version = "0.0.0"
-description = "MCP server for Agent Skills"
+description = "Use your Claude Agent Skills in Cursor, Copilot, Codex - one MCP server for any AI agent"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
