@@ -1,18 +1,16 @@
-# ⚓ *SkillPort: All Your Agent Skills in One MCP Server*
+# ⚓ SkillPort
 
 <div align="center">
 
-🚢 **Agent Skills Harbor** · *Install once, serve anywhere* ⚓
+🚢 **All Your Agent Skills in One Place** — *Manage once, serve anywhere* ⚓
 
-A centralized hub to install, organize, and distribute Agent Skills to any Agent (Cursor, Copilot, Codex, etc.).
+Agent Skills → Cursor · Copilot · Codex & more — via CLI or MCP
 
 [![MCP](https://img.shields.io/badge/MCP-Enabled-green)](https://modelcontextprotocol.io)
 [![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 </div>
-
-🔄 **100% Compatible with [Claude Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview)** — Write skills once, use everywhere. Skills that work with Claude Code work with SkillPort, and vice versa.
 
 ## Why SkillPort?
 
@@ -26,6 +24,8 @@ Claude Agent Skills are great — but they only work in Claude Code. What about 
 | Long debugging session, context running low | Skills load on-demand - not all upfront | [Scale →](#scale-context-efficient-search) |
 | Found an awesome skill on GitHub | `skillport add <url>` - ready to use in seconds | [CLI →](#manage-cli) |
 | Don't want to set up MCP | CLI works standalone - `search`, `show`, `sync` to AGENTS.md | [CLI →](#manage-cli) |
+
+🔄 **Compatible with [Claude Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview)** — Write skills once, use everywhere. Skills that work with Claude Code work with SkillPort, and vice versa.
 
 <!-- DEMO_GIF: `skillport add` → use in Cursor -->
 
@@ -47,7 +47,7 @@ Claude Agent Skills are great — but they only work in Claude Code. What about 
                 └─────────────────┘
 ```
 
-## Quick Start
+## Quick Start (5 min)
 
 ### 1. Install
 
