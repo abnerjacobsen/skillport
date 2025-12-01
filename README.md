@@ -14,22 +14,23 @@ Agent Skills → Cursor · Copilot · Codex & more — via CLI or MCP
 
 ## Why SkillPort?
 
-Claude Agent Skills are great — but they only work in Claude Code. What about Cursor, Copilot, Codex? And as your library grows, finding the right skill gets harder.
+Claude Agent Skills are great — but they only work in Claude. What about Cursor, Copilot, Codex? And as your library grows, finding the right skill gets harder.
 
 | When you... | SkillPort helps by... | |
 |-------------|----------------------|-|
-| Switching to Cursor with 20+ Claude Code skills | Add one line to config - all skills work instantly | [MCP Server →](#deliver-mcp-server) |
-| Team using Cursor, Copilot, and Claude Code | Share one folder, filter by category per tool | [Organize →](#organize-categories--namespaces) |
+| Switching to Cursor with 20+ Agent skills | Add one line to config - all skills work instantly | [MCP Server →](#deliver-mcp-server) |
+| Team using Cursor, Copilot, and Codex | Share one folder, filter by category per tool | [Organize →](#organize-categories--namespaces) |
 | 50+ skills, "which one was for PR reviews?" | `skillport search "PR"` - finds it in milliseconds | [Scale →](#scale-context-efficient-search) |
 | Long debugging session, context running low | Skills load on-demand - not all upfront | [Scale →](#scale-context-efficient-search) |
 | Found an awesome skill on GitHub | `skillport add <url>` - ready to use in seconds | [CLI →](#manage-cli) |
 | Don't want to set up MCP | CLI works standalone — `init`, `add`, `sync` to AGENTS.md | [CLI Mode →](#cli-mode) |
 
+<br>
 🔄 **Compatible with [Claude Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview)** — Write skills once, use everywhere. Skills that work with Claude Code work with SkillPort, and vice versa.
 
 <!-- DEMO_GIF: `skillport add` → use in Cursor -->
 
-```
+<!-- ```
         ┌─────────┐ ┌─────────┐ ┌─────────┐
         │  Cursor │ │ Copilot │ │  Codex  │   MCP Clients
         └────┬────┘ └────┬────┘ └────┬────┘
@@ -45,7 +46,7 @@ Claude Agent Skills are great — but they only work in Claude Code. What about 
                 │ Skills Library  │
                 │ (single source) │
                 └─────────────────┘
-```
+``` -->
 
 ## Quick Start (5 min)
 
@@ -54,7 +55,7 @@ Choose your setup:
 | Mode | Best for | Per-project setup |
 |------|----------|-------------------|
 | [**MCP Mode**](#mcp-mode) | Multi-project, per-client filtering | Not required |
-| [**CLI Mode**](#cli-mode) | Quick試用, single project | Required (`skillport init`) |
+| [**CLI Mode**](#cli-mode) | Quick Setup, single project | Required (`skillport init`) |
 
 > **Tip:** Start with MCP Mode for the full experience. CLI Mode is simpler but requires setup in each project.
 

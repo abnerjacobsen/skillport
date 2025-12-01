@@ -1,12 +1,17 @@
 [project]
 name = "skillport"
 version = "0.1.0b2"
-description = "Your Agent Skills → Cursor · Copilot · Codex & more — via CLI or MCP"
+description = "Bring Agent Skills to Cursor / Copilot / Codex & more — via CLI or MCP. Manage once, serve anywhere."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [{ name = "Gota" }]
-keywords = ["mcp", "model-context-protocol", "agent", "skills", "ai", "claude", "cursor", "copilot"]
+keywords = [
+    "agent-skills", "claude-skills", 
+    "mcp", "model-context-protocol", "mcp-server",
+    "cursor", "copilot", "codex", "claude-code",
+    "ai-agent", "context-engineering",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "License :: OSI Approved :: MIT License",
