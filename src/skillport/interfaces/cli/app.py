@@ -36,8 +36,9 @@ def version_callback(value: bool):
 
 app = typer.Typer(
     name="skillport",
-    help="[bold]SkillPort[/bold] - Manage AI agent skills\n\n"
-         "A CLI and MCP server for organizing, searching, and serving skills to AI agents.",
+    help="[bold]⚓ SkillPort[/bold] - All Your Agent Skills in One Place\n\n"
+         "A CLI and MCP server for managing, searching, and serving skills to AI agents.\n\n"
+         "[dim]Docs: https://github.com/gotalab/skillport[/dim]",
     rich_markup_mode="rich",
     no_args_is_help=False,
     add_completion=True,
@@ -57,7 +58,7 @@ def main(
         help="Show version and exit",
     ),
 ):
-    """SkillPort - Manage AI agent skills."""
+    """SkillPort - All Your Agent Skills in One Place."""
     # If no command given, run serve (legacy behavior)
     if ctx.invoked_subcommand is None:
         serve()
@@ -132,9 +133,12 @@ app.command(
 app.command(
     "serve",
     help="Start the MCP server.\n\n"
+         "By default, runs in stdio mode (Local) for direct agent integration.\n"
+         "Use --http for HTTP server (Remote) mode.\n\n"
          "[bold]Examples:[/bold]\n\n"
          "  skillport serve\n\n"
-         "  skillport serve --reindex",
+         "  skillport serve --reindex\n\n"
+         "  skillport serve --http --port 8080",
 )(serve)
 
 app.command(

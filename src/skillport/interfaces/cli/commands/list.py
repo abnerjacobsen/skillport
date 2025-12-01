@@ -23,7 +23,7 @@ def list_cmd(
         max=1000,
     ),
 ):
-    """List all installed skills."""
+    """List installed skills."""
     config = Config()
     result: ListResult = list_skills(config=config, limit=limit)
 

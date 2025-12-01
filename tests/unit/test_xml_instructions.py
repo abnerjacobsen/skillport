@@ -1,8 +1,7 @@
 """Unit tests for XML-structured instructions (SPEC3 Section 2)."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 
 from skillport.interfaces.mcp.instructions import (
     build_xml_instructions,

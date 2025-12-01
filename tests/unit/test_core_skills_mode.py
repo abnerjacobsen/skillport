@@ -2,7 +2,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from skillport.shared.config import Config
 from skillport.modules.indexing.public.query import get_core_skills

@@ -1,6 +1,6 @@
 [project]
 name = "skillport"
-version = "0.1.0b1"
+version = "0.1.0b2"
 description = "Your Agent Skills → Cursor · Copilot · Codex & more — via CLI or MCP"
 readme = "README.md"
 requires-python = ">=3.10"

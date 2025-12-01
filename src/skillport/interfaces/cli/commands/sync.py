@@ -63,10 +63,10 @@ Each skill contains step-by-step instructions, templates, and scripts.
 
 - `search_skills(query)` - Find skills by task description. Use `""` to list all.
 - `load_skill(id)` - Get full instructions and the skill's filesystem path.
-- `read_skill_file(id, file)` - Read templates or config files inside a skill.
 
 ### Tips
 
+- Use your native Read tool with `{path}/file` for templates/assets
 - Execute scripts via path, don't read them into context: `python {path}/scripts/run.py`
 - Replace `{path}` in instructions with the actual path from `load_skill`
 - If search returns too many results, use more specific terms
@@ -207,7 +207,7 @@ def sync(
         help="Overwrite without confirmation",
     ),
 ):
-    """Sync installed skills to AGENTS.md."""
+    """Sync skills to AGENTS.md for non-MCP agents."""
     # Validate format
     if format not in ("xml", "markdown"):
         console.print(f"[error]Invalid format: {format}. Use 'xml' or 'markdown'.[/error]")

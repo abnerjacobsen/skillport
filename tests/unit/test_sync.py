@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-import pytest
 
 from skillport.interfaces.cli.commands.sync import (
     generate_skills_block,
@@ -154,7 +153,10 @@ class TestGenerateSkillsBlockMcpMode:
         ]
         result = generate_skills_block(skills, format="xml", mode="mcp")
         assert "### Tools" in result
-        assert "read_skill_file" in result
+        # read_skill_file is HTTP-only, so not included in sync output
+        # (sync generates instructions for Local/stdio mode)
+        assert "search_skills" in result
+        assert "load_skill" in result
 
     def test_cli_mode_does_not_have_mcp_tools(self):
         """CLI mode does not include MCP tools."""
@@ -303,7 +305,7 @@ class TestGenerateSkillsBlockPipeEscape:
         assert "\\|" in result
         # Should not break table structure (unescaped pipe)
         lines = result.split("\n")
-        table_lines = [l for l in lines if l.startswith("|")]
+        table_lines = [line for line in lines if line.startswith("|")]
         for line in table_lines:
             # Each table row should have exactly 4 pipes (5 cells for | Name | Desc | Cat |)
             if "---" not in line:  # Skip separator line
