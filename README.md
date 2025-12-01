@@ -26,6 +26,7 @@ Claude Agent Skills are great — but they only work in Claude. What about Curso
 | Don't want to set up MCP | CLI works standalone — `init`, `add`, `sync` to AGENTS.md | [CLI Mode →](#cli-mode) |
 
 <br>
+
 🔄 **Compatible with [Claude Agent Skills](https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview)** — Write skills once, use everywhere. Skills that work with Claude Code work with SkillPort, and vice versa.
 
 <!-- DEMO_GIF: `skillport add` → use in Cursor -->
