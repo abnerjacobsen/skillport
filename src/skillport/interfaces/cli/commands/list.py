@@ -6,6 +6,7 @@ from rich.table import Table
 from skillport.modules.skills import list_skills, ListResult
 from ..context import get_config
 from ..theme import console, empty_skills_panel
+from ..auto_index import ensure_index_fresh
 
 
 def list_cmd(
@@ -26,6 +27,7 @@ def list_cmd(
 ):
     """List installed skills."""
     config = get_config(ctx)
+    ensure_index_fresh(ctx, config)
     result: ListResult = list_skills(config=config, limit=limit)
 
     if json_output:

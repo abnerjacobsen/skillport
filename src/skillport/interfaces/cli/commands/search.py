@@ -5,6 +5,7 @@ import typer
 from skillport.modules.skills import search_skills, SearchResult
 from ..context import get_config
 from ..theme import console, no_results_panel, create_skills_table, format_score
+from ..auto_index import ensure_index_fresh
 
 
 def search(
@@ -30,6 +31,7 @@ def search(
 ):
     """Search for skills matching a query."""
     config = get_config(ctx)
+    ensure_index_fresh(ctx, config)
     result: SearchResult = search_skills(query, limit=limit, config=config)
 
     if json_output:

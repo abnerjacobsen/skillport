@@ -190,6 +190,138 @@ class TestShowCommand:
         assert "instructions" in data
 
 
+class TestProjectConfigResolution:
+    """CLI should respect .skillportrc skills_dir when present."""
+
+    def test_show_uses_skillportrc_skills_dir(self, tmp_path: Path, monkeypatch):
+        project = tmp_path / "project"
+        project.mkdir()
+
+        skills_dir = project / "custom-skills"
+        skills_dir.mkdir()
+        _create_skill(skills_dir, "rc-skill", "From skillportrc")
+
+        # Write .skillportrc pointing to custom skills directory
+        rc_path = project / ".skillportrc"
+        rc_path.write_text(
+            "skills_dir: ./custom-skills\ninstructions:\n  - AGENTS.md\n",
+            encoding="utf-8",
+        )
+
+        # Build index in project-scoped location to avoid ~/.skillport writes
+        db_path = project / "db.lancedb"
+        _rebuild_index(SkillsEnv(skills_dir=skills_dir, db_path=db_path))
+
+        # Run CLI from project root; should pick up .skillportrc skills_dir
+        monkeypatch.chdir(project)
+        env = {
+            "SKILLPORT_DB_PATH": str(db_path),
+            "SKILLPORT_EMBEDDING_PROVIDER": "none",
+        }
+        result = runner.invoke(app, ["show", "rc-skill", "--json"], env=env)
+
+        assert result.exit_code == 0, result.stdout
+        data = json.loads(result.stdout)
+        assert data["id"] == "rc-skill"
+        assert data["path"].startswith(str(skills_dir))
+
+    def test_env_overrides_skillportrc_skills_dir(self, tmp_path: Path, monkeypatch):
+        """When both env and .skillportrc are set, env wins."""
+        project = tmp_path / "project"
+        project.mkdir()
+
+        env_skills = project / "env-skills"
+        env_skills.mkdir()
+        _create_skill(env_skills, "env-skill", "From env")
+        env_db = project / "env-db.lancedb"
+        _rebuild_index(SkillsEnv(skills_dir=env_skills, db_path=env_db))
+
+        rc_skills = project / "rc-skills"
+        rc_skills.mkdir()
+        _create_skill(rc_skills, "rc-skill", "From rc")
+        rc_path = project / ".skillportrc"
+        rc_path.write_text("skills_dir: ./rc-skills\ninstructions: []\n", encoding="utf-8")
+
+        # Both env var and .skillportrc set; env should take precedence
+        monkeypatch.chdir(project)
+        env = {
+            "SKILLPORT_SKILLS_DIR": str(env_skills),
+            "SKILLPORT_DB_PATH": str(env_db),
+            "SKILLPORT_EMBEDDING_PROVIDER": "none",
+        }
+        result = runner.invoke(app, ["show", "env-skill", "--json"], env=env)
+
+        assert result.exit_code == 0, result.stdout
+        data = json.loads(result.stdout)
+        assert data["id"] == "env-skill"
+        assert data["path"].startswith(str(env_skills))
+
+
+class TestAutoReindexSearch:
+    """Auto reindex should refresh stale indexes for read commands."""
+
+    def test_search_triggers_reindex_when_stale(self, skills_env: SkillsEnv, monkeypatch):
+        skill_dir = _create_skill(skills_env.skills_dir, "auto-skill", "old description")
+        _rebuild_index(skills_env)
+
+        # mutate description without rebuilding
+        skill_md = skill_dir / "SKILL.md"
+        skill_md.write_text(
+            """---
+name: auto-skill
+description: banana-updated
+metadata:
+  skillport:
+    category: test
+---
+# auto-skill
+""",
+            encoding="utf-8",
+        )
+
+        env = {
+            "SKILLPORT_SKILLS_DIR": str(skills_env.skills_dir),
+            "SKILLPORT_DB_PATH": str(skills_env.db_path),
+            "SKILLPORT_EMBEDDING_PROVIDER": "none",
+        }
+        result = runner.invoke(app, ["search", "banana-updated", "--json"], env=env)
+
+        assert result.exit_code == 0, result.stdout
+        data = json.loads(result.stdout)
+        assert any("auto-skill" == s["id"] for s in data["skills"])
+
+    def test_search_skips_reindex_when_disabled(self, skills_env: SkillsEnv, monkeypatch):
+        skill_dir = _create_skill(skills_env.skills_dir, "auto-skill", "old description")
+        _rebuild_index(skills_env)
+
+        # mutate description without rebuilding
+        skill_md = skill_dir / "SKILL.md"
+        skill_md.write_text(
+            """---
+name: auto-skill
+description: cantaloupe-new
+metadata:
+  skillport:
+    category: test
+---
+# auto-skill
+""",
+            encoding="utf-8",
+        )
+
+        env = {
+            "SKILLPORT_SKILLS_DIR": str(skills_env.skills_dir),
+            "SKILLPORT_DB_PATH": str(skills_env.db_path),
+            "SKILLPORT_EMBEDDING_PROVIDER": "none",
+            "SKILLPORT_AUTO_REINDEX": "0",
+        }
+        result = runner.invoke(app, ["search", "cantaloupe-new", "--json"], env=env)
+
+        assert result.exit_code == 0, result.stdout
+        data = json.loads(result.stdout)
+        assert len(data["skills"]) == 0, "auto reindex disabled should not refresh index"
+
+
 class TestAddCommand:
     """skillport add tests.
 

@@ -12,11 +12,13 @@ SkillPort CLI provides commands to manage AI agent skills:
 """
 
 from pathlib import Path
+import os
 from typing import Optional
 
 import typer
 
 from skillport.shared.config import Config
+from .config import load_project_config
 from .commands.search import search
 from .commands.show import show
 from .commands.add import add
@@ -27,6 +29,7 @@ from .commands.serve import serve
 from .commands.sync import sync
 from .commands.init import init
 from .theme import VERSION, console
+from .auto_index import should_auto_reindex
 
 
 def version_callback(value: bool):
@@ -69,18 +72,31 @@ def main(
         "--db-path",
         help="Override LanceDB path (CLI > env > default)",
     ),
+    auto_reindex: Optional[bool] = typer.Option(
+        None,
+        "--auto-reindex/--no-auto-reindex",
+        help="Automatically rebuild index if stale (default: enabled; respects SKILLPORT_AUTO_REINDEX)",
+    ),
 ):
     """SkillPort - All Your Agent Skills in One Place."""
-    # Build base config and apply CLI overrides (CLI > env > defaults)
+    # Resolve project config (env → .skillportrc → pyproject → default)
+    project_config = load_project_config()
+
+    # Build base config and apply CLI overrides (CLI > env/.skillportrc > default)
     overrides = {}
     if skills_dir:
         overrides["skills_dir"] = skills_dir.expanduser().resolve()
     if db_path:
         overrides["db_path"] = db_path.expanduser().resolve()
 
-    config = Config()
-    if overrides:
-        config = config.with_overrides(**overrides)
+    # Only inject project-config skills_dir when env/CLI haven't set it
+    if not os.getenv("SKILLPORT_SKILLS_DIR") and not skills_dir:
+        overrides.setdefault("skills_dir", project_config.skills_dir)
+
+    config = Config(**overrides) if overrides else Config()
+    # propagate auto_reindex preference to child commands
+    ctx.meta["auto_reindex"] = auto_reindex if auto_reindex is not None else None
+    ctx.meta["auto_reindex_default"] = should_auto_reindex(ctx)
     ctx.obj = config
 
     # If no command given, run serve (legacy behavior) with injected config
