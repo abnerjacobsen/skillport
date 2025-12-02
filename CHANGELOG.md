@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.3](https://github.com/gotalab/skillport/compare/v0.1.2...v0.1.3) (2025-12-02)
+
+
+### Bug Fixes
+
+* use raw FTS scores and fix scalar index  ([24442a9](https://github.com/gotalab/skillport/commit/24442a96873148150c797ffc46f364e2e2073b8d))
+* use raw FTS scores and fix scalar index type ([9e04d26](https://github.com/gotalab/skillport/commit/9e04d26366e3aab4e0c11f54a7caf145ccab77ff))
+
 ## [0.1.2](https://github.com/gotalab/skillport/compare/v0.1.1...v0.1.2) (2025-12-02)
 
 
