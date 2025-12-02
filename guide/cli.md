@@ -70,8 +70,9 @@ $ skillport init
 
 ? Which instruction files to update? (comma-separated)
   [1] AGENTS.md (Codex, Cursor, Antigravity)
-  [2] None (skip)
-  [3] Custom...
+  [2] CLAUDE.md (Claude Code)
+  [3] None (skip)
+  [4] Custom...
 
 ✓ Created .skillportrc
 ✓ Created ~/.skillport/skills/
@@ -89,7 +90,7 @@ $ skillport init
 skillport init --yes
 
 # Specify explicitly
-skillport init --skills-dir .agent/skills --instructions AGENTS.md
+skillport init --skills-dir .agent/skills --instructions AGENTS.md --instructions CLAUDE.md
 ```
 
 #### Generated .skillportrc
@@ -101,6 +102,7 @@ skillport init --skills-dir .agent/skills --instructions AGENTS.md
 skills_dir: ~/.skillport/skills
 instructions:
   - AGENTS.md
+  - CLAUDE.md
 ```
 
 The `instructions` list is used by `skillport sync --all` to update all files at once.

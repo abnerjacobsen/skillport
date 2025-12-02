@@ -93,6 +93,11 @@ class TestDefaultConstants:
         names = [name for name, _ in DEFAULT_INSTRUCTIONS]
         assert "AGENTS.md" in names
 
+    def test_default_instructions_has_claude_md(self):
+        """DEFAULT_INSTRUCTIONS includes CLAUDE.md."""
+        names = [name for name, _ in DEFAULT_INSTRUCTIONS]
+        assert "CLAUDE.md" in names
+
     def test_default_instructions_has_skip_option(self):
         """DEFAULT_INSTRUCTIONS includes None (skip) option."""
         names = [name for name, _ in DEFAULT_INSTRUCTIONS]

@@ -25,6 +25,7 @@ DEFAULT_SKILLS_DIRS = [
 
 DEFAULT_INSTRUCTIONS = [
     ("AGENTS.md", "Codex, Cursor, Antigravity"),
+    ("CLAUDE.md", "Claude Code"),
     (None, "None (skip)"),  # Special: None means skip instruction file creation
 ]
 
