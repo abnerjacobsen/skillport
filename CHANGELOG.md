@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/gotalab/skillport/compare/v0.1.1...v0.1.2) (2025-12-02)
+
+
+### Bug Fixes
+
+* auto reindex read commands ([230a729](https://github.com/gotalab/skillport/commit/230a729c56bb383bde4fa4c3f38b50a25bdcd323))
+
 ## [0.1.1](https://github.com/gotalab/skillport/compare/v0.1.0...v0.1.1) (2025-12-02)
 
 
