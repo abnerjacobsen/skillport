@@ -14,7 +14,7 @@ from skillport.modules.skills.internal import (
     fetch_github_source,
     record_origin,
 )
-from .types import AddResult
+from .types import AddResult, AddResultItem
 
 
 def add_skill(
@@ -112,16 +112,50 @@ def add_skill(
             rename_single_to=name_override,
         )
 
+        details = [
+            AddResultItem(skill_id=r.skill_id, success=r.success, message=r.message)
+            for r in results
+        ]
+
         added_ids = [r.skill_id for r in results if r.success]
         skipped_ids = [r.skill_id for r in results if not r.success]
         messages_added = [r.message for r in results if r.success and r.message]
         messages_skipped = [r.message for r in results if not r.success and r.message]
 
+        def _summarize_skipped(reasons: list[str]) -> str:
+            """Return a concise summary for skipped skills."""
+            if not reasons:
+                return "No skills added"
+
+            exists = [r for r in reasons if "exists" in r]
+            invalid = [r for r in reasons if "Invalid SKILL.md" in r]
+            others = [r for r in reasons if r not in exists and r not in invalid]
+
+            parts: list[str] = []
+            if exists:
+                parts.append(f"{len(exists)} already exist")
+            if invalid:
+                parts.append(f"{len(invalid)} invalid SKILL.md")
+            if others:
+                # Show first other reason and count remainder
+                first_other = others[0]
+                extra = len(others) - 1
+                parts.append(first_other if extra == 0 else f"{first_other} (+{extra} more)")
+
+            return "; ".join(parts) if parts else "No skills added"
+
         success_all = len(skipped_ids) == 0
         if messages_skipped:
-            message = "; ".join(messages_skipped)
+            message = _summarize_skipped(messages_skipped)
         elif messages_added:
-            message = "; ".join(messages_added)
+            # Deduplicate added messages but keep order
+            seen = set()
+            uniq_added = []
+            for msg in messages_added:
+                if msg not in seen:
+                    uniq_added.append(msg)
+                    seen.add(msg)
+            message = "; ".join(uniq_added)
         else:
             message = "No skills added"
 
@@ -140,6 +174,7 @@ def add_skill(
             message=message,
             added=added_ids,
             skipped=skipped_ids,
+            details=details,
         )
     finally:
         if temp_dir and temp_dir.exists():

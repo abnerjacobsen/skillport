@@ -181,6 +181,7 @@ def add(
                 "added": result.added,
                 "skipped": result.skipped,
                 "message": result.message,
+                "details": [d.model_dump() for d in getattr(result, "details", [])],
             })
             if not result.added and result.skipped:
                 raise typer.Exit(code=1)
@@ -191,8 +192,12 @@ def add(
             for skill_id in result.added:
                 console.print(f"[success]  ✓ Added '{skill_id}'[/success]")
         if result.skipped:
-            skip_reason = result.message or "skipped"
             for skill_id in result.skipped:
+                detail_reason = next(
+                    (d.message for d in getattr(result, "details", []) if d.skill_id == skill_id and d.message),
+                    None,
+                )
+                skip_reason = detail_reason or result.message or "skipped"
                 console.print(f"[warning]  ⊘ Skipped '{skill_id}' ({skip_reason})[/warning]")
 
         # Summary
