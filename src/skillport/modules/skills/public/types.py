@@ -76,6 +76,10 @@ class AddResult(FrozenModel):
     message: str = Field(..., description="Human-readable result message")
     added: list[str] = Field(default_factory=list, description="Successfully added skill IDs")
     skipped: list[str] = Field(default_factory=list, description="Skipped skill IDs (already exist)")
+    details: list[AddResultItem] = Field(
+        default_factory=list,
+        description="Per-skill results for bulk adds",
+    )
 
 
 class RemoveResult(FrozenModel):

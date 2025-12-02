@@ -181,6 +181,7 @@ def add(
                 "added": result.added,
                 "skipped": result.skipped,
                 "message": result.message,
+                "details": [d.model_dump() for d in getattr(result, "details", [])],
             })
             if not result.added and result.skipped:
                 raise typer.Exit(code=1)
@@ -192,17 +193,21 @@ def add(
                 console.print(f"[success]  ✓ Added '{skill_id}'[/success]")
         if result.skipped:
             for skill_id in result.skipped:
-                console.print(f"[warning]  ⊘ Skipped '{skill_id}' (exists)[/warning]")
+                detail_reason = next(
+                    (d.message for d in getattr(result, "details", []) if d.skill_id == skill_id and d.message),
+                    None,
+                )
+                skip_reason = detail_reason or result.message or "skipped"
+                console.print(f"[warning]  ⊘ Skipped '{skill_id}' ({skip_reason})[/warning]")
 
         # Summary
         if result.added and not result.skipped:
             print_success(f"Added {len(result.added)} skill(s)")
         elif result.added and result.skipped:
-            print_warning(f"Added {len(result.added)}, skipped {len(result.skipped)} (use --force to overwrite)")
+            print_warning(f"Added {len(result.added)}, skipped {len(result.skipped)} ({result.message})")
         elif result.skipped:
             print_error(
-                f"All {len(result.skipped)} skill(s) already exist",
-                suggestion="Use --force to overwrite",
+                result.message or f"All {len(result.skipped)} skill(s) skipped",
             )
             raise typer.Exit(code=1)
         else:
