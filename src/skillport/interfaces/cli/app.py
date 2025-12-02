@@ -29,6 +29,7 @@ from .commands.serve import serve
 from .commands.sync import sync
 from .commands.init import init
 from .theme import VERSION, console
+from .auto_index import should_auto_reindex
 
 
 def version_callback(value: bool):
@@ -71,6 +72,11 @@ def main(
         "--db-path",
         help="Override LanceDB path (CLI > env > default)",
     ),
+    auto_reindex: Optional[bool] = typer.Option(
+        None,
+        "--auto-reindex/--no-auto-reindex",
+        help="Automatically rebuild index if stale (default: enabled; respects SKILLPORT_AUTO_REINDEX)",
+    ),
 ):
     """SkillPort - All Your Agent Skills in One Place."""
     # Resolve project config (env → .skillportrc → pyproject → default)
@@ -88,6 +94,9 @@ def main(
         overrides.setdefault("skills_dir", project_config.skills_dir)
 
     config = Config(**overrides) if overrides else Config()
+    # propagate auto_reindex preference to child commands
+    ctx.meta["auto_reindex"] = auto_reindex if auto_reindex is not None else None
+    ctx.meta["auto_reindex_default"] = should_auto_reindex(ctx)
     ctx.obj = config
 
     # If no command given, run serve (legacy behavior) with injected config

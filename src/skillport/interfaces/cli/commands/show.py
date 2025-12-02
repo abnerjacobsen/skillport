@@ -8,6 +8,7 @@ from skillport.modules.skills import load_skill
 from skillport.shared.exceptions import SkillNotFoundError
 from ..context import get_config
 from ..theme import console, print_error
+from ..auto_index import ensure_index_fresh
 
 
 def show(
@@ -25,6 +26,7 @@ def show(
 ):
     """Show skill details and instructions."""
     config = get_config(ctx)
+    ensure_index_fresh(ctx, config)
 
     try:
         detail = load_skill(skill_id, config=config)

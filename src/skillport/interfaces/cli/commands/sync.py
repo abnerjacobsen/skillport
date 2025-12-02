@@ -14,6 +14,7 @@ from skillport.modules.skills import list_skills, SkillSummary
 from skillport.shared.config import Config
 from ..config import load_project_config
 from ..theme import console
+from ..auto_index import ensure_index_fresh
 
 MARKER_START = "<!-- SKILLPORT_START -->"
 MARKER_END = "<!-- SKILLPORT_END -->"
@@ -227,6 +228,9 @@ def sync(
         config = obj
     else:
         config = Config(skills_dir=project_config.skills_dir)
+
+    # Ensure index freshness (auto-reindex if stale)
+    ensure_index_fresh(ctx, config)
 
     # Get all skills
     result = list_skills(config=config, limit=1000)

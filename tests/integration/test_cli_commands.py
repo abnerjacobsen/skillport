@@ -257,6 +257,71 @@ class TestProjectConfigResolution:
         assert data["path"].startswith(str(env_skills))
 
 
+class TestAutoReindexSearch:
+    """Auto reindex should refresh stale indexes for read commands."""
+
+    def test_search_triggers_reindex_when_stale(self, skills_env: SkillsEnv, monkeypatch):
+        skill_dir = _create_skill(skills_env.skills_dir, "auto-skill", "old description")
+        _rebuild_index(skills_env)
+
+        # mutate description without rebuilding
+        skill_md = skill_dir / "SKILL.md"
+        skill_md.write_text(
+            """---
+name: auto-skill
+description: banana-updated
+metadata:
+  skillport:
+    category: test
+---
+# auto-skill
+""",
+            encoding="utf-8",
+        )
+
+        env = {
+            "SKILLPORT_SKILLS_DIR": str(skills_env.skills_dir),
+            "SKILLPORT_DB_PATH": str(skills_env.db_path),
+            "SKILLPORT_EMBEDDING_PROVIDER": "none",
+        }
+        result = runner.invoke(app, ["search", "banana-updated", "--json"], env=env)
+
+        assert result.exit_code == 0, result.stdout
+        data = json.loads(result.stdout)
+        assert any("auto-skill" == s["id"] for s in data["skills"])
+
+    def test_search_skips_reindex_when_disabled(self, skills_env: SkillsEnv, monkeypatch):
+        skill_dir = _create_skill(skills_env.skills_dir, "auto-skill", "old description")
+        _rebuild_index(skills_env)
+
+        # mutate description without rebuilding
+        skill_md = skill_dir / "SKILL.md"
+        skill_md.write_text(
+            """---
+name: auto-skill
+description: cantaloupe-new
+metadata:
+  skillport:
+    category: test
+---
+# auto-skill
+""",
+            encoding="utf-8",
+        )
+
+        env = {
+            "SKILLPORT_SKILLS_DIR": str(skills_env.skills_dir),
+            "SKILLPORT_DB_PATH": str(skills_env.db_path),
+            "SKILLPORT_EMBEDDING_PROVIDER": "none",
+            "SKILLPORT_AUTO_REINDEX": "0",
+        }
+        result = runner.invoke(app, ["search", "cantaloupe-new", "--json"], env=env)
+
+        assert result.exit_code == 0, result.stdout
+        data = json.loads(result.stdout)
+        assert len(data["skills"]) == 0, "auto reindex disabled should not refresh index"
+
+
 class TestAddCommand:
     """skillport add tests.
 
