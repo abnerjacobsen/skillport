@@ -15,7 +15,7 @@ For CLI mode, create a `.skillportrc` file (or use `skillport init`) to configur
 skills_dir: .agent/skills
 instructions:
   - AGENTS.md
-  - CLAUDE.md
+  - GEMINI.md
 ```
 
 | Field | Type | Required | Description |
@@ -31,6 +31,7 @@ For Python projects, you can use `pyproject.toml` instead:
 [tool.skillport]
 skills_dir = ".agent/skills"
 instructions = ["AGENTS.md", "CLAUDE.md"]
+instructions = ["AGENTS.md", "GEMINI.md"]
 ```
 
 ### Resolution Order (CLI)

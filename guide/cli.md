@@ -69,8 +69,8 @@ $ skillport init
   [4] Custom path...
 
 ? Which instruction files to update? (comma-separated)
-  [1] AGENTS.md (Codex, Cursor, Antigravity)
-  [2] CLAUDE.md (Claude Code)
+  [1] AGENTS.md (Codex, Cursor, Windsurf)
+  [2] GEMINI.md (Gemini CLI, Antigravity)
   [3] None (skip)
   [4] Custom...
 
@@ -90,7 +90,7 @@ $ skillport init
 skillport init --yes
 
 # Specify explicitly
-skillport init --skills-dir .agent/skills --instructions AGENTS.md --instructions CLAUDE.md
+skillport init --skills-dir .agent/skills --instructions AGENTS.md --instructions GEMINI.md
 ```
 
 #### Generated .skillportrc
@@ -102,7 +102,7 @@ skillport init --skills-dir .agent/skills --instructions AGENTS.md --instruction
 skills_dir: ~/.skillport/skills
 instructions:
   - AGENTS.md
-  - CLAUDE.md
+  - GEMINI.md
 ```
 
 The `instructions` list is used by `skillport sync --all` to update all files at once.
