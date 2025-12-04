@@ -501,12 +501,12 @@ class TestLintCommand:
 
     def test_lint_warning_only_exit_0(self, skills_env: SkillsEnv):
         """Only warnings → exit 0."""
-        # Create skill with long description (warning, not fatal)
+        # Create skill with >500 lines (warning, not fatal)
         skill_dir = skills_env.skills_dir / "warning-skill"
         skill_dir.mkdir()
-        long_desc = "x" * 1025  # > 1024 chars
+        long_body = "\n".join(["line"] * 501)  # >500 lines triggers warning
         (skill_dir / "SKILL.md").write_text(
-            f"---\nname: warning-skill\ndescription: {long_desc}\n---\nbody",
+            f"---\nname: warning-skill\ndescription: A valid skill\n---\n{long_body}",
             encoding="utf-8"
         )
         _rebuild_index(skills_env)

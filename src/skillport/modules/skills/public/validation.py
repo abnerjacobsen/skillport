@@ -24,10 +24,22 @@ def _build_validation_dict(skill: SkillSummary | Mapping[str, Any]) -> dict[str,
     }
 
 
-def validate_skill(skill: SkillSummary | Mapping[str, Any]) -> ValidationResult:
-    """Validate a skill summary (SkillSummary or dict from index)."""
+def validate_skill(
+    skill: SkillSummary | Mapping[str, Any],
+    *,
+    strict: bool = False,
+) -> ValidationResult:
+    """Validate a skill summary (SkillSummary or dict from index).
+
+    Args:
+        skill: Skill summary or dict to validate.
+        strict: If True, only fatal issues are returned.
+
+    Returns:
+        ValidationResult with valid flag, issues, and skill_id.
+    """
     data = _build_validation_dict(skill)
-    issues = validate_skill_record(data)
+    issues = validate_skill_record(data, strict=strict)
     valid = all(issue.severity != "fatal" for issue in issues)
     skill_id = data.get("id") or data.get("name") or ""
     return ValidationResult(valid=valid, issues=issues, skill_id=skill_id)

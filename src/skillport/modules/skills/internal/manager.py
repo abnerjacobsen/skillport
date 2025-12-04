@@ -102,7 +102,7 @@ def _load_skill_info(skill_dir: Path) -> SkillInfo:
         raise ValueError(
             f"Invalid SKILL.md in {skill_dir}: frontmatter must be a mapping"
         )
-    name = meta.get("name") or skill_dir.name
+    name = meta.get("name") or ""
     return SkillInfo(name=name, source_path=skill_dir)
 
 
@@ -200,11 +200,13 @@ def _validate_skill_file(skill_dir: Path) -> None:
             "description": description,
             "lines": lines,
             "path": str(skill_dir),
-        }
+        },
+        strict=True,
+        meta=meta,
     )
-    fatal = [i for i in issues if i.severity == "fatal"]
-    if fatal:
-        raise ValueError("; ".join([i.message for i in fatal]))
+    # strict=True returns only fatal issues
+    if issues:
+        raise ValueError("; ".join([i.message for i in issues]))
     # Warnings printed but non-fatal
     for issue in issues:
         if issue.severity != "fatal":

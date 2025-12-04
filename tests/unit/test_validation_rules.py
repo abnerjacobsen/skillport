@@ -142,9 +142,9 @@ class TestValidationFatal:
         """name containing reserved word → fatal."""
         issues = validate_skill_record(
             {
-                "name": "my-anthropic-helper-skill",
+                "name": "my-anthropic-skill",
                 "description": "desc",
-                "path": "/skills/my-anthropic-helper-skill",
+                "path": "/skills/my-anthropic-skill",
             }
         )
         fatal = [
@@ -238,18 +238,18 @@ class TestValidationWarning:
         assert len(line_issues) == 0
 
     def test_description_over_1024_chars(self):
-        """description > 1024 chars → warning."""
+        """description > 1024 chars → fatal."""
         long_desc = "a" * (DESCRIPTION_MAX_LENGTH + 1)
         issues = validate_skill_record(
             {"name": "test", "description": long_desc, "path": "/skills/test"}
         )
-        warning = [
+        fatal = [
             i
             for i in issues
-            if i.severity == "warning" and "description" in i.message.lower()
+            if i.severity == "fatal" and "description" in i.message.lower()
         ]
-        assert len(warning) == 1
-        assert str(DESCRIPTION_MAX_LENGTH) in warning[0].message
+        assert len(fatal) == 1
+        assert str(DESCRIPTION_MAX_LENGTH) in fatal[0].message
 
     def test_description_exactly_1024_chars_ok(self):
         """description = 1024 chars → ok."""
@@ -267,7 +267,7 @@ class TestValidationWarning:
         assert len(desc_length_issues) == 0
 
     def test_description_with_xml_tags(self):
-        """description contains XML tags → warning."""
+        """description contains XML tags → fatal."""
         issues = validate_skill_record(
             {
                 "name": "test",
@@ -275,10 +275,10 @@ class TestValidationWarning:
                 "path": "/skills/test",
             }
         )
-        warning = [
-            i for i in issues if i.severity == "warning" and "xml" in i.message.lower()
+        fatal = [
+            i for i in issues if i.severity == "fatal" and "xml" in i.message.lower()
         ]
-        assert len(warning) == 1
+        assert len(fatal) == 1
 
     def test_description_without_xml_tags_ok(self):
         """description without XML tags → ok."""
@@ -301,9 +301,9 @@ class TestValidationExitCode:
         issues = validate_skill_record(
             {
                 "name": "test",
-                "description": "a" * (DESCRIPTION_MAX_LENGTH + 1),  # warning
+                "description": "valid description",
                 "path": "/skills/test",
-                "lines": SKILL_LINE_THRESHOLD + 1,  # warning
+                "lines": SKILL_LINE_THRESHOLD + 1,  # warning (lines > 500)
             }
         )
         # All issues should be warnings
@@ -464,3 +464,74 @@ metadata:
         )
         frontmatter_issues = [i for i in issues if "unexpected" in i.message.lower()]
         assert len(frontmatter_issues) == 0
+
+
+class TestMetaKeyExistence:
+    """Key existence checks when meta is provided."""
+
+    def test_name_key_missing_in_frontmatter(self):
+        """meta without 'name' key → fatal."""
+        issues = validate_skill_record(
+            {"name": "test", "description": "desc", "path": "/skills/test"},
+            meta={"description": "desc"},
+        )
+        fatal = [
+            i
+            for i in issues
+            if i.severity == "fatal" and "'name' key is missing" in i.message
+        ]
+        assert len(fatal) == 1
+
+    def test_description_key_missing_in_frontmatter(self):
+        """meta without 'description' key → fatal."""
+        issues = validate_skill_record(
+            {"name": "test", "description": "desc", "path": "/skills/test"},
+            meta={"name": "test"},
+        )
+        fatal = [
+            i
+            for i in issues
+            if i.severity == "fatal" and "'description' key is missing" in i.message
+        ]
+        assert len(fatal) == 1
+
+    def test_meta_none_skips_key_check(self):
+        """meta=None → skip key existence check."""
+        issues = validate_skill_record(
+            {"name": "test", "description": "desc", "path": "/skills/test"},
+            meta=None,
+        )
+        key_missing = [i for i in issues if "key is missing" in i.message]
+        assert len(key_missing) == 0
+
+
+class TestStrictMode:
+    """strict mode behavior tests."""
+
+    def test_strict_mode_filters_warnings(self):
+        """strict=True → only fatal issues returned."""
+        issues = validate_skill_record(
+            {
+                "name": "test",
+                "description": "desc",
+                "path": "/skills/test",
+                "lines": SKILL_LINE_THRESHOLD + 1,  # would be warning
+            },
+            strict=True,
+        )
+        # lines > 500 is a warning, should be filtered out
+        assert len(issues) == 0
+
+    def test_strict_false_includes_warnings(self):
+        """strict=False → all issues returned."""
+        issues = validate_skill_record(
+            {
+                "name": "test",
+                "description": "desc",
+                "path": "/skills/test",
+                "lines": SKILL_LINE_THRESHOLD + 1,  # warning
+            },
+            strict=False,
+        )
+        warnings = [i for i in issues if i.severity == "warning"]
+        assert len(warnings) == 1

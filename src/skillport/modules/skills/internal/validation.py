@@ -12,7 +12,7 @@ from skillport.shared.utils import parse_frontmatter
 SKILL_LINE_THRESHOLD = 500
 NAME_MAX_LENGTH = 64
 NAME_PATTERN = re.compile(r"^[a-z0-9-]+$")
-NAME_RESERVED_WORDS = {"anthropic-helper", "claude-tools"}
+NAME_RESERVED_WORDS = {"anthropic", "claude"}
 DESCRIPTION_MAX_LENGTH = 1024
 XML_TAG_PATTERN = re.compile(r"<[^>]+>")
 
@@ -26,8 +26,23 @@ ALLOWED_FRONTMATTER_KEYS: Set[str] = {
 }
 
 
-def validate_skill_record(skill: Dict) -> List[ValidationIssue]:
-    """Validate a skill dict; returns issue list."""
+def validate_skill_record(
+    skill: Dict,
+    *,
+    strict: bool = False,
+    meta: Dict | None = None,
+) -> List[ValidationIssue]:
+    """Validate a skill dict; returns issue list.
+
+    Args:
+        skill: Skill data dict (name, description, lines, path).
+        strict: If True, return only fatal issues. Used by add command.
+        meta: Raw frontmatter dict from parse_frontmatter(). If provided,
+              enables key existence checks (A1/A2). Used by add command.
+
+    Returns:
+        List of validation issues.
+    """
     issues: List[ValidationIssue] = []
     name = skill.get("name", "")
     description = skill.get("description", "")
@@ -35,7 +50,26 @@ def validate_skill_record(skill: Dict) -> List[ValidationIssue]:
     path = skill.get("path", "")
     dir_name = path.rsplit("/", 1)[-1] if path else ""
 
-    # Required fields
+    # A1/A2: Key existence checks (only when meta is provided)
+    if meta is not None:
+        if "name" not in meta:
+            issues.append(
+                ValidationIssue(
+                    severity="fatal",
+                    message="frontmatter: 'name' key is missing",
+                    field="name",
+                )
+            )
+        if "description" not in meta:
+            issues.append(
+                ValidationIssue(
+                    severity="fatal",
+                    message="frontmatter: 'description' key is missing",
+                    field="description",
+                )
+            )
+
+    # Required fields (value checks)
     if not name:
         issues.append(
             ValidationIssue(
@@ -118,7 +152,7 @@ def validate_skill_record(skill: Dict) -> List[ValidationIssue]:
         if len(description) > DESCRIPTION_MAX_LENGTH:
             issues.append(
                 ValidationIssue(
-                    severity="warning",
+                    severity="fatal",
                     message=f"frontmatter.description: {len(description)} chars (max {DESCRIPTION_MAX_LENGTH})",
                     field="description",
                 )
@@ -126,7 +160,7 @@ def validate_skill_record(skill: Dict) -> List[ValidationIssue]:
         if XML_TAG_PATTERN.search(description):
             issues.append(
                 ValidationIssue(
-                    severity="warning",
+                    severity="fatal",
                     message="frontmatter.description: contains <xml> tags",
                     field="description",
                 )
@@ -151,4 +185,7 @@ def validate_skill_record(skill: Dict) -> List[ValidationIssue]:
             except Exception:
                 pass  # Skip if file cannot be parsed
 
+    # strict mode: return only fatal issues
+    if strict:
+        return [i for i in issues if i.severity == "fatal"]
     return issues
