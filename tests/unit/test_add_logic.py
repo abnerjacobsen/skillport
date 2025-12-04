@@ -408,3 +408,61 @@ class TestSymlinkRejection:
         assert len(results) == 1
         assert not results[0].success
         assert "symlink" in results[0].message.lower()
+
+
+class TestFrontmatterKeyValidation:
+    """Tests for frontmatter key existence validation on add."""
+
+    def test_add_rejects_missing_name_key(self, tmp_path: Path):
+        """SKILL.md without 'name' key in frontmatter → rejected."""
+        source = tmp_path / "source"
+        skill_dir = source / "bad-skill"
+        skill_dir.mkdir(parents=True)
+        # No 'name' key, only 'description'
+        (skill_dir / "SKILL.md").write_text(
+            "---\ndescription: A test skill\n---\nBody",
+            encoding="utf-8"
+        )
+
+        target = tmp_path / "target"
+        cfg = Config(skills_dir=target)
+        skills = detect_skills(source)
+
+        results = add_local(
+            source_path=source,
+            skills=skills,
+            config=cfg,
+            keep_structure=False,
+            force=False,
+        )
+
+        assert len(results) == 1
+        assert not results[0].success
+        assert "name" in results[0].message.lower()
+
+    def test_add_rejects_missing_description_key(self, tmp_path: Path):
+        """SKILL.md without 'description' key in frontmatter → rejected."""
+        source = tmp_path / "source"
+        skill_dir = source / "bad-skill"
+        skill_dir.mkdir(parents=True)
+        # No 'description' key, only 'name'
+        (skill_dir / "SKILL.md").write_text(
+            "---\nname: bad-skill\n---\nBody",
+            encoding="utf-8"
+        )
+
+        target = tmp_path / "target"
+        cfg = Config(skills_dir=target)
+        skills = detect_skills(source)
+
+        results = add_local(
+            source_path=source,
+            skills=skills,
+            config=cfg,
+            keep_structure=False,
+            force=False,
+        )
+
+        assert len(results) == 1
+        assert not results[0].success
+        assert "description" in results[0].message.lower()

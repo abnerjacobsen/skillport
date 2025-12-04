@@ -421,15 +421,15 @@ skillport lint [skill-id] [options]
 | name pattern | Only `a-z`, `0-9`, `-` allowed |
 | no leading/trailing hyphen | Name cannot start or end with `-` |
 | no consecutive hyphens | Name cannot contain `--` |
-| reserved words | Name cannot contain `anthropic-helper` or `claude-tools` |
+| reserved words | Name cannot contain `anthropic` or `claude` |
+| description ≤ 1024 chars | Description is too long |
+| no XML tags in description | Description contains `<tag>` |
 
 **Warning (warning only)**
 
 | Rule | Description |
 |------|-------------|
 | SKILL.md ≤ 500 lines | File is too long |
-| description ≤ 1024 chars | Description is too long |
-| no XML tags | Description contains `<tag>` |
 | allowed frontmatter keys | Only `name`, `description`, `license`, `allowed-tools`, `metadata` |
 
 #### Examples
