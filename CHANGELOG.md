@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.6](https://github.com/gotalab/skillport/compare/v0.1.5...v0.1.6) (2025-12-05)
+
+
+### Bug Fixes
+
+* change cli command sync to doc ([a28d95c](https://github.com/gotalab/skillport/commit/a28d95c4440392c824e4e6daa145cbf4f2efa380))
+
+
+### Documentation
+
+* add Hugging Face Skills, remove SkillsMP Marketplace ([4f153cd](https://github.com/gotalab/skillport/commit/4f153cd0ac9c9582c6a81c30d0ab92b49fe0ca6c))
+* add recommended community skills table to README ([913dc27](https://github.com/gotalab/skillport/commit/913dc27f498b8b1dc0d5dace2fb8311d977d2a2f))
+* add recommended community skills table to README ([d40f04e](https://github.com/gotalab/skillport/commit/d40f04e5b6ef9f189fe93fceaf45e2b990f57748))
+* update how to add codex skills ([4814997](https://github.com/gotalab/skillport/commit/4814997dbb2a2eedc711cc9412e4d5d24164fea2))
+
 ## [0.1.5](https://github.com/gotalab/skillport/compare/v0.1.4...v0.1.5) (2025-12-04)
 
 
