@@ -4,7 +4,6 @@ Uses Typer's CliRunner for E2E CLI testing.
 """
 
 import json
-import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
