@@ -89,6 +89,10 @@ skillport add hello-world
 
 # Or add from GitHub
 skillport add https://github.com/anthropics/skills/tree/main/skills
+
+# Or add from GitHub with custom skills directory (Claude Code, Codex)
+skillport --skills-dir .claude/skills add https://github.com/anthropics/skills/tree/main/skills
+skillport --skills-dir ~/.codex/skills add https://github.com/anthropics/skills/tree/main/skills/frontend-design
 ```
 
 ### 3. Add to Your MCP Client
@@ -110,17 +114,17 @@ skillport add https://github.com/anthropics/skills/tree/main/skills
 **CLI Agents**
 
 ```bash
-# Claude Code
-claude mcp add skillport -- uvx skillport
-
-# With custom skills directory
-claude mcp add skillport --env SKILLPORT_SKILLS_DIR=~/.claude/skills -- uvx skillport
-
 # Codex
 codex mcp add skillport -- uvx skillport
 
 # With custom skills in the project directory
 codex mcp add skillport --env SKILLPORT_SKILLS_DIR=./.agent/skills -- uvx skillport
+
+# Claude Code
+claude mcp add skillport -- uvx skillport
+
+# With custom skills directory
+claude mcp add skillport --env SKILLPORT_SKILLS_DIR=~/.claude/skills -- uvx skillport
 ```
 
 **Other MCP Clients** (Windsurf, Cline, Roo Code, Antigravity, etc.)
@@ -193,6 +197,7 @@ skillport init
 # 3. Add skills (uses skills_dir from .skillportrc)
 skillport add hello-world
 skillport add https://github.com/anthropics/skills/tree/main/skills
+skillport add https://github.com/anthropics/skills/tree/main/skills/frontend-design
 ```
 
 **How it works:** Your agent reads the skills table in AGENTS.md, then runs `skillport show <id>` to load full instructions.
